@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Pages on sp blogs</title>
+    <title>Pages on sp</title>
     <link>/page/</link>
-    <description>Recent content in Pages on sp blogs</description>
+    <description>Recent content in Pages on sp</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Sean Pinkney</copyright>
@@ -18,7 +18,7 @@
       <pubDate>Sun, 17 Dec 2017 00:00:00 -0500</pubDate>
       
       <guid>/page/about/</guid>
-      <description>About I measure advertising effectiveness</description>
+      <description>About I work at comScore measuring advertising effectiveness in the statistics department.</description>
     </item>
     
     <item>
