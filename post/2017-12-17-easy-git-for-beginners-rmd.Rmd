@@ -15,11 +15,11 @@ description: ''
 ##################################
 
 # clone repo to pull into your local directory
-git clone https://git.office.comscore.com/scm/slam/REPO
+git clone URL_EXT_REPO
 
 # clone all repos in project folder
 FOR %i in (repo1 repo2 repo3 ...) DO git clone
-https://git.office.comscore.com/scm/slam/%i
+URL_EXT_REPO/%i
 
 ##################################
 ### clone local repo to remote ###
@@ -30,7 +30,7 @@ https://git.office.comscore.com/scm/slam/%i
 git init
 
 # clone to remote
-git clone https://git.office.comscore.com/scm/slam/REPO
+git clone URL_EXT_REPO
 
 ##################################
 ### committing and pushing #######

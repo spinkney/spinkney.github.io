@@ -4,14 +4,14 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>easy git for beginners &middot; Sean Pinkney</title>
-        <meta name="description" content="################################## ### clone repos from remote ###### ################################## # clone repo to pull into your local directory git clone https://git.office.comscore.com/scm/slam/REPO # clone all repos in project folder FOR %i in (repo1 repo2 repo3 ...) DO git clone https://git.office.comscore.com/scm/slam/%i ################################## ### clone local repo to remote ### ################################## # first set up local repo. # cd into your local repo folder git init # clone to remote git clone https://git.office.comscore.com/scm/slam/REPO ################################## ### committing and pushing ####### ################################## # let&#39;s start in our local repo # change something # added it for &#39;staging&#39; git add .">
+        <meta name="description" content="################################## ### clone repos from remote ###### ################################## # clone repo to pull into your local directory git clone URL_EXT_REPO # clone all repos in project folder FOR %i in (repo1 repo2 repo3 ...) DO git clone URL_EXT_REPO/%i ################################## ### clone local repo to remote ### ################################## # first set up local repo. # cd into your local repo folder git init # clone to remote git clone URL_EXT_REPO ################################## ### committing and pushing ####### ################################## # let&#39;s start in our local repo # change something # added it for &#39;staging&#39; git add .">
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
         <meta name="generator" content="Hugo 0.31.1" />
         <meta name="robots" content="index,follow">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:title" content="easy git for beginners">
-<meta property="og:description" content="################################## ### clone repos from remote ###### ################################## # clone repo to pull into your local directory git clone https://git.office.comscore.com/scm/slam/REPO # clone all repos in project folder FOR %i in (repo1 repo2 repo3 ...) DO git clone https://git.office.comscore.com/scm/slam/%i ################################## ### clone local repo to remote ### ################################## # first set up local repo. # cd into your local repo folder git init # clone to remote git clone https://git.office.comscore.com/scm/slam/REPO ################################## ### committing and pushing ####### ################################## # let&#39;s start in our local repo # change something # added it for &#39;staging&#39; git add .">
+<meta property="og:description" content="################################## ### clone repos from remote ###### ################################## # clone repo to pull into your local directory git clone URL_EXT_REPO # clone all repos in project folder FOR %i in (repo1 repo2 repo3 ...) DO git clone URL_EXT_REPO/%i ################################## ### clone local repo to remote ### ################################## # first set up local repo. # cd into your local repo folder git init # clone to remote git clone URL_EXT_REPO ################################## ### committing and pushing ####### ################################## # let&#39;s start in our local repo # change something # added it for &#39;staging&#39; git add .">
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2017/12/17/2017-12-17-easy-git-for-beginners-rmd/">
         <link rel="stylesheet" href="/dist/styles.css">
@@ -113,11 +113,11 @@ ga('send', 'pageview');
 ##################################
 
 # clone repo to pull into your local directory
-git clone https://git.office.comscore.com/scm/slam/REPO
+git clone URL_EXT_REPO
 
 # clone all repos in project folder
 FOR %i in (repo1 repo2 repo3 ...) DO git clone
-https://git.office.comscore.com/scm/slam/%i
+URL_EXT_REPO/%i
 
 ##################################
 ### clone local repo to remote ###
@@ -128,7 +128,7 @@ https://git.office.comscore.com/scm/slam/%i
 git init
 
 # clone to remote
-git clone https://git.office.comscore.com/scm/slam/REPO
+git clone URL_EXT_REPO
 
 ##################################
 ### committing and pushing #######
