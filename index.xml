@@ -22,6 +22,15 @@
     </item>
     
     <item>
+      <title>easy git for beginners</title>
+      <link>/2017/12/17/2017-12-17-easy-git-for-beginners/</link>
+      <pubDate>Sun, 17 Dec 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/12/17/2017-12-17-easy-git-for-beginners/</guid>
+      <description>################################## ### clone repos from remote ###### ################################## # clone repo to pull into your local directory git clone https://git.office.comscore.com/scm/slam/REPO # clone all repos in project folder FOR %i in (repo1 repo2 repo3 ...) DO git clone https://git.office.comscore.com/scm/slam/%i ################################## ### clone local repo to remote ### ################################## # first set up local repo. # cd into your local repo folder git init # clone to remote git clone https://git.office.comscore.com/scm/slam/REPO ################################## ### committing and pushing ####### ################################## # let&#39;s start in our local repo # change something # added it for &#39;staging&#39; git add .</description>
+    </item>
+    
+    <item>
       <title>hello world</title>
       <link>/2017/12/17/2017-12-17-first-post-rmd/</link>
       <pubDate>Sun, 17 Dec 2017 00:00:00 +0000</pubDate>
@@ -57,6 +66,15 @@ summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 2
       
       <guid>/project/my-awesome-project/</guid>
       <description>About project Aenean ipsum justo, semper eu nisl ut, pretium tincidunt sem. Praesent et diam sit amet lacus lobortis dictum a id lacus. Quisque hendrerit sit amet turpis eu varius. Ut id lorem ac felis ultrices tincidunt. Pellentesque consequat arcu ac fringilla imperdiet. Phasellus pellentesque, sapien non pulvinar blandit, sapien ante aliquet felis, vel porttitor sapien ante in lacus. Fusce non urna aliquet, malesuada nibh vel, luctus urna. Phasellus ut lacus molestie, varius purus quis, malesuada lorem.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/1/01/01/2017-12-17-easy-git-for-beginners/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/1/01/01/2017-12-17-easy-git-for-beginners/</guid>
+      <description>easy git for beginners       code{white-space: pre;} pre:not([class]) { background-color: white; }  if (window.hljs) { hljs.configure({languages: []}); hljs.initHighlightingOnLoad(); if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) { window.setTimeout(function() { hljs.initHighlighting(); }, 0); } }  h1 { font-size: 34px; } h1.title { font-size: 38px; } h2 { font-size: 30px; } h3 { font-size: 24px; } h4 { font-size: 18px; } h5 { font-size: 16px; } h6 { font-size: 12px; } .</description>
     </item>
     
   </channel>
