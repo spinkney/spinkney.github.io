@@ -6,6 +6,9 @@ slug: easy-git-for-beginners-rmd
 categories: []
 tags:
   - code
+  - git
+  - beginner
+  - tutorial
 description: ''
 ---
 

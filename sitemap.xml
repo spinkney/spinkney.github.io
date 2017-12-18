@@ -38,7 +38,19 @@
   </url>
   
   <url>
+    <loc>/tags/beginner/</loc>
+    <lastmod>2017-12-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/code/</loc>
+    <lastmod>2017-12-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/git/</loc>
     <lastmod>2017-12-17T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -87,6 +99,12 @@
   
   <url>
     <loc>/tags/test/</loc>
+    <lastmod>2017-12-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/tutorial/</loc>
     <lastmod>2017-12-17T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
