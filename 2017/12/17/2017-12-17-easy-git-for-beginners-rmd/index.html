@@ -140,7 +140,9 @@ git clone URL_EXT_REPO
 # let&#39;s start in our local repo
 # change something
 # added it for &#39;staging&#39;
-git add .
+git add -A  # stages All
+git add .   # stages new and modified, without deleted
+git add -u  # stages modified and deleted, without new
 
 # commit to local
 git commit -m &quot;message&quot;
@@ -216,7 +218,11 @@ git branch -d -r origin/&lt;remote branch name&gt;
 
 # you also need to reset the configuration associated to the local branch:
 git config --unset branch.&lt;branch&gt;.remote
-git config --unset branch.&lt;branch&gt;.merge</code></pre>
+git config --unset branch.&lt;branch&gt;.merge
+
+# merge problems?
+# resolve conflicts with mergetool
+git mergetool</code></pre>
 
 </div>
 
