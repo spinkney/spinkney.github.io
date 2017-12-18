@@ -13,7 +13,7 @@ I recently started using git, github (the online UI counterpart) and bitbucket (
 
 After initial set up and noodling around, creating a few repos/branches, I noticed I kept getting lost in which branch I was on. The "easy" way to save yourself from this is to check where the git HEAD is pointed. That is how git knows where it's located and why you don't have to type the name of the branch you're currently in. Use the command "git log --online --decorate". 
 
-![](/img/pointer.png)
+![](img/pointer.png)
 What's happening in the output? The HEAD is pointed to master. I could change the pointer using `git checkout origin/master`. The origin/HEAD branch is created from using a remote (see [Why is “origin/HEAD” shown when running “git branch -r”?](https://stackoverflow.com/questions/354312/why-is-origin-head-shown-when-running-git-branch-r)).
 You'll be able to figure out 80% of your issues if you know which repo you're in and whether it's the local or remote version. 
 
