@@ -23,7 +23,7 @@ pre code.hljs {
   border-right: 2px solid #999;
   width: 12px;
   height: 15px;
-  font-size: 12px; /* affects code, fragment */
+  font-size: 13px; /* affects code, fragment */
   font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 .hljs-ln-code {
@@ -31,14 +31,14 @@ pre code.hljs {
   color: #ccc;
   width: 100px;
   height: 18px;
-  font-size: 12px; /* affects code, fragment */
+  font-size: 13px; /* affects code, fragment */
 }
 
 code, div.fragment, pre.fragment {
   border: none;
   overflow: hidden;
   font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-  font-size: 12px; /* affects code, fragment */
+  font-size: 13px; /* affects code, fragment */
 
 }
 
