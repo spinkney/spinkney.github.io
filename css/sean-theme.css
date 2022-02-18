@@ -17,27 +17,23 @@ pre code.hljs {
   font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
-code.hljs {
-  padding: 3px 5px
-}
-
 .hljs-ln-numbers {
+  text-align: left;
+  color: #ccc;
+  border-right: 2px solid #999;
+  width: 12px;
+  height: 15px;
+  padding-right: 50px;
+  font-size: 12px; /* affects code, fragment */
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+.hljs-ln-code {
   text-align: center;
   color: #ccc;
-  border-right: 1px solid #999;
-  vertical-align: top;
-  padding-right: 5px;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  height: 18px;
+  padding-right: 50px;
+  font-size: 12px; /* affects code, fragment */
 }
-/* 
-.hljs-ln-code {
-  padding-left: 5px;
-} */
 
 code, div.fragment, pre.fragment {
   border: none;
