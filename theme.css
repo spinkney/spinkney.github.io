@@ -73,7 +73,7 @@ p code {
     border: 1px solid rgba(0,0,0,.25);
     border-radius: 4px;
     display: inline-block;
-    margin: 0 .25rem;
+    margin: -6 .25rem;
     padding: 0 .25rem;
   }
 p.note {
@@ -85,10 +85,10 @@ p.note {
 
 pre {
   background-color: rgba(0,0,0,.75);
-  border-left: .5rem solid rgba(0,0,0,.5);
+  /* border-left: .5rem solid rgba(0,0,0,.5); */
   color: #FBAF5C;
   margin: 0;
-  padding: 1rem;
+  padding: 0.25rem;
 }
 
 ul {
