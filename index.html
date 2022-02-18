@@ -1,193 +1,61 @@
-<!-- Copyright (c) 2021 by Will Boyd (https://codepen.io/lonekorean/pen/xGLLwX)
+<link href="theme.css" rel="stylesheet" type="text/css">
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="toggle.js"></script>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- -->
-
-<style>
-@import url(https://fonts.googleapis.com/css?family=Roboto:500,700);
-
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html {
-  min-height: 100%;
-}
-
-body {
-  margin: 20px;
-  color: #435757;
-  background: linear-gradient(-20deg, #d0b782 20%, #a0cecf 80%);
-  font: 500 1.2em/1.2 'Roboto', sans-serif;
-}
-
-.container {
-  max-width: 450px;
-  margin: 0 auto;
-  border-top: 5px solid #435757;
-  background-color: rgba(255, 255, 255, .2);
-  box-shadow: 0 0 20px rgba(0, 0, 0, .1);
-  user-select: none;
-}
-
-h1 {
-  margin: 0;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, .4);
-  font-size: 1.8em;
-  text-align: center;
-}
-
-.items {
+<header>
+  <h1 class="logo">P Nought</h1>
+<h1> 
+    Leftover Models for Lunch
+</h1>
+<nav id="sc2">
+  <ul>
+    <li><a href="#" title="Home">Home</a></li>
+    <li><a href="#" title="Blog">Blog</a></li>
+    <li><a href="#" title="Work">Work</a></li>
+    <li><a href="#" title="Resources">Resources</a></li>
+    <li><a href="#" title="Meta">Meta</a></li>
+  </ul>
+</nav>
+<p>Initial Test!!</p>
+<p>Here, I have inline code <code>for i in 1:10</code> and here a code block:</p>
+<pre><code>flex-grow: 1;
+flex-shrink: 1;
+flex-basis: auto;</code></pre>
+<p>Like the previous example, <code>flex-grow: 1</code> 
+  allows the children to grow when necessary, 
+  but on the condition that the width of each element is
+   based on the size of its content. The latter is achieved with the help of 
+   <code>flex-basis: auto</code>.</p>
+<a href="#" class="css-toggle">Show Code</a>
+<pre><code>nav {
+& ul {
   display: flex;
-  flex-direction: column;
-  padding: 20px;
-  counter-reset: done-items undone-items;
-}
-
-h2 {
-  position: relative;
-  margin: 0;
-  padding: 10px 0;
-  font-size: 1.2em;
-}
-
-h2::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  left: -20px;
-  width: 5px;
-  background-color: #435757;
-}
-
-h2::after {
-  display: block;
-  float: right;
-  font-weight: normal;
-}
-
-.done {
-  order: 1;
-}
-
-.done::after {
-  content: ' (' counter(done-items) ')';
-}
-
-.undone {
-  order: 3;
-}
-
-.undone::after {
-  content: ' (' counter(undone-items) ')';
-}
-
-/* hide inputs offscreen, but at the same vertical positions as the correpsonding labels, so that tabbing scrolls the viewport as expected */
-input {
-  display: block;
-  height: 53px;
-  margin: 0 0 -53px -9999px;
-  order: 4;
-  outline: none;
-  counter-increment: undone-items;
-}
-
-input:checked {
-  order: 2;
-  counter-increment: done-items;  
-}
-
-label {
-  display: block;
-  position: relative;
-  padding: 15px 0 15px 45px;
-  border-top: 1px dashed #fff;
-  order: 4;
-  cursor: pointer;
-  animation: undone .5s;
-}
-
-label::before {
-  content: '\f10c'; /* circle outline */
-  display: block;
-  position: absolute;
-  top: 11px;
-  left: 10px;
-  font: 1.5em 'FontAwesome';
-}
-
-label:hover, input:focus + label {
-  background-color: rgba(255, 255, 255, .2);
-}
-
-input:checked + label {
-  order: 2;
-  animation: done .5s;
-}
-
-input:checked + label::before {
-  content: '\f058'; /* circle checkmark */
-}
-
-@keyframes done {
-  0% {
-    opacity: 0;
-    background-color: rgba(255, 255, 255, .4);
-    transform: translateY(20px);
-  }
-  50% {
-    opacity: 1;
-    background-color: rgba(255, 255, 255, .4);
+  width: 100%;
+  & li {
+    flex-grow: 1;
   }
 }
+}</code></pre>
+  <p>The markup for all examples illustrated below are identical as follow:</p>
+  <pre><code>&lt;nav&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot; title=&quot;Home&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot; title=&quot;Blog&quot;&gt;Blog&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot; title=&quot;Work&quot;&gt;Work&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot; title=&quot;Resources&quot;&gt;Resources&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot; title=&quot;Meta&quot;&gt;Meta&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;</code></pre>
+  <p>The CSS code provided in each of the demo below can be toggled. They are written in the flavour of <a href="http://sass-lang.com/">Sassy CSS</a>.</p>
 
-@keyframes undone {
-  0% {
-    opacity: 0;
-    background-color: rgba(255, 255, 255, .4);
-    transform: translateY(-20px);
-  }
-  50% {
-    opacity: 1;
-    background-color: rgba(255, 255, 255, .4);
-  }
-}
-</style>
-<!--
-  Checkbox Trickery with CSS:
-  http://codersblock.com/blog/checkbox-trickery-with-css/ 
--->
+</header>
 
-<div class="container">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <h1>Will's Summer To-Do List</h1>
-    <div class="items">
-      <input id="item1" type="checkbox" checked>
-      <label for="item1">Create a to-do list</label>
-  
-      <input id="item2" type="checkbox">
-      <label for="item2">Take down Christmas tree</label>
-  
-      <input id="item3" type="checkbox">
-      <label for="item3">Learn Ember.js</label>
-  
-      <input id="item4" type="checkbox">
-      <label for="item4">Binge watch every episode of MacGyver</label>
-  
-      <input id="item5" type="checkbox">
-      <label for="item5">Alphabetize everything in the fridge</label>
-  
-      <input id="item6" type="checkbox">
-      <label for="item6">Do 10 pull-ups without dropping</label>
-  
-      <h2 class="done" aria-hidden="true">Done</h2>
-      <h2 class="undone" aria-hidden="true">Not Done</h2>
-    </div>
-  </div>
+<section>
+  <p>When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are:</p>
+  <p>$$x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$</p>
+  <h2>Straight line equations</h2>
+  <p>The equation for a straight line is usually written as \(y = mx + c\)</p>
+</section>
