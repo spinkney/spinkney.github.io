@@ -12,6 +12,15 @@ div.fragment, pre.fragment {
 	max-width: 1200px;
 }
 
+
+.grow { 
+transition: all .2s ease-in-out; 
+}
+
+.grow:hover { 
+transform: scale(1.1); 
+}
+
 /*********************************************/
 /**               Inline code               **/
 /*********************************************/

@@ -189,3 +189,11 @@ ul li {
 #fun2 ul li :hover {
     transform: scale(1.2);
   }
+
+.grow { 
+transition: all .2s ease-in-out; 
+}
+
+.grow:hover { 
+transform: scale(1.1); 
+}
