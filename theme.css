@@ -192,8 +192,11 @@ ul li {
 
 .grow { 
 transition: all .2s ease-in-out; 
+color: rgb(0, 0, 0);
+flex: 1 1 auto;
 }
 
 .grow:hover { 
-transform: scale(1.1); 
+transform: scale(1.2); 
+color: #666;
 }
