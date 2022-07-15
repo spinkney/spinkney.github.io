@@ -4,61 +4,59 @@
   Author: Sean Pinkney
   Updated: 2022-01-26
 */
+html {
+  --font-family-monospace: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 
-pre > code {
-  white-space: pre-wrap;
+}
+
+table  {
+  font: 11px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+div.line {
+  white-space: pre;
 }
 
 pre code.hljs {
   display: block;
   overflow-x: auto;
   padding: 1em;
-  line-height: 15pt;
   font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
-/* 
+
+code.hljs {
+  padding: 3px 5px
+}
+
 .hljs-ln-numbers {
-  text-align: right;
+  text-align: center;
   color: #ccc;
-  border-right: 2px solid #999;
-  padding-left: 10px;
-  width: 12px;
-  height: 15px;
-  font-size: 13px; /* affects code, fragment */
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-} */
-
-.hljs-ln-line {
-  padding-left: 50px;
-}
-
-.hljs-ln-numbers {
-  text-align: right;
-  border-right: 1px solid #CCC; 
-}
-
-.hljs-ln-line.hljs-ln-n {
-  padding-right: 50px;
+  border-right: 1px solid #999;
+  vertical-align: top;
+  padding-right: 5px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .hljs-ln-code {
-  color: #ccc;
-  padding-left: 100px;
-  height: 18px;
-  font-size: 13px; /* affects code, fragment */
+  padding-left: 5px;
 }
 
 code, div.fragment, pre.fragment {
+  border-radius: var(--border-radius-small);
   border: none;
   overflow: hidden;
   font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-  font-size: 13px; /* affects code, fragment */
-
+  font-size: 13px;
 }
 
 .hljs {
   color: #adbac7;
-  /* background: #2a2c2f; */
+  background: #2a2c2f;
 }
 
 .hljs-doctag,
