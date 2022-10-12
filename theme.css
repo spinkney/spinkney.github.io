@@ -14,7 +14,7 @@ body{
   font-family: 'Montserrat';
 }
 h1{
-  text-align: center;
+  text-align: left;
 }
 .logo{
   color: rgba(254, 1, 1, 0);
@@ -28,7 +28,7 @@ h1{
 }
 
 body {
-  background-color: #eee;
+  background-color: #fff;
   color: #333;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 1rem;
@@ -40,6 +40,10 @@ header, section {
   padding: 1rem 2rem 2rem;
   width: 80%;
 }
+section {
+  text-align: left;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: Montserrat, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-weight: bold;
@@ -48,9 +52,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 h1 {
   font-size: 2rem;
-  text-align: center;
+  text-align: left;
 }
 h2 {
+  font-size: 1.25rem;
+  margin-bottom: .5rem;
+}
+
+h3 { 
   font-size: 1.25rem;
   margin-bottom: .5rem;
 }
@@ -110,7 +119,7 @@ li {
   background-position: top center;
   color: #666;
   display: block;
-  text-align: center;
+  text-align: left;
   text-decoration: none;
   transition: all .25s ease-in-out;
 }

@@ -5,3 +5,9 @@ $(function () {
     $(this).load(file)
   })
 })
+
+if (window.MathJax) {
+  MathJax.Hub.Queue(
+    ["Typeset",MathJax.Hub]
+  );
+}
