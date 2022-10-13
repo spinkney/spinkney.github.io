@@ -7,8 +7,7 @@ bibliography: references.bib
 draft: false
 ---
 
-In this post I'll show a way to do quantile regression on a bounded unit interval. 
-The Vasicek distribution is an alternative distribution for beta regressions and is described in @vasicek. The Vasicek distribution is given as
+In this post I'll show a way to do quantile regression on a bounded unit interval. The Vasicek distribution is an alternative distribution for beta regressions and is described in @vasicek. The Vasicek distribution is given as
 
 $$
   \begin{aligned}
@@ -18,21 +17,17 @@ f(y \mid \alpha, \theta) &= \sqrt{\frac{1 - \theta}{\theta}} \exp \bigg\{\frac{1
 F(y \mid \alpha, \theta) &= \Phi \bigg( \frac{\Phi^{-1}(y) \sqrt{1 - \theta} - \Phi^{-1}(\alpha)}{\sqrt{\theta}} \bigg) \\
 Q(\tau \mid \alpha, \theta) &= F^{-1}(\tau \mid \alpha, \theta) = \Phi \bigg( \frac{\Phi^{-1}(\alpha) + \Phi^{-1}(\tau) \sqrt{\theta}}{\sqrt{1 - \theta}} \bigg)
 \end{aligned}
-$$
-where $0 < (y, \alpha, \theta, \tau) < 1$ and $\Phi$ and $\Phi^{-1}$ are the standard normal CDF and QF respectively. The mean of the distribution is $\operatorname{E}(Y) = \alpha$ and $\operatorname{Var}(Y) = \Phi_2(\Phi^{-1}(\alpha), \Phi^{-1}(\alpha), \theta)$ where $\Phi_2$ is the bivariate standard normal CDF. 
+$$ where $0 < (y, \alpha, \theta, \tau) < 1$ and $\Phi$ and $\Phi^{-1}$ are the standard normal CDF and QF respectively. The mean of the distribution is $\operatorname{E}(Y) = \alpha$ and $\operatorname{Var}(Y) = \Phi_2(\Phi^{-1}(\alpha), \Phi^{-1}(\alpha), \theta)$ where $\Phi_2$ is the bivariate standard normal CDF.
 
-In the paper they reparameterize the mean in terms of the $\tau$-th quantile as
-$$
+In the paper they reparameterize the mean in terms of the $\tau$-th quantile as $$
 \alpha = h^{-1}(\mu) = \Phi(\Phi^{-1}(\mu)\sqrt{1 - \theta} - \Phi^{-1}(\tau)\sqrt{\theta}).
-$$
-Given this reparmeterization the log-likelihood is
-$$
+$$ Given this reparmeterization the log-likelihood is $$
 \begin{aligned}
-\ell(\mu, \theta \mid y, \tau) = & \\
-& \frac{n}{2}\log\bigg(\frac{1 - \theta}{\theta} \bigg) - \frac{\Phi^{-1}(y)^\top \Phi^{-1}(y)}{2} - \frac{1}{2\theta} \sum_{i=1}^{n} \bigg(\sqrt{1 - \theta}\bigg[\Phi^{-1}(y_i) - \Phi^{-1}(\mu) \bigg] + \sqrt{\theta}\Phi^{-1}(\tau) \bigg)^2
+\ell( \mu, \theta \mid y, \tau) = \;& \frac{n}{2}\log\bigg(\frac{1 - \theta}{\theta} \bigg) - \frac{\Phi^{-1}(y)^\top \Phi^{-1}(y)}{2} - \\
+& \frac{1}{2\theta} \sum_{i=1}^{n} \bigg(\sqrt{1 - \theta}\bigg[\Phi^{-1}(y_i) - \Phi^{-1}(\mu) \bigg] + \sqrt{\theta}\Phi^{-1}(\tau) \bigg)^2
 \end{aligned}
-$$
-The log-likelihood may be written in Stan as:
+$$ The log-likelihood may be written in Stan as:
+
 ``` stan
   real vasicek_quantile_lpdf(vector y, real theta, vector mu, real tau) {
     if (tau <= 0 || tau >= 1) 
@@ -46,11 +41,14 @@ The log-likelihood may be written in Stan as:
     vector[N] qnorm_mu = inv_Phi(mu);
     real qnorm_tau = inv_Phi(tau);
     vector[N] qnorm_y = inv_Phi(y);
-    vector[N] qnorm_alpha = -sqrt(theta) * qnorm_tau + qnorm_mu * sqrt(1 - theta);
+    vector[N] qnorm_alpha = -sqrt(theta) * qnorm_tau + 
+                              qnorm_mu * sqrt(1 - theta);
     
-    return lpdf + 0.5 * dot_self(qnorm_y) - 0.5 * sum( (sqrt(1 - theta) * qnorm_y - qnorm_alpha)^2 / theta);
+    return lpdf + 0.5 * dot_self(qnorm_y) -
+            0.5 * sum( (sqrt(1 - theta) * qnorm_y - qnorm_alpha)^2 / theta);
   }
 ```
+
 The authors provided an R package `vasicekreg` where we can check if it results in the same log-likelihood,
 
 ```{r, message=FALSE}
@@ -63,6 +61,7 @@ stan_lpdf <- vasicek_quantile_lpdf(x, theta = 0.69, mu = 0.5, tau = 0.5)
 r_lpdf <- dVASIQ(x, mu = 0.5, sigma = 0.69, log = T)
 all.equal(stan_lpdf, r_lpdf)
 ```
+
 To expose the Stan function to my R environment I have used the `expose_cmdstanr_funs.R` [script from Rok Češnovar's repo](https://github.com/rok-cesnovar/misc/blob/master/expose-cmdstanr-functions/expose_cmdstanr_functions.R).
 
 We can test this out aginst the R package fit. The following Stan code performs the regression.
@@ -98,6 +97,7 @@ fit_stan$summary()
 Similar results!
 
 We can update the code to run multiple quantiles which is the same as running the model for each quantile. In Stan, we can run the same model multiple times or we do the loop, as I show below, inside the program and pass a vector of $\tau$'s in as data.
+
 ```{r, results='hide', warning=FALSE}
 fittaus <- lapply(c(0.10, 0.25, 0.50, 0.75, 0.90), function(Tau)
  {
@@ -122,14 +122,19 @@ fit_stan_vector <- mod_vector$sample(
 ```
 
 The parameter results
+
 ```{r}
-data.frame(stan = fit_stan_vector$summary()[-1, 1:2], gamlss_estimates =c(t(gamlss_mtau)))
+data.frame(stan = fit_stan_vector$summary()[-1, 1:2], 
+           gamlss_estimates =c(t(gamlss_mtau)))
 ```
-In my next post, [quantile regression post](/posts/post-1-quantile-reg/quantile-reg.qmd) I'll show various ways to represent a quantile regression in Stan where the outcome, however, is continuous on the real line. 
+
+In my next post, [quantile regression post](/posts/post-1-quantile-reg/quantile-reg.qmd) I'll show various ways to represent a quantile regression in Stan where the outcome, however, is continuous on the real line.
 
 ## Appendix
+
 Single tau
-```stan
+
+``` stan
 functions {
   real vasicek_quantile_lpdf(vector y, real theta, vector mu, real tau) {
     int N = num_elements(y);
@@ -164,7 +169,8 @@ model {
 ```
 
 Multiple tau
-```stan
+
+``` stan
 functions {
   real vasicek_quantile_lpdf(vector y, real theta, vector mu, real tau) {
     if (tau <= 0 || tau >= 1) 
@@ -178,9 +184,12 @@ functions {
     vector[N] qnorm_mu = inv_Phi(mu);
     real qnorm_tau = inv_Phi(tau);
     vector[N] qnorm_y = inv_Phi(y);
-    vector[N] qnorm_alpha = -sqrt(theta) * qnorm_tau + qnorm_mu * sqrt(1 - theta);
+    vector[N] qnorm_alpha = -sqrt(theta) * qnorm_tau +  
+                              qnorm_mu * sqrt(1 - theta);
     
-    return lpdf + 0.5 * dot_self(qnorm_y) - 0.5 * sum( (sqrt(1 - theta) * qnorm_y - qnorm_alpha)^2 / theta);
+    return lpdf + 
+            0.5 * dot_self(qnorm_y) - 
+            0.5 * sum( (sqrt(1 - theta) * qnorm_y - qnorm_alpha)^2 / theta);
   }
 }
 data {
@@ -202,6 +211,7 @@ model {
   sigma ~ normal(0, 2);
   
   for (i in 1:K)
-    y ~ vasicek_quantile(inv_logit(sigma[i]), inv_logit(alpha[i] + beta[i] * x), tau[i]);
+    y ~ vasicek_quantile(inv_logit(sigma[i]), 
+                         inv_logit(alpha[i] + beta[i] * x), tau[i]);
 }
 ```
