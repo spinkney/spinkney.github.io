@@ -1,0 +1,32 @@
+project:
+  type: website
+
+website:
+  title: "Ruler"
+  navbar:
+    left:
+      - "Measure Twice Cut Once"
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/
+      - icon: twitter
+        href: https://twitter.com
+format:
+  html:
+    theme: 
+      light: [litera, styles.scss]
+      dark: [darkly, styles-dark.scss]
+    highlight-style: 
+      light: pygments
+      dark: my.theme
+    mainfont: "Atkinson Hyperlegible"
+editor: visual
+
+# Change the background to a different color.
+# Add another hyperlink in the navigation bar.
+# Add your name to the left side of the top navigation bar.
+
+# Change to another Bootswatch theme.
+# Add a dark theme with another Bootswatch theme.
+# Change the syntax highlighting to `eiffel`.
