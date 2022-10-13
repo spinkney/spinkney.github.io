@@ -1,0 +1,9 @@
+---
+title: "Quantile Regressions in Stan"
+author: "Sean Pinkney"
+date: "2022-10-12"
+categories: [model, stan]
+draft: false
+---
+
+Quantile regressions are

@@ -1,2 +1,5 @@
 
 .vscode/extensions.json
+.Rproj.user
+
+/.quarto/

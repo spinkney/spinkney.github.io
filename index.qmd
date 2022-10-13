@@ -1,0 +1,25 @@
+---
+title: "Ruler"
+subtitle: "Measure What Matters"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+  sort-ui: false
+  filter-ui: true
+page-layout: full
+# highlight-style: 
+#   dark: my.theme
+#   light: pygments
+title-block-banner: true
+---
+
+```{=html}
+<!--
+    Change the title of your listing page.
+    Choose another listing type.
+    Change the sort option to date asc.
+    What happens when you change filter-ui to true?
+-->
+```
