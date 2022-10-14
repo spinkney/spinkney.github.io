@@ -1,8 +1,9 @@
 ---
 title: "Quantile Regressions in Stan"
 author: "Sean Pinkney"
-date: "2022-10-12"
+date: "2022-10-14"
 categories: [model, stan]
+bibliography: references.bib
 draft: false
 ---
 
