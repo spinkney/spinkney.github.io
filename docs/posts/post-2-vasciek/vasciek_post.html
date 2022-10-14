@@ -422,7 +422,7 @@ Total execution time: 0.3 seconds.</code></pre>
 15      sigma[5] -0.2588908       -0.2914669</code></pre>
 </div>
 </div>
-<p><a href="https://twitter.com/avehtari/status/1580841358713323521">Aki Veharti</a> correctly noted that the increase in the number of parameters will reduce the step size and increase the number of steps. If you have lots of data then it may make more sense to run each <span class="math inline">\(/tau\)</span> independently.</p>
+<p><a href="https://twitter.com/avehtari/status/1580841358713323521">Aki Veharti</a> correctly noted that the increase in the number of parameters will reduce the step size and increase the number of steps. If you have lots of data then it may make more sense to run each <span class="math inline">\(\tau\)</span> independently.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>individual_fit <span class="ot">&lt;-</span> fit_stan<span class="sc">$</span><span class="fu">sampler_diagnostics</span>()[,,<span class="fu">c</span>(<span class="st">"stepsize__"</span>, </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                                                     <span class="st">"n_leapfrog__"</span>)]</span>
@@ -446,14 +446,12 @@ vector_fit             0.38          13.10</code></pre>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(posterior)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_tidybayes</span>())</span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_tidybayes</span>())</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>fit_stan_vector <span class="sc">|&gt;</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread_draws</span>(alpha[K]) <span class="sc">|&gt;</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> K, <span class="at">x =</span> alpha))  <span class="sc">+</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_slabh</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>fit_stan_vector <span class="sc">|&gt;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread_draws</span>(alpha[K]) <span class="sc">|&gt;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> K, <span class="at">x =</span> alpha))  <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_slabh</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="vasciek_post_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>

@@ -127,7 +127,7 @@ The parameter results
 data.frame(stan = fit_stan_vector$summary()[-1, 1:2], 
            gamlss_estimates =c(t(gamlss_mtau)))
 ```
-[Aki Veharti](https://twitter.com/avehtari/status/1580841358713323521) correctly noted that the increase in the number of parameters will reduce the step size and increase the number of steps. If you have lots of data then it may make more sense to run each $/tau$ independently.
+[Aki Veharti](https://twitter.com/avehtari/status/1580841358713323521) correctly noted that the increase in the number of parameters will reduce the step size and increase the number of steps. If you have lots of data then it may make more sense to run each $\tau$ independently.
 ```{r}
 individual_fit <- fit_stan$sampler_diagnostics()[,,c("stepsize__", 
                                                      "n_leapfrog__")]
@@ -148,8 +148,6 @@ Lastly, we can plot the effects. Here are the intercepts and beta coefficients
 library(posterior)
 library(tidybayes)
 library(ggplot2)
-
-
 theme_set(theme_tidybayes())
 
 fit_stan_vector |>
