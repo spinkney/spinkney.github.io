@@ -10,9 +10,11 @@ website:
     right:
       - about.qmd
       - icon: github
-        href: https://github.com/
+        href: https://github.com/spinkney
+      - icon: linkedin
+        href: https://www.linkedin.com/in/sean-pinkney123/
       - icon: twitter
-        href: https://twitter.com
+        href: https://twitter.com/thatpinkney
 format:
   html:
     theme: 

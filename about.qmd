@@ -6,16 +6,16 @@ about:
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com
+      href: https://twitter.com/thatpinkney
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://www.linkedin.com/in/sean-pinkney123/
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/spinkney
 ---
 
-About this blog
+I'm Sean and I do statistics. I'm a Group Director at Omnicom Media Group focused on TV analytics. In my spare time I try to contribute to the Stan project. Connect with me on one of the platforms below. 
 
 ```{=html}
 <!--
