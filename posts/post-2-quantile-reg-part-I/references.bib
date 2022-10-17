@@ -1,0 +1,73 @@
+@article{yu,
+title = {Bayesian quantile regression},
+journal = {Statistics & Probability Letters},
+volume = {54},
+number = {4},
+pages = {437-447},
+year = {2001},
+issn = {0167-7152},
+doi = {https://doi.org/10.1016/S0167-7152(01)00124-9},
+url = {https://www.sciencedirect.com/science/article/pii/S0167715201001249},
+author = {Keming Yu and Rana A. Moyeed},
+keywords = {Asymmetric Laplace distribution, Bayesian inference, Markov chain Monte Carlo methods, Quantile regression},
+abstract = {The paper introduces the idea of Bayesian quantile regression employing a likelihood function that is based on the asymmetric Laplace distribution. It is shown that irrespective of the original distribution of the data, the use of the asymmetric Laplace distribution is a very natural and effective way for modelling Bayesian quantile regression. The paper also demonstrates that improper uniform priors for the unknown model parameters yield a proper joint posterior. The approach is illustrated via a simulated and two real data sets.}
+}
+
+@article{yang2016,
+author = {Yang, Yunwen and Wang, Huixia Judy and He, Xuming},
+title = {Posterior Inference in Bayesian Quantile Regression with Asymmetric Laplace Likelihood},
+journal = {International Statistical Review},
+volume = {84},
+number = {3},
+pages = {327-344},
+keywords = {Bayesian, censoring, posterior, quantile regression},
+doi = {https://doi.org/10.1111/insr.12114},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1111/insr.12114},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1111/insr.12114},
+abstract = {Summary The paper discusses the asymptotic validity of posterior inference of pseudo-Bayesian quantile regression methods with complete or censored data when an asymmetric Laplace likelihood is used. The asymmetric Laplace likelihood has a special place in the Bayesian quantile regression framework because the usual quantile regression estimator can be derived as the maximum likelihood estimator under such a model, and this working likelihood enables highly efficient Markov chain Monte Carlo algorithms for posterior sampling. However, it seems to be under-recognised that the stationary distribution for the resulting posterior does not provide valid posterior inference directly. We demonstrate that a simple adjustment to the covariance matrix of the posterior chain leads to asymptotically valid posterior inference. Our simulation results confirm that the posterior inference, when appropriately adjusted, is an attractive alternative to other asymptotic approximations in quantile regression, especially in the presence of censored data.},
+year = {2016}
+}
+
+
+@article{binary_quantile,
+author = {Benoit, Dries F. and Van den Poel, Dirk},
+title = {Binary quantile regression: a Bayesian approach based on the asymmetric Laplace distribution},
+journal = {Journal of Applied Econometrics},
+volume = {27},
+number = {7},
+pages = {1174-1188},
+doi = {https://doi.org/10.1002/jae.1216},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/jae.1216},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/jae.1216},
+abstract = {SUMMARY This paper develops a Bayesian method for quantile regression for dichotomous response data. The frequentist approach to this type of regression has proven problematic in both optimizing the objective function and making inferences on the parameters. By accepting additional distributional assumptions on the error terms, the Bayesian method proposed sets the problem in a parametric framework in which these problems are avoided. To test the applicability of the method, we ran two Monte Carlo experiments and applied it to Horowitz's (1993) often studied work-trip mode choice dataset. Compared to previous estimates for the latter dataset, the method proposed leads to a different economic interpretation. Copyright © 2010 John Wiley \& Sons, Ltd.},
+year = {2012}
+}
+
+
+
+@article{score,
+author = {Teng Wu and Naveen N. Narisetty},
+title = {{Bayesian Multiple Quantile Regression for Linear Models Using a Score Likelihood}},
+volume = {16},
+journal = {Bayesian Analysis},
+number = {3},
+publisher = {International Society for Bayesian Analysis},
+pages = {875 -- 903},
+keywords = {Adaptive importance sampling, Bayesian quantile regression, multiple quantile regression, working likelihood},
+year = {2021},
+doi = {10.1214/20-BA1217},
+URL = {https://doi.org/10.1214/20-BA1217}
+}
+
+@article{bayesqr,
+ title={bayesQR: A Bayesian Approach to Quantile Regression},
+ volume={76},
+ url={http://statistik-jstat.uibk.ac.at/index.php/jss/article/view/v076i07},
+ doi={10.18637/jss.v076.i07},
+ abstract={After its introduction by Koenker and Basset (1978), quantile regression has become an important and popular tool to investigate the conditional response distribution in regression. The R package bayesQR contains a number of routines to estimate quantile regression parameters using a Bayesian approach based on the asymmetric Laplace distribution. The package contains functions for the typical quantile regression with continuous dependent variable, but also supports quantile regression for binary dependent variables. For both types of dependent variables, an approach to variable selection using the adaptive lasso approach is provided. For the binary quantile regression model, the package also contains a routine that calculates the fitted probabilities for each vector of predictors. In addition, functions for summarizing the results, creating traceplots, posterior histograms and drawing quantile plots are included. This paper starts with a brief overview of the theoretical background of the models used in the bayesQR package. The main part of this paper discusses the computational problems that arise in the implementation of the procedure and illustrates the usefulness of the package through selected examples.},
+ number={7},
+ journal={Journal of Statistical Software},
+ author={Benoit, Dries F. and Van den Poel, Dirk},
+ year={2017},
+ pages={1–32}
+}

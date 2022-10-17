@@ -1,0 +1,171 @@
+---
+title: "Quantile Regressions in Stan: Part II"
+author: "Sean Pinkney"
+date: last-modified
+categories: [stan, quantile]
+bibliography: references.bib
+draft: false
+---
+
+```{r, message=FALSE, echo=FALSE}
+library(cmdstanr)
+check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
+register_knitr_engine(override = FALSE)
+```
+
+Quantile regressions are relatively new in the Bayesian literature first appearing in @yu who described an asymmetric Laplace distribution to estimate the conditional quantiles.
+
+# Quantile regression with score 
+
+## Are the standard errors of `beta` off in the asymmetric Laplace?
+
+## Score function
+
+```{cmdstan, eval=TRUE, output.var="score_qr"}
+functions{
+  vector q_loss(real q, vector u){
+      return 0.5 * (abs(u) + (2 * q - 1) * u);
+  }
+    
+  vector score(real q, vector y, matrix x, vector beta) {
+    int N = num_elements(y);
+    int P = num_elements(beta);
+    
+    return transpose(x) * q_loss(q, y - x * beta);
+  }
+    
+  matrix make_w (matrix x, real q) {
+    int N = rows(x);
+    int P = cols(x);
+    real alpha = inv(q * (1 - q));
+    matrix[P, P] out = crossprod(x);
+      
+    return alpha * inverse_spd( out ) * N;
+  }
+}
+data {
+  int N;                 // Number of observation
+  int P;                 // Number of predictors
+  real q;
+  vector[N] y;           // Response variable sorted
+  matrix[N, P] x;
+}
+transformed data {
+  matrix[P, P] W = make_w(x, q);
+}
+parameters {
+  vector[P] beta;
+}
+model {
+  vector[P] score_vec = score(q, y, x, beta);
+
+  beta ~ normal(0, 4);
+  
+  target += -quad_form(W, score_vec) * inv(2 * N);
+}
+```
+
+```{r}
+out <- score_qr$sample(
+  data = list(N = nrow(ImmunogG),
+              P = 3,
+              q = 0.05,
+              y = ImmunogG$IgG,
+              x = as.matrix(data.frame(alpha = 1, x = ImmunogG$Age, xsq = ImmunogG$Age^2))),
+  seed = 12123123, 
+  parallel_chains = 4,
+  adapt_delta = 0.9,
+  iter_warmup = 500,
+  iter_sampling = 500,
+    refresh = 0,
+  show_messages = FALSE
+)
+out$summary()
+```
+
+### Multiple quantiles with the score representation
+
+```{cmdstan, eval=FALSE, cache=TRUE, output.var="multiple_score_qr.stan"}
+functions{
+matrix kronecker(matrix A, matrix B) {
+  matrix[rows(A) * rows(B), cols(A) * cols(B)] C;
+  int m = rows(A);
+  int n = cols(A);
+  int p = rows(B);
+  int q = cols(B);
+
+  for (i in 1:m) {
+    for (j in 1:n) {
+      int row_start = (i - 1) * p + 1;
+      int row_end = (i - 1) * p + p;
+      int col_start = (j - 1) * q + 1;
+      int col_end = (j - 1) * q + q;
+      C[row_start:row_end, col_start:col_end] = A[i, j] * B;
+    }
+  }
+  return C;
+}
+  
+vector q_loss(real q, vector u){
+  return 0.5 * (abs(u) + (2 * q - 1) * u);
+}
+    
+ matrix score(vector q, vector y, matrix x, array[] vector beta) {
+   int N = num_elements(y);
+   int P = num_elements(beta[ , 1]);
+   int K = num_elements(q);
+   matrix[K, P] out;
+    
+   for (k in 1:K) {
+     out[k] = (x' * q_loss(q[k], y - x * to_vector(beta[ ,k])))';
+   }
+    
+  return out;
+}
+
+matrix make_w (matrix x, vector q) {
+  int N = rows(x);
+  int P = cols(x);
+  int m = num_elements(q);
+  matrix[m * P, m * P] out;
+    
+  matrix[m, m] Q;
+  matrix[P, P] G = crossprod(x) / N;
+    
+  for (i in 1:m) {
+    Q[i, i] = q[i] * (1 - q[i]);
+    for (j in 1:i - 1) {
+      Q[i, j] = min([q[i], q[j]]) - q[i] * q[j];
+      Q[j, i] = Q[i, j];
+    }
+  }
+    
+  return kronecker(inverse(G), inverse(Q));
+  }
+}
+data {
+  int N;            // Number of observation
+  int P;            // Number of predictors
+  int K;            // Number of quantiles
+  vector[K] q;
+  vector[N] y;      // Response variable sorted
+  matrix[N, P] x;
+}
+transformed data {
+  matrix[K * P, K * P] W = make_w(x, q);
+}
+parameters {
+  // can add ordered constraint here
+  array[P] vector[K] beta;
+}
+model {
+  vector[K * P] score_out = to_vector(score(q, y, x, beta));
+  
+  for (i in 1:K) 
+    beta[, i] ~ normal(0, 4);
+ 
+  target += -score_out' * W * score_out / (2 * N); 
+}
+```
+
+

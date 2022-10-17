@@ -2,8 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/post-2-vasciek/vasciek_post.html",
-      "/posts/post-1-quantile-reg/quantile-reg.html"
+      "/posts/post-2-quantile-reg-part-I/quantile-reg.html",
+      "/posts/post-2-quantile-reg-part-II/quantile-reg-part-II.html",
+      "/posts/post-1-vasciek/vasciek_post.html"
     ]
   }
 ]
