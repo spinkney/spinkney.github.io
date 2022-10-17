@@ -4,7 +4,7 @@ author: "Sean Pinkney"
 date: last-modified
 categories: [stan, quantile]
 bibliography: references.bib
-draft: false
+draft: true
 ---
 
 ```{r, message=FALSE, echo=FALSE}
