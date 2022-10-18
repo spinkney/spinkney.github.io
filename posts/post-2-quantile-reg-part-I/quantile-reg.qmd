@@ -88,6 +88,7 @@ print(summary(fit))
 ## Scale-mixture representation
 
 The above may also be written as a mixture of exponential  and normal distributions. Letting
+
 $$
 \begin{aligned}
 z_i &\sim \operatorname{Exp}(1) \\
@@ -96,13 +97,14 @@ y_i &\sim \mathcal{N}(x_i^{\top}\beta_p + \sigma \theta z_i,\, \tau \sigma \sqrt
 \end{aligned}
 $$
 where 
+
 $$
 \begin{aligned}
 \theta &= \frac{1 - 2 q}{q (1 - q)} \\
 \tau &= \sqrt{\frac{2}{q(1 -q)}}
-
 \end{aligned}
 $$
+
 The following Stan model implements the augmented approach.
 ```{cmdstan, eval=TRUE, output.var="augmented_laplace"}
 data {

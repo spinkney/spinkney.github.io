@@ -1,10 +1,10 @@
 ---
-title: "Quantile Regressions in Stan: Part II"
+title: "Quantile Regressions in Stan: Part III"
 author: "Sean Pinkney"
 date: last-modified
 categories: [stan, quantile]
 bibliography: references.bib
-draft: false
+draft: true
 format:
   html:
     code-fold: true
@@ -17,44 +17,39 @@ check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
 register_knitr_engine(override = FALSE)
 ```
 
-In [part I](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) I showed the basic Bayesian quantile regression using the asymmetric Laplace distribution and augmented scheme. In this post I'm going to show an approximate likelihood, score method proposed in @score. 
+In [part I](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) I showed the basic Bayesian quantile regression using the asymmetric Laplace distribution and augmented scheme. In this post I'm going to show an approximate likelihood, score method proposed in @score.
 
 # First, why not use the asymmetric Laplace?
 
-The ALD (asymmetric Laplace distribution) is great. It's fast and gives point results comparable to the frequentist estimator. However, @yang2016 showed that the asymptotic variance of the posterior distribution is "incorrect". It does not correspond to the frequentist interval. A reason is that the ALD and pinball loss function, $\rho_\tau(u) = \frac{|u| + (2\tau - 1)u}{2}$, is maximized at the standard frequentist quantile but does not correspond to a true data generating likelihood. In the aforementioned paper, they propose a correction to the interval after sampling. I might show this in another post but post-processing is annoying. The score method asymptotically approaches the correct estimates with the correct interval. 
+The ALD (asymmetric Laplace distribution) is great. It's fast and gives point results comparable to the frequentist estimator. However, @yang2016 showed that the asymptotic variance of the posterior distribution is "incorrect". It does not correspond to the frequentist interval. A reason is that the ALD and pinball loss function, $\rho_\tau(u) = \frac{|u| + (2\tau - 1)u}{2}$, is maximized at the standard frequentist quantile but does not correspond to a true data generating likelihood. In the aforementioned paper, they propose a correction to the interval after sampling. I might show this in another post but post-processing is annoying. The score method asymptotically approaches the correct estimates with the correct interval.
 
-# Quantile regression with score 
+# Quantile regression with score
 
-The score method includes the regressors into the objective function as
-$$
+The score method includes the regressors into the objective function as $$
 s_\tau(\beta) = \sum_{i=1}^{n} x_i \psi_\tau(y_i - x_i^{\top}\beta).
-$$
-where $\psi_\tau(u) = \tau - I(u < 0)$. 
+$$ where $\psi_\tau(u) = \tau - I(u < 0)$.
 
-:::{.callout-warning}
-Warning! It seems that $\psi$ doesn't work for me! What does work is using $\rho_\tau = \frac{|u| + (2\tau - 1)u}{2}$ as before. They mention that the loss is the same but then use new notation indicating that it's different. Anyway, this may be what they intended. 
+::: callout-warning
+Warning! It seems that $\psi$ doesn't work for me! What does work is using $\rho_\tau = \frac{|u| + (2\tau - 1)u}{2}$ as before. They mention that the loss is the same but then use new notation indicating that it's different. Anyway, this may be what they intended.
 :::
 
-@score consider the following "working" likelihood 
-$$
+@score consider the following "working" likelihood $$
 \mathcal{L}(y \mid x,\, \beta) = C \exp\bigg(-\frac{1}{2n} s_\tau(\beta)^{\top} W s_\tau(\beta)  \bigg),
-$$
-where $W$ is a $p \times p$ positive definite weight matrix, and C is a constant free of $\beta$. The quadratic form and the given objective function implies that the quantile estimator is maximized at the typical quantile estimate. 
+$$ where $W$ is a $p \times p$ positive definite weight matrix, and C is a constant free of $\beta$. The quadratic form and the given objective function implies that the quantile estimator is maximized at the typical quantile estimate.
 
 They then choose a weight matrix which gives the correct posterior covariance as
 
 $$
 W = \frac{n}{\tau (1 - \tau)}\bigg(\sum_{i=1}^n x_i x_i^{\top} \bigg).
-$$
-In fact, they also show how this can incorporate multiple $\tau$'s (I'll show this in part III) which allows more flexible modeling options, such as a squared exponential kernel that shares information across $\beta$ quantile estimates which are near each other. The $W$ matrix for multiple quantiles is given as 
+$$ In fact, they also show how this can incorporate multiple $\tau$'s (I'll show this in part III) which allows more flexible modeling options, such as a squared exponential kernel that shares information across $\beta$ quantile estimates which are near each other. The $W$ matrix for multiple quantiles is given as
 
 $$
 W = (Q \otimes G )^{-1}, \text{ where } Q = (\min(\tau_i, \tau_j) - \tau_i \tau_j)_{ij}, \; G = \frac{1}{n}\sum_{i=1}^n x_i x_i^{\top}.
-$$
-A nice property of $W$ is that it depends all on user input data so can be constructed outside of the MCMC iterations.
+$$ A nice property of $W$ is that it depends all on user input data so can be constructed outside of the MCMC iterations.
 
 ## Score function
-The following Stan model implements the single $\tau$ code. I'll simulate some data and compare to the asymmetric Laplace: 
+
+The following Stan model implements the single $\tau$ code. I'll simulate some data and compare to the asymmetric Laplace:
 
 ```{cmdstan, eval=TRUE, output.var="score_qr", class.source = 'fold-show'}
 functions{
@@ -97,7 +92,6 @@ model {
 }
 ```
 
-
 ```{cmdstan, echo=FALSE, eval=TRUE, output.var="asym_laplace"}
 functions{
 real q_loss(real q, vector u){
@@ -128,9 +122,9 @@ model {
 }
 ```
 
-Let's simulate some data and see how well it performs. 
+Let's simulate some data and see how well it performs.
 
-:::{.callout-note}
+::: callout-note
 I have to dial up the iterations a bit for the score method as it's less efficient from an ESS perspective.
 :::
 
@@ -179,8 +173,10 @@ print(summary(out_freq, se = "boot"))
 out_score$summary()
 out_asym_laplace$summary("beta")
 ```
+
 ### Modified Score
-We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated.  Noticing this behavior, I found that modifying the weight matrix to put 0s in for the intercept and setting the first element to $1 + (P - 1) \alpha^{P - 1} = 1 + (P -1)[q (1 - q)]^{P-1}$ provides better estimates. I have no theoretical justification for this, only that it will equal 1 when only the intercept is estimated and the standard errors and estimates are closer to the asymmetric Laplace when providing this modification.
+
+We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, I found that modifying the weight matrix to put 0s in for the intercept and setting the first element to $1 + (P - 1) \alpha^{P - 1} = 1 + (P -1)[q (1 - q)]^{P-1}$ provides better estimates. I have no theoretical justification for this, only that it will equal 1 when only the intercept is estimated and the standard errors and estimates are closer to the asymmetric Laplace when providing this modification.
 
 ```{cmdstan, eval=FALSE, output.var="make_w", class.source = 'foldable'}
   matrix make_w (matrix x, real q) {
@@ -262,6 +258,7 @@ out_score <- score_qr_modified$sample(
 )
 out_score$summary()
 ```
+
 Now we get estimates which are closer to what we get with the asymmetric Laplace!
 
 # Test on ImmunogG data
@@ -308,7 +305,9 @@ out_freq <- rq(y ~ x + xsq,
 ```
 
 ### Results
+
 Modified score:
+
 ```{r}
 out_score_mod$summary()
 ```
@@ -316,15 +315,15 @@ out_score_mod$summary()
 ```{r}
 summary(out_freq, se = "boot")
 ```
+
 Asymmetric Laplace:
+
 ```{r}
 out_al$summary()
 ```
 
-Interestingly, the results of the score method lie between the frequentist and asymmetric Laplace methods. 
+Interestingly, the results of the score method lie between the frequentist and asymmetric Laplace methods.
 
 # Conclusion
 
-The score method is promising but it doesn't seem like one would use the asymmetric Laplace due to the ad-hoc nature of the intercept. One thing the score method has is incorporating multipled quantiles in a principled way that allows you to put priors on the estimates that correspond to linking them. It also doesn't need to re-run the data through each quantile. In the next post, part III, I'll show this. If you have a bunch of different quantiles, lots of data, and want to understand the correlations across parameters then the score method may be right for you. 
-
-
+The score method is promising but it doesn't seem like one would use the asymmetric Laplace due to the ad-hoc nature of the intercept. One thing the score method has is incorporating multipled quantiles in a principled way that allows you to put priors on the estimates that correspond to linking them. It also doesn't need to re-run the data through each quantile. In the next post, part III, I'll show this. If you have a bunch of different quantiles, lots of data, and want to understand the correlations across parameters then the score method may be right for you.

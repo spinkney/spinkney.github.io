@@ -164,7 +164,7 @@ fit_stan_vector |>
   stat_slabh()
 ```
 
-In my next post, [quantile regression post](/posts/post-1-quantile-reg/quantile-reg.qmd) I'll show various ways to represent a quantile regression in Stan where the outcome, however, is continuous on the real line.
+In my next post, [quantile regression post](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) I'll show various ways to represent a quantile regression in Stan where the outcome, however, is continuous on the real line.
 
 ## Appendix
 

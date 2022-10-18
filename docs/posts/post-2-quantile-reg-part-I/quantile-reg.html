@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sean Pinkney">
-<meta name="dcterms.date" content="2022-10-17">
+<meta name="dcterms.date" content="2022-10-18">
 
 <title>Ruler - Quantile Regressions in Stan: Part I</title>
 <style>
@@ -221,7 +221,7 @@ div.csl-indent {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">October 17, 2022</p>
+        <p class="date">October 18, 2022</p>
       </div>
     </div>
     
@@ -340,19 +340,21 @@ X         -0.1541316 -0.2265564 -0.08528427</code></pre>
 </div>
 <section id="scale-mixture-representation" class="level2">
 <h2 class="anchored" data-anchor-id="scale-mixture-representation">Scale-mixture representation</h2>
-The above may also be written as a mixture of exponential and normal distributions. Letting <span class="math display">\[
+<p>The above may also be written as a mixture of exponential and normal distributions. Letting</p>
+<p><span class="math display">\[
 \begin{aligned}
 z_i &amp;\sim \operatorname{Exp}(1) \\
 \sigma &amp;\sim \operatorname{Exp}(1) \\
 y_i &amp;\sim \mathcal{N}(x_i^{\top}\beta_p + \sigma \theta z_i,\, \tau \sigma \sqrt{z_i})
 \end{aligned}
-\]</span> where $$
-<span class="math display">\[\begin{aligned}
+\]</span> where</p>
+<p><span class="math display">\[
+\begin{aligned}
 \theta &amp;= \frac{1 - 2 q}{q (1 - q)} \\
 \tau &amp;= \sqrt{\frac{2}{q(1 -q)}}
-
-\end{aligned}\]</span>
-<p>$$ The following Stan model implements the augmented approach.</p>
+\end{aligned}
+\]</span></p>
+<p>The following Stan model implements the augmented approach.</p>
 <div class="cell" data-output.var="augmented_laplace">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> N;                   <span class="co">// Number of observation</span></span>
@@ -397,9 +399,9 @@ y_i &amp;\sim \mathcal{N}(x_i^{\top}\beta_p + \sigma \theta z_i,\, \tau \sigma \
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 3.8 seconds.
+Chain 1 finished in 3.7 seconds.
 Chain 3 finished in 3.7 seconds.
-Chain 2 finished in 4.1 seconds.
+Chain 2 finished in 4.0 seconds.
 Chain 4 finished in 4.1 seconds.
 
 All 4 chains finished successfully.
