@@ -1,7 +1,7 @@
 ---
 title: "Quantile Regressions in Stan: Part II"
 author: "Sean Pinkney"
-date: last-modified
+date: "10/18/2022"
 categories: [stan, quantile]
 bibliography: references.bib
 draft: false
