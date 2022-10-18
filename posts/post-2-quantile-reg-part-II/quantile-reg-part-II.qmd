@@ -203,18 +203,18 @@ functions{
   vector score(real q, vector y, matrix x, vector beta) {
     return transpose(x) * q_loss(q, y - x * beta);
   }
-    
-  
+
   matrix make_w (matrix x, real q) {
     int N = rows(x);
     int P = cols(x);
     real alpha = 1 / (q * (1 - q));
     matrix[P, P] x_out = crossprod(x);
 
-    x_out[2:P, 1] /= 1 + log(N);
+    x_out[2:P, 1] /= log(N);
     x_out[1, 2:P] = transpose(x_out[2:P, 1]);
   
-    return alpha * inverse_spd(x_out) * N;
+   return alpha * inverse_spd(x_out) * N;
+
   }
 }
 data {
@@ -258,7 +258,7 @@ out_score_modified$summary()
 
 We now have estimates which line up a bit closer with the frequentist estimate but is completely unprincipled. Out of curiosity let's see how this compares on simulated data with $N = 10000$
 
-```{r, message=FALSE, echo=FALSE}
+```{r, message=FALSE, results='hide', echo=FALSE}
 set.seed(12312)
 N     <- 10000
 x     <- runif(N, max=10)
@@ -308,6 +308,8 @@ out_asym_laplace <- asym_laplace$sample(
     refresh = 0,
   show_messages = FALSE
 )
+
+out_freq <- quantreg::rq(y ~ x, tau = q)
 ```
 
 ### Score
