@@ -180,7 +180,7 @@ out_score$summary()
 out_asym_laplace$summary("beta")
 ```
 ### Modified Score
-We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated.  Noticing this behavior, I found that modifying the weight matrix to put 0s in for the intercept and setting the first element to $1 + (P - 1) \alpha^{P - 1} = 1 + (P -1)[q (1 - q)]^{P-1}$ provides better estimates. I have no theoretical justification for this, only that it will equal 1 when only the intercept is estimated and the standard errors and estimates are closer to the asymmetric Laplace when providing this modification.
+We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated.  Noticing this behavior, I found that modifying the weight matrix to put 0s in for the intercept and setting the first element to $\sqrt{(N - 1) / q (1-q)}$ provides better estimates. I have no theoretical justification for this besides doing something similar in using the QR decomposition for linear regression and that the standard errors and estimates are closer to the frequentist estimate when providing this modification.
 
 ```{cmdstan, eval=FALSE, output.var="make_w", class.source = 'foldable'}
   matrix make_w (matrix x, real q) {
@@ -193,7 +193,7 @@ We see that the frequentist estimate from `quantreg` and the asymmetric Laplace 
     x_out[2:P, 2:P] = x_reg[2:P, 2:P];
     x_out[1:P, 1] = rep_vector(0, P);
     x_out[1, 1:P] = transpose(x_out[1:P, 1]);
-    x_out[1, 1] =  1 + (P - 1) * alpha^(P - 1);
+    x_out[1, 1] = sqrt( (N - 1) / alpha );
      
     return alpha * inverse_spd(x_out) * N;
   }
@@ -216,11 +216,11 @@ functions{
     matrix[P, P] x_reg = crossprod(x);
     matrix[P, P] x_out;
     
-    x_out[2:P, 2:P] = x_reg[2:P, 2:P];
-    x_out[1:P, 1] = rep_vector(0, P);
-    x_out[1, 1:P] = transpose(x_out[1:P, 1]);
-    x_out[1, 1] =  1 + (P - 1) * alpha^(P - 1);
-     
+    if (P > 1) x_out[2:P, 2:P] = x_reg[2:P, 2:P];
+      x_out[1:P, 1] = rep_vector(0, P);
+      x_out[1, 1:P] = transpose(x_out[1:P, 1]);
+      x_out[1, 1] = sqrt( (N - 1) / alpha );
+  
     return alpha * inverse_spd(x_out) * N;
   }
 }
@@ -268,6 +268,7 @@ Now we get estimates which are closer to what we get with the asymmetric Laplace
 
 ```{r}
 library(Brq)
+library(quantreg)
 data("ImmunogG")
 dat <- data.frame(y = ImmunogG$IgG, 
                   alpha = 1, 
