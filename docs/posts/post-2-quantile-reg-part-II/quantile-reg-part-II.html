@@ -448,33 +448,26 @@ x            1.23539  0.03639   33.95156  0.00000</code></pre>
 </div>
 <section id="modified-score" class="level3">
 <h3 class="anchored" data-anchor-id="modified-score">Modified Score</h3>
-<p>We see that the frequentist estimate from <code>quantreg</code> and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn’t even include -1 and the coefficient for <span class="math inline">\(x\)</span> seems to be over-estimated. Noticing this behavior, I found that modifying the weight matrix to put 0s in for the intercept and setting the first element to <span class="math inline">\(\sqrt{(N - 1) / q (1-q)}\)</span> provides better estimates. I have no theoretical justification for this besides doing something similar in using the QR decomposition for linear regression and that the standard errors and estimates are closer to the frequentist estimate when providing this modification.</p>
-<div class="cell" data-output.var="make_w">
-<details>
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode stan foldable code-with-copy"><code class="sourceCode stan"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> make_w (<span class="dt">matrix</span> x, <span class="dt">real</span> q) {</span>
+<p>We see that the frequentist estimate from <code>quantreg</code> and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn’t even include -1 and the coefficient for <span class="math inline">\(x\)</span> seems to be over-estimated. Noticing this behavior, let’s see what modifying the weight matrix for the intercept does. We’d like the estimate to correspond to shrinking standard deviations with increasing <span class="math inline">\(N\)</span>. Something like <span class="math inline">\(\log(N)\)</span> will work. The modification being</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> make_w (<span class="dt">matrix</span> x, <span class="dt">real</span> q) {</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(x);</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> P = cols(x);</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> alpha = <span class="dv">1</span> / (q * (<span class="dv">1</span> - q));</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[P, P] x_reg = crossprod(x);</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[P, P] x_out;</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    x_out[<span class="dv">2</span>:P, <span class="dv">2</span>:P] = x_reg[<span class="dv">2</span>:P, <span class="dv">2</span>:P];</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    x_out[<span class="dv">1</span>:P, <span class="dv">1</span>] = rep_vector(<span class="dv">0</span>, P);</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    x_out[<span class="dv">1</span>, <span class="dv">1</span>:P] = transpose(x_out[<span class="dv">1</span>:P, <span class="dv">1</span>]);</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    x_out[<span class="dv">1</span>, <span class="dv">1</span>] = sqrt( (N - <span class="dv">1</span>) / alpha );</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> alpha * inverse_spd(x_out) * N;</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[P, P] x_out = crossprod(x);</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    x_out[<span class="dv">2</span>:P, <span class="dv">1</span>] /= <span class="dv">1</span> + log(N);</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    x_out[<span class="dv">1</span>, <span class="dv">2</span>:P] = transpose(x_out[<span class="dv">2</span>:P, <span class="dv">1</span>]);</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> alpha * inverse_spd(x_out) * N;</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s re-estimate the above with the modification.</p>
 <div class="cell" data-output.var="score_qr_modified">
 
 </div>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>out_score <span class="ot">&lt;-</span> score_qr_modified<span class="sc">$</span><span class="fu">sample</span>(</span>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>out_score_modified <span class="ot">&lt;-</span> score_qr_modified<span class="sc">$</span><span class="fu">sample</span>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> N,</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">P =</span> <span class="dv">2</span>,</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">q =</span> q,</span>
@@ -491,30 +484,140 @@ x            1.23539  0.03639   33.95156  0.00000</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 2 finished in 1.2 seconds.
-Chain 3 finished in 1.1 seconds.
-Chain 4 finished in 1.1 seconds.
-Chain 1 finished in 1.3 seconds.
+Chain 1 finished in 0.5 seconds.
+Chain 2 finished in 0.5 seconds.
+Chain 3 finished in 0.5 seconds.
+Chain 4 finished in 0.5 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 1.2 seconds.
-Total execution time: 1.4 seconds.</code></pre>
+Mean chain execution time: 0.5 seconds.
+Total execution time: 0.6 seconds.</code></pre>
 </div>
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>out_score<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>out_score_modified<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 10
+  variable    mean  median     sd    mad      q5     q95  rhat ess_bulk ess_tail
+  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -1.33e3 -1.33e3 0.854  0.667  -1.33e3 -1.33e3  1.00    1555.    1643.
+2 beta[1]  -1.16e0 -1.15e0 0.0902 0.0894 -1.31e0 -1.01e0  1.01     759.     821.
+3 beta[2]   1.26e0  1.26e0 0.0158 0.0156  1.23e0  1.29e0  1.01     773.     814.</code></pre>
+</div>
+</div>
+<p>We now have estimates which line up a bit closer with the frequentist estimate but is completely unprincipled. Out of curiosity let’s see how this compares on simulated data with <span class="math inline">\(N = 10000\)</span></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 4 finished in 4.3 seconds.
+Chain 1 finished in 4.4 seconds.
+Chain 3 finished in 4.5 seconds.
+Chain 2 finished in 4.9 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 4.5 seconds.
+Total execution time: 5.1 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 3 finished in 3.3 seconds.
+Chain 4 finished in 3.4 seconds.
+Chain 1 finished in 3.5 seconds.
+Chain 2 finished in 3.5 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 3.4 seconds.
+Total execution time: 3.6 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 finished in 1.8 seconds.
+Chain 2 finished in 1.8 seconds.
+Chain 3 finished in 1.8 seconds.
+Chain 4 finished in 1.8 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 1.8 seconds.
+Total execution time: 1.8 seconds.</code></pre>
+</div>
+</div>
+</section>
+<section id="score" class="level3">
+<h3 class="anchored" data-anchor-id="score">Score</h3>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>out_score<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 10
   variable      mean    median      sd     mad        q5      q95  rhat ess_bulk
   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -94184.   -94184.   0.851   0.890   -94186.   -9.42e+4  1.01     519.
-2 beta[1]      -1.02     -1.03 0.0132  0.0126      -1.04 -9.97e-1  1.01     370.
-3 beta[2]       1.23      1.23 0.00229 0.00248      1.23  1.23e+0  1.02     383.
+1 lp__     -9621.    -9620.    1.02    0.801   -9623.    -9.62e+3  1.00    1487.
+2 beta[1]     -0.914    -0.912 0.0357  0.0354     -0.977 -8.60e-1  1.00    1168.
+3 beta[2]      1.15      1.15  0.00668 0.00658     1.14   1.16e+0  1.00    1070.
 # … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>Now we get estimates which are closer to what we get with the asymmetric Laplace!</p>
+</section>
+<section id="modified-score-1" class="level3">
+<h3 class="anchored" data-anchor-id="modified-score-1">Modified Score</h3>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>out_score_modified<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 10
+  variable       mean     median      sd     mad      q5      q95  rhat ess_bulk
+  &lt;chr&gt;         &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -15479.    -15479.    1.01    0.741   -1.55e4 -1.55e+4  1.00    1694.
+2 beta[1]      -0.989     -0.989 0.0110  0.00994 -1.01e0 -9.72e-1  1.00    1256.
+3 beta[2]       1.17       1.17  0.00398 0.00407  1.16e0  1.17e+0  1.00    1613.
+# … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="quantreg" class="level3">
+<h3 class="anchored" data-anchor-id="quantreg">Quantreg</h3>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"boot"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call: quantreg::rq(formula = y ~ x, tau = q)
+
+tau: [1] 0.05
+
+Coefficients:
+            Value    Std. Error t value  Pr(&gt;|t|)
+(Intercept) -1.03935  0.11422   -9.09972  0.00000
+x            1.23539  0.03351   36.86264  0.00000</code></pre>
+</div>
+</div>
+</section>
+<section id="asymmetric-laplace" class="level3">
+<h3 class="anchored" data-anchor-id="asymmetric-laplace">Asymmetric Laplace</h3>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>out_asym_laplace<span class="sc">$</span><span class="fu">summary</span>(<span class="st">"beta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 10
+  variable   mean median      sd     mad    q5    q95  rhat ess_bulk ess_tail
+  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 beta[1]  -0.997 -0.995 0.0147  0.0138  -1.02 -0.974  1.00    1332.    1112.
+2 beta[2]   1.17   1.17  0.00593 0.00581  1.16  1.18   1.00    1273.    1336.</code></pre>
+</div>
+</div>
+<p>It does appear to be better. Let’s see how this does on the ImmunogG data.</p>
 </section>
 </section>
 </section>
@@ -523,55 +626,82 @@ Total execution time: 1.4 seconds.</code></pre>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Brq)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantreg)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"ImmunogG"</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG, </span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="dv">1</span>, </span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">x =</span> ImmunogG<span class="sc">$</span>Age, </span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">xsq =</span> ImmunogG<span class="sc">$</span>Age<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>out_score_mod <span class="ot">&lt;-</span> score_qr_modified<span class="sc">$</span><span class="fu">sample</span>(</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(ImmunogG),</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">P =</span> <span class="dv">3</span>,</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">q =</span> <span class="fl">0.05</span>,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Brq)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"ImmunogG"</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG, </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">alpha =</span> <span class="dv">1</span>, </span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">x =</span> ImmunogG<span class="sc">$</span>Age, </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">xsq =</span> ImmunogG<span class="sc">$</span>Age<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>out_score <span class="ot">&lt;-</span> score_qr<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(ImmunogG),</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">P =</span> <span class="dv">3</span>,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">q =</span> q,</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG,</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 4 finished in 1.2 seconds.
-Chain 1 finished in 1.4 seconds.
-Chain 3 finished in 1.6 seconds.
-Chain 2 finished in 1.7 seconds.
+Chain 2 finished in 0.8 seconds.
+Chain 3 finished in 0.7 seconds.
+Chain 4 finished in 0.7 seconds.
+Chain 1 finished in 0.8 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 1.5 seconds.
-Total execution time: 1.7 seconds.</code></pre>
+Mean chain execution time: 0.8 seconds.
+Total execution time: 0.9 seconds.</code></pre>
 </div>
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>out_al <span class="ot">&lt;-</span> asym_laplace<span class="sc">$</span><span class="fu">sample</span>(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(ImmunogG),</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">P =</span> <span class="dv">3</span>,</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">q =</span> <span class="fl">0.05</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">500</span>,</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">500</span>,</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>out_score_mod <span class="ot">&lt;-</span> score_qr_modified<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(ImmunogG),</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">P =</span> <span class="dv">3</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">q =</span> q,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 finished in 0.7 seconds.
+Chain 3 finished in 0.7 seconds.
+Chain 4 finished in 0.7 seconds.
+Chain 2 finished in 0.8 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.7 seconds.
+Total execution time: 0.9 seconds.</code></pre>
+</div>
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>out_al <span class="ot">&lt;-</span> asym_laplace<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(ImmunogG),</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">P =</span> <span class="dv">3</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">q =</span> q,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> ImmunogG<span class="sc">$</span>IgG,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">500</span>,</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">500</span>,</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
@@ -587,60 +717,79 @@ Total execution time: 0.7 seconds.</code></pre>
 </div>
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>out_freq <span class="ot">&lt;-</span> <span class="fu">rq</span>(y <span class="sc">~</span> x <span class="sc">+</span> xsq, </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> dat,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">tau =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>out_freq <span class="ot">&lt;-</span> <span class="fu">rq</span>(y <span class="sc">~</span> x <span class="sc">+</span> xsq, </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> dat,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">tau =</span> q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="results" class="level3">
 <h3 class="anchored" data-anchor-id="results">Results</h3>
 </section>
-<section id="modified-score-1" class="level3">
-<h3 class="anchored" data-anchor-id="modified-score-1">Modified score:</h3>
+<section id="orginal-score" class="level3">
+<h3 class="anchored" data-anchor-id="orginal-score">Orginal score:</h3>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>out_score_mod<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>out_score<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 10
-  variable      mean    median      sd     mad        q5      q95  rhat ess_bulk
-  &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -6721.    -6720.    1.89    1.60    -6724.    -6.72e+3  1.01     474.
-2 beta[1]      0.758     0.760 0.0159  0.0121      0.730  7.80e-1  1.01     376.
-3 beta[2]      1.20      1.20  0.0126  0.0102      1.18   1.22e+0  1.01     354.
-4 beta[3]     -0.135    -0.135 0.00193 0.00155    -0.138 -1.32e-1  1.01     374.
+  variable    mean  median     sd    mad       q5      q95  rhat ess_bulk
+  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -89.5   -89.2   1.33   1.12   -92.2    -88.0     1.00     902.
+2 beta[1]    0.638   0.670 0.327  0.343    0.0655   1.14    1.00     609.
+3 beta[2]    1.23    1.23  0.276  0.272    0.776    1.68    1.00     556.
+4 beta[3]   -0.141  -0.141 0.0444 0.0433  -0.213   -0.0688  1.01     587.
 # … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
 </div>
 </div>
 </section>
-<section id="quantreg" class="level3">
-<h3 class="anchored" data-anchor-id="quantreg">Quantreg:</h3>
+<section id="modified-score-2" class="level3">
+<h3 class="anchored" data-anchor-id="modified-score-2">Modified score:</h3>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"boot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>out_score_mod<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 10
+  variable     mean   median     sd    mad       q5       q95  rhat ess_bulk
+  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -149.    -149.    1.34   1.03   -152.    -148.      1.00     940.
+2 beta[1]     0.686    0.710 0.256  0.267     0.248    1.06    1.01     485.
+3 beta[2]     1.23     1.23  0.202  0.201     0.925    1.57    1.01     471.
+4 beta[3]    -0.144   -0.142 0.0335 0.0325   -0.201   -0.0936  1.01     521.
+# … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="quantreg-1" class="level3">
+<h3 class="anchored" data-anchor-id="quantreg-1">Quantreg:</h3>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"boot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-Call: rq(formula = y ~ x + xsq, tau = 0.05, data = dat)
+Call: rq(formula = y ~ x + xsq, tau = q, data = dat)
 
 tau: [1] 0.05
 
 Coefficients:
             Value    Std. Error t value  Pr(&gt;|t|)
-(Intercept)  0.76514  0.40466    1.89082  0.05963
-x            1.19143  0.48030    2.48058  0.01367
-xsq         -0.13371  0.08514   -1.57043  0.11739</code></pre>
+(Intercept)  0.76514  0.41910    1.82569  0.06891
+x            1.19143  0.50873    2.34199  0.01985
+xsq         -0.13371  0.08969   -1.49080  0.13708</code></pre>
 </div>
 </div>
 </section>
-<section id="asymmetric-laplace" class="level3">
-<h3 class="anchored" data-anchor-id="asymmetric-laplace">Asymmetric Laplace:</h3>
+<section id="asymmetric-laplace-1" class="level3">
+<h3 class="anchored" data-anchor-id="asymmetric-laplace-1">Asymmetric Laplace:</h3>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>out_al<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>out_al<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 10
