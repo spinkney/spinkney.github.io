@@ -307,19 +307,21 @@ out_freq <- rq(y ~ x + xsq,
 ## Results
 
 ### Modified score:
-
+ 
 ```{r}
 out_score_mod$summary()
 ```
 
-### Quantreg:
+Quantreg
 
+### Quantreg:
+ 
 ```{r}
 summary(out_freq, se = "boot")
 ```
 
 ### Asymmetric Laplace:
-
+ 
 ```{r}
 out_al$summary()
 ```
