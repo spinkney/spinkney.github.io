@@ -16,6 +16,7 @@ check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
 register_knitr_engine(override = FALSE)
 ```
 
+
 Quantile regressions are relatively new in the Bayesian literature first appearing in @yu who described an asymmetric Laplace distribution to estimate the conditional quantiles. This post is going to show the asymmetric Laplace and the augmented version. In part II I will show the score likelihood method.
 
 The asymmetric Laplace distribution is given as 
@@ -31,6 +32,7 @@ $$
 $$
 
 We may write this in Stan as
+
 
 ```{cmdstan, output.var="asymetric_laplace"}
 functions{
@@ -62,7 +64,9 @@ model {
 }
 ```
 
+
 Let's compare the 5th percentile to the `Brq` R package
+
 
 ```{r, message=F}
 library(Brq)
@@ -89,11 +93,13 @@ fit = Brq(y ~ X , tau= 0.05,runs= 2000, burn=1000)
 print(summary(fit))
 ```
 
+
 ### Using the covariates for extra information
 
 In @Lee2022 they detail a Bayesian approach to the envelope quantile regression. In all honesty, I briefly skimmed the paper and gathered that by adding a regression on the covariates and using this information in the asymmetric Laplace can help identification. This isn't a recreation of their method but a quick detour to see if a simplified version of what they do increases ESS.
 
 The idea is that we use the variability in the covariance of the regressors to help identify the coefficients on the ALD regression. I now have to separate out the intercept into $\alpha$.
+
 
 ```{cmdstan, output.var="asymetric_laplace_envelope"}
 functions{
@@ -145,7 +151,9 @@ model {
 }
 ```
 
+
 Let's fit the model. 
+
 ```{r}
 out_envelope <- asymetric_laplace_envelope$sample(
   data = list(N = nrow(ImmunogG),
@@ -163,6 +171,7 @@ out_envelope <- asymetric_laplace_envelope$sample(
 
 out_envelope$summary(c("alpha", "beta", "sigma"))
 ```
+
 Slightly different estimates, higher ESS, slower to fit, but lower standard deviations! Neat.
 
 ## Scale-mixture representation
@@ -185,6 +194,7 @@ $$
 $$
 
 The following Stan model implements the augmented approach.
+
 
 ```{cmdstan, eval=TRUE, output.var="augmented_laplace"}
 data {
@@ -213,7 +223,9 @@ model {
 }
 ```
 
+
 Let's fit the model
+
 
 ```{r}
 out_aug_laplace <- augmented_laplace$sample(
@@ -232,7 +244,9 @@ out_aug_laplace <- augmented_laplace$sample(
 out_aug_laplace$summary("beta")
 ```
 
+
 Ouch! Divergences. Although the parameter estimates look comparable. Let's inspect the pairs plots between the augmented version and the asymmetric Laplace.
+
 
 ```{r}
 library(bayesplot)
@@ -242,9 +256,11 @@ mcmc_pairs(out_aug_laplace$draws(c("beta", "sigma")), np = np_aug_laplace)
 mcmc_pairs(out_asym_laplace$draws(c("beta", "sigma")), np = np_asym_laplace)
 ```
 
+
 The pairs plots don't appear to show the divergence originating be due to `beta` or `sigma`. It's most likely the augmentation variables `z`. As I'm up for time on this, I'd be curious to test out alternative specifications or see if anyone has encountered these issues with the augmented version and found a solution.
 
 For the next post, we'll take a look at an approximate likelihood using the data which asymptotically approaches the true likelihood with more data.
+
 
 
 
