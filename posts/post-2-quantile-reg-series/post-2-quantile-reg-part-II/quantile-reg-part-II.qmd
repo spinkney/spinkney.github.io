@@ -191,7 +191,7 @@ summary(out_freq, se = "boot")
 
 ### Modified Score
 
-We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, let's see what modifying the weight matrix for the intercept does. We'd like the estimate to correspond to shrinking standard deviations with increasing $N$. Something like division by $\log(N)$ will work. The modification being
+We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, let's see what modifying the weight matrix for the intercept does. We'd like the estimate to correspond to shrinking standard deviations with increasing $N$. It seems that the method converges with more accurate standard errors at a rate of $N / 2$ . The modification being
 
 ``` stan
   matrix make_w (matrix x, real q) {
@@ -199,11 +199,8 @@ We see that the frequentist estimate from `quantreg` and the asymmetric Laplace 
     int P = cols(x);
     real alpha = 1 / (q * (1 - q));
     matrix[P, P] x_out = crossprod(x);
-
-    x_out[2:P, 1] /= log(N);
-    x_out[1, 2:P] = transpose(x_out[2:P, 1]);
   
-    return alpha * inverse_spd(x_out) * N;
+    return alpha * inverse_spd(x_out) * N * 0.5; // modified here
   }
 ```
 
@@ -225,10 +222,7 @@ functions{
     real alpha = 1 / (q * (1 - q));
     matrix[P, P] x_out = crossprod(x);
 
-    x_out[2:P, 1] /= log(N);
-    x_out[1, 2:P] = transpose(x_out[2:P, 1]);
-  
-   return alpha * inverse_spd(x_out) * N;
+   return alpha * inverse_spd(x_out) * (N * 0.5);
 
   }
 }
@@ -357,11 +351,12 @@ It does appear to be better. Let's see how this does on the ImmunogG data.
 
 # Test on ImmunogG data
 
-We'll use the same quantile of $5/%$ to test.
+We'll use the same quantile of $5\%$ to test.
 
 ```{r, results='hide'}
 library(Brq)
 data("ImmunogG")
+q <- 0.05
 dat <- data.frame(y = ImmunogG$IgG, 
                   alpha = 1, 
                   x = ImmunogG$Age, 
