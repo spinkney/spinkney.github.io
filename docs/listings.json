@@ -2,9 +2,20 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/post-2-quantile-reg-part-II/quantile-reg-part-II.html",
-      "/posts/post-2-quantile-reg-part-I/quantile-reg.html",
+      "/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html",
+      "/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html",
       "/posts/post-1-vasciek/vasciek_post.html"
+    ]
+  },
+  {
+    "listing": "/posts/post-2-quantile-reg-series/quantile-reg-series.html",
+    "items": []
+  },
+  {
+    "listing": "/quantile-reg-series.html",
+    "items": [
+      "/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html",
+      "/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html"
     ]
   }
 ]

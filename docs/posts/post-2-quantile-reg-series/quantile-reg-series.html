@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Ruler</title>
+<title>Ruler - Series: Quantile Regression in Stan</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,25 +23,25 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-listing/list.min.js"></script>
+<script src="../../site_libs/quarto-listing/quarto-listing.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -71,9 +71,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-reading-time','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-description","listing-categories"],
+      searchColumns: [],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -102,7 +102,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Ruler</span>
     </a>
   </div>
@@ -116,7 +116,7 @@ ul.task-list li input[type="checkbox"] {
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html">
+    <a class="nav-link" href="../../about.html">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -146,9 +146,8 @@ ul.task-list li input[type="checkbox"] {
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Ruler</h1>
-            <p class="subtitle lead">Measure What Matters</p>
+    <div class="quarto-title column-page">
+      <h1 class="title">Series: Quantile Regression in Stan</h1>
                       </div>
   </div>
     
@@ -164,141 +163,20 @@ ul.task-list li input[type="checkbox"] {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(3)</span></div><div class="category" data-category="quantile">quantile <span class="quarto-category-count">(3)</span></div><div class="category" data-category="stan">stan <span class="quarto-category-count">(3)</span></div></div></div>
+    
 <!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+<main class="content quarto-banner-title-block column-page" id="quarto-document-content">
 
 
 
 
-<div class="grid">
-<section id="series" class="level1 g-col-12 g-col-md-6">
-<h1>Series</h1>
-<section id="quantile-regression" class="level5">
-<h5 class="anchored" data-anchor-id="quantile-regression"><a href="quantile-reg-series.html">quantile regression</a></h5>
-<p>This series is all about quantile regressions using Stan.</p>
-</section>
-</section>
-</div>
 
 
 
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="listing-actions-group">
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
-    </div>
-</div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="stan,quantile" data-listing-date-sort="1666065600000" data-listing-file-modified-sort="1666168566336" data-listing-reading-time-sort="12.76">
-<div class="body">
-<a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html">
-<h3 class="no-anchor listing-title">
-Quantile Regressions in Stan: Part II
-</h3>
-<div class="listing-subtitle">
 
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('stan'); return false;">
-stan
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('quantile'); return false;">
-quantile
-</div>
-</div>
-<a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html">
-<div class="listing-description">
-Part I showed the basic…<span class="citation" data-cites="score"></span>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html">
-<div class="listing-date">
-Oct 18, 2022
-</div>
-<div class="listing-author">
-Sean Pinkney
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="stan,quantile" data-listing-date-sort="1665806400000" data-listing-file-modified-sort="1666167718476" data-listing-reading-time-sort="3.975">
-<div class="body">
-<a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html">
-<h3 class="no-anchor listing-title">
-Quantile Regressions in Stan: Part I
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('stan'); return false;">
-stan
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('quantile'); return false;">
-quantile
-</div>
-</div>
-<a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html">
-<div class="listing-description">
-Quantile regressions are relatively new in the Bayesian literature first appearing in <span class="citation" data-cites="yu">Yu and Moyeed (2001)</span> who described an asymmetric Laplace distribution to estimate the conditional quantiles. This post is going to show the asymmetric Laplace and the…
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html">
-<div class="listing-date">
-Oct 15, 2022
-</div>
-<div class="listing-author">
-Sean Pinkney
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="stan,quantile" data-listing-date-sort="1665720000000" data-listing-file-modified-sort="1666086397110" data-listing-reading-time-sort="9.225">
-<div class="body">
-<a href="./posts/post-1-vasciek/vasciek_post.html">
-<h3 class="no-anchor listing-title">
-Vasicek Quantile Regression in Stan
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('stan'); return false;">
-stan
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('quantile'); return false;">
-quantile
-</div>
-</div>
-<a href="./posts/post-1-vasciek/vasciek_post.html">
-<div class="listing-description">
-In…<span class="citation" data-cites="vasicek"></span>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/post-1-vasciek/vasciek_post.html">
-<div class="listing-date">
-Oct 14, 2022
-</div>
-<div class="listing-author">
-Sean Pinkney
-</div>
-</a>
-</div>
-</div>
 </div>
 <div class="listing-no-matching d-none">
 No matching items

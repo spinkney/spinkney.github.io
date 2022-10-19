@@ -17,7 +17,7 @@ check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
 register_knitr_engine(override = FALSE)
 ```
 
-In [part I](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) I showed the basic Bayesian quantile regression using the asymmetric Laplace distribution and augmented scheme. In this post I'm going to show an approximate likelihood, score method proposed in @score.
+[Part I](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) showed the basic Bayesian quantile regression using the asymmetric Laplace distribution and augmented scheme. In this post I'm going to show an approximate likelihood, score method proposed in @score.
 
 # First, why not use the asymmetric Laplace?
 
@@ -128,7 +128,8 @@ Let's simulate some data and see how well it performs.
 I have to dial up the iterations a bit for the score method as it's less efficient from an ESS perspective.
 :::
 
-```{r, message=FALSE, warning=FALSE, class.source = 'foldable'}
+```{r, message=FALSE, warning=FALSE}
+#| code-fold: show
 set.seed(12312)
 library(quantreg)
 N     <- 1000
@@ -168,15 +169,29 @@ out_asym_laplace <- asym_laplace$sample(
     refresh = 0,
   show_messages = FALSE
 )
+```
 
-print(summary(out_freq, se = "boot"))
+### Score
+
+```{r}
 out_score$summary()
+```
+
+### Asymmetric Laplace
+
+```{r}
 out_asym_laplace$summary("beta")
+```
+
+### Quantreg
+
+```{r}
+summary(out_freq, se = "boot")
 ```
 
 ### Modified Score
 
-We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, let's see what modifying the weight matrix for the intercept does. We'd like the estimate to correspond to shrinking standard deviations with increasing $N$. Something like $\log(N)$ will work. The modification being
+We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, let's see what modifying the weight matrix for the intercept does. We'd like the estimate to correspond to shrinking standard deviations with increasing $N$. Something like division by $\log(N)$ will work. The modification being
 
 ``` stan
   matrix make_w (matrix x, real q) {
@@ -185,7 +200,7 @@ We see that the frequentist estimate from `quantreg` and the asymmetric Laplace 
     real alpha = 1 / (q * (1 - q));
     matrix[P, P] x_out = crossprod(x);
 
-    x_out[2:P, 1] /= 1 + log(N);
+    x_out[2:P, 1] /= log(N);
     x_out[1, 2:P] = transpose(x_out[2:P, 1]);
   
     return alpha * inverse_spd(x_out) * N;
@@ -256,7 +271,9 @@ out_score_modified <- score_qr_modified$sample(
 out_score_modified$summary()
 ```
 
-We now have estimates which line up a bit closer with the frequentist estimate but is completely unprincipled. Out of curiosity let's see how this compares on simulated data with $N = 10000$
+We now have estimates which line up a bit closer with the frequentist estimate but is completely unprincipled. Out of curiosity let's see how this compares on simulated data with $N = 10000$.
+
+### Simulated data with N = 10000
 
 ```{r, message=FALSE, results='hide', echo=FALSE}
 set.seed(12312)
@@ -340,7 +357,9 @@ It does appear to be better. Let's see how this does on the ImmunogG data.
 
 # Test on ImmunogG data
 
-```{r}
+We'll use the same quantile of $5/%$ to test.
+
+```{r, results='hide'}
 library(Brq)
 data("ImmunogG")
 dat <- data.frame(y = ImmunogG$IgG, 

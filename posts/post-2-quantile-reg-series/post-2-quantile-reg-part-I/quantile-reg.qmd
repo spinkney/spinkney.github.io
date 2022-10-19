@@ -13,14 +13,13 @@ check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
 register_knitr_engine(override = FALSE)
 ```
 
-Quantile regressions are relatively new in the Bayesian literature first appearing in @yu who described an asymmetric Laplace distribution to estimate the conditional quantiles. This post is going to show the asymmetric Laplace and the augmented version. In part II I will show the score likelihood method. 
+Quantile regressions are relatively new in the Bayesian literature first appearing in @yu who described an asymmetric Laplace distribution to estimate the conditional quantiles. This post is going to show the asymmetric Laplace and the augmented version. In part II I will show the score likelihood method.
 
-The asymmetric Laplace distribution is given as 
-$$
+The asymmetric Laplace distribution is given as $$
 \operatorname{ALD}(Y \mid x, \beta) = \frac{\tau^n (1 - \tau)^n}{\sigma^n}\exp \bigg( -\frac{\sum_{i=1}^n \rho_\tau (y_i - x_i^{\top}\beta)}{\sigma} \bigg)
 $$
 
-where 
+where
 
 $$
 \rho_\tau(u) = \frac{|u| + (2\tau - 1)u}{2}
@@ -87,7 +86,7 @@ print(summary(fit))
 
 ## Scale-mixture representation
 
-The above may also be written as a mixture of exponential  and normal distributions. Letting
+The above may also be written as a mixture of exponential and normal distributions. Letting
 
 $$
 \begin{aligned}
@@ -95,8 +94,7 @@ z_i &\sim \operatorname{Exp}(1) \\
 \sigma &\sim \operatorname{Exp}(1) \\
 y_i &\sim \mathcal{N}(x_i^{\top}\beta_p + \sigma \theta z_i,\, \tau \sigma \sqrt{z_i})
 \end{aligned}
-$$
-where 
+$$ where
 
 $$
 \begin{aligned}
@@ -106,6 +104,7 @@ $$
 $$
 
 The following Stan model implements the augmented approach.
+
 ```{cmdstan, eval=TRUE, output.var="augmented_laplace"}
 data {
   int N;                   // Number of observation
@@ -132,7 +131,9 @@ model {
   y ~ normal(x * beta + sigma * theta * z, tau * sqrt(z) * sigma);
 }
 ```
+
 Let's fit the model
+
 ```{r}
 out_aug_laplace <- augmented_laplace$sample(
   data = list(N = nrow(ImmunogG),
@@ -149,7 +150,9 @@ out_aug_laplace <- augmented_laplace$sample(
 )
 out_aug_laplace$summary("beta")
 ```
+
 Ouch! Divergences. Although the parameter estimates look comparable. Let's inspect the pairs plots between the augmented version and the asymmetric Laplace.
+
 ```{r}
 library(bayesplot)
 np_aug_laplace <- nuts_params(out_aug_laplace)
@@ -157,8 +160,7 @@ np_asym_laplace <- nuts_params(out_asym_laplace)
 mcmc_pairs(out_aug_laplace$draws(c("beta", "sigma")), np = np_aug_laplace)
 mcmc_pairs(out_asym_laplace$draws(c("beta", "sigma")), np = np_asym_laplace)
 ```
+
 The pairs plots don't appear to show the divergence originating be due to `beta` or `sigma`. It's most likely the augmentation variables `z`. As I'm up for time on this, I'd be curious to test out alternative specifications or see if anyone has encountered these issues with the augmented version and found a solution.
 
-For the next post, we'll take a look at an approximate likelihood using the data which asymptotically approaches the true likelihood with more data. 
-
-
+For the next post, we'll take a look at an approximate likelihood using the data which asymptotically approaches the true likelihood with more data.

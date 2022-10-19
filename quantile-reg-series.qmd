@@ -1,0 +1,13 @@
+---
+title: "Series: Quantile Regression in Stan"
+listing:
+  contents: posts/post-2-quantile-reg-series
+  sort: "date desc"
+  type: default
+  categories: false
+  sort-ui: false
+  filter-ui: false
+  fields: [date, title, reading-time, description]
+page-layout: full
+title-block-banner: true
+---
