@@ -18,7 +18,7 @@ register_knitr_engine(override = FALSE)
 
 Quantile regressions are relatively new in the Bayesian literature first appearing in @yu who described an asymmetric Laplace distribution to estimate the conditional quantiles. This post is going to show the asymmetric Laplace and the augmented version. In part II I will show the score likelihood method.
 
-The asymmetric Laplace distribution is given as 
+The asymmetric Laplace distribution is given as
 
 $$
 \operatorname{ALD}(Y \mid x, \beta) = \frac{\tau^n (1 - \tau)^n}{\sigma^n}\exp \bigg( -\frac{\sum_{i=1}^n \rho_\tau (y_i - x_i^{\top}\beta)}{\sigma} \bigg)
@@ -145,7 +145,8 @@ model {
 }
 ```
 
-Let's fit the model. 
+Let's fit the model.
+
 ```{r}
 out_envelope <- asymetric_laplace_envelope$sample(
   data = list(N = nrow(ImmunogG),
@@ -163,6 +164,7 @@ out_envelope <- asymetric_laplace_envelope$sample(
 
 out_envelope$summary(c("alpha", "beta", "sigma"))
 ```
+
 Slightly different estimates, higher ESS, slower to fit, but lower standard deviations! Neat.
 
 ## Scale-mixture representation
@@ -229,7 +231,7 @@ out_aug_laplace <- augmented_laplace$sample(
     refresh = 0,
   show_messages = FALSE
 )
-out_aug_laplace$summary("beta")
+out_aug_laplace$summary(c("beta"))
 ```
 
 Ouch! Divergences. Although the parameter estimates look comparable. Let's inspect the pairs plots between the augmented version and the asymmetric Laplace.
@@ -244,7 +246,58 @@ mcmc_pairs(out_asym_laplace$draws(c("beta", "sigma")), np = np_asym_laplace)
 
 The pairs plots don't appear to show the divergence originating be due to `beta` or `sigma`. It's most likely the augmentation variables `z`. As I'm up for time on this, I'd be curious to test out alternative specifications or see if anyone has encountered these issues with the augmented version and found a solution.
 
+### Try Student T
+::: callout-warning
+The Student T won't result in the same posterior and is likely not ALD. However, it approaches a normal distribution with increasing $\nu$. 
+:::
+
+Let's use the `student_t` with $\nu = 30$
+```{cmdstan, eval=TRUE, output.var="student_augmented_laplace"}
+data {
+  int N;                   // Number of observation
+  int P;                   // Number of predictors
+  real<lower=0, upper=1> q;
+  vector[N] y;             // Response variable sorted
+  matrix[N, P] x;
+}
+transformed data {
+  real theta = (1 - 2 * q) / (q * (1 - q));
+  real tau = sqrt(2 / (q * (1 - q)));
+}
+parameters {
+  vector[P] beta;
+  vector<lower=0>[N] z;
+  real<lower=0> sigma;
+}
+model {
+  beta ~ normal(0, 2);
+  sigma ~ exponential(1);
+  
+  // Data Augmentation
+  z ~ exponential(1);
+  y ~ student_t(30, x * beta + sigma * theta * z, tau * sqrt(z) * sigma);
+}
+```
+
+Let's fit the same model
+
+```{r}
+out_student_aug_laplace <- student_augmented_laplace$sample(
+  data = list(N = nrow(ImmunogG),
+              P = 3,
+              q = 0.05,
+              y = ImmunogG$IgG,
+              x = as.matrix(data.frame(alpha = 1, x = ImmunogG$Age, xsq = ImmunogG$Age^2))),
+  seed = 12123123, 
+  parallel_chains = 4,
+  iter_warmup = 500,
+  iter_sampling = 500,
+    refresh = 0,
+  show_messages = FALSE
+)
+out_student_aug_laplace$summary(c("beta"))
+```
+Great no divergences! 
+
+# Conclusion
 For the next post, we'll take a look at an approximate likelihood using the data which asymptotically approaches the true likelihood with more data.
-
-
-
