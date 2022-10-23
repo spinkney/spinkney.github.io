@@ -4,7 +4,7 @@ author: "Sean Pinkney"
 date: last-modified
 categories: [stan, quantile]
 bibliography: references.bib
-draft: true
+draft: false
 format:
   html:
     code-fold: true
