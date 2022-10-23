@@ -26,10 +26,6 @@ The score method includes the regressors into the objective function as $$
 s_\tau(\beta) = \sum_{i=1}^{n} x_i \psi_\tau(y_i - x_i^{\top}\beta).
 $$ where $\psi_\tau(u) = \tau - I(u < 0)$.
 
-::: callout-warning
-Warning! It seems that $\psi$ doesn't work for me! What does work is using $\rho_\tau = \frac{|u| + (2\tau - 1)u}{2}$ as before. They mention that the loss is the same but then use new notation indicating that it's different. Anyway, this may be what they intended.
-:::
-
 @score consider the following "working" likelihood 
 $$
 \mathcal{L}(y \mid x,\, \beta) = C \exp\bigg(-\frac{1}{2n} s_\tau(\beta)^{\top} W s_\tau(\beta)  \bigg),
@@ -79,7 +75,7 @@ functions{
     matrix[K, P] out;
       
     for (k in 1:K) {
-      out[k] = (x' * q_loss(q[k], y - x * to_vector(beta[ ,k])))';
+      out[k] = transpose(transpose(x) * q_loss(q[k], y - x * to_vector(beta[ ,k])));
     }
       
     return to_vector(out);
@@ -94,8 +90,8 @@ functions{
     matrix[m, m] Q;
     matrix[P, P] G = crossprod(x) ;
     
-    G[1:P, 1] /= log(N);
-    G[1, 2:P] = transpose(G[2:P, 1]);
+  //  G[1:P, 1] /= log(N);
+  //  G[1, 2:P] = transpose(G[2:P, 1]);
       
     for (i in 1:m) {
       Q[i, i] = q[i] * (1 - q[i]);
@@ -122,14 +118,17 @@ transformed data {
 parameters {
   // can add ordered constraint here
    array[P] vector[K] beta;
+   real<lower=0> sigma;
 }
 model {
-  vector[K * P] score_vec = score(q, y, x, beta);
+  vector[K * P] score_vec = score(q, y, x, beta) / sigma;
   
   for (i in 1:K) 
     beta[, i] ~ normal(0, 4);
+  
+  sigma ~ exponential(1);
  
-  target += -quad_form(W, score_vec) / (2 * N);
+  target += -quad_form(W, score_vec) / (2 * N * K) - K * N * log(sigma);
 
 }
 ```
@@ -155,7 +154,7 @@ out_score <- multiple_score_qr$sample(
               K = length(q),
               q = q,
               y = y,
-              x = as.matrix(data.frame(alpha = 1, x = x))),
+              x = as.matrix(data.frame(alpha = 1,  x = x))),
   seed = 12123123, 
   parallel_chains = 4,
   iter_warmup = 500,
@@ -217,8 +216,8 @@ Quantreg
 ### Quantreg:
 
 ```{r}
-summary(out_freq_1, se = "boot")
-summary(out_freq_2, se = "boot")
-summary(out_freq_3, se = "boot")
+summary(out_freq_1, se = "iid")
+summary(out_freq_2, se = "iid")
+summary(out_freq_3, se = "iid")
 ```
 

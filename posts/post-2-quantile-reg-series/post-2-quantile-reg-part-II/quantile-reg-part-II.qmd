@@ -58,7 +58,7 @@ functions{
   }
     
   vector score(real q, vector y, matrix x, vector beta) {
-    return transpose(x) * q_loss(q, y - x * beta);
+    return transpose(x) * q_loss(q, y - x * beta );
   }
     
   matrix make_w (matrix x, real q) {
@@ -124,10 +124,6 @@ model {
 
 Let's simulate some data and see how well it performs.
 
-::: callout-note
-I have to dial up the iterations a bit for the score method as it's less efficient from an ESS perspective.
-:::
-
 ```{r, message=FALSE, warning=FALSE}
 #| code-fold: show
 set.seed(12312)
@@ -150,8 +146,8 @@ out_score <- score_qr$sample(
               x = as.matrix(data.frame(alpha = 1, x = x))),
   seed = 12123123, 
   parallel_chains = 4,
-  iter_warmup = 1000,
-  iter_sampling = 1000,
+  iter_warmup = 500,
+  iter_sampling = 500,
     refresh = 0,
   show_messages = FALSE
 )
@@ -180,7 +176,7 @@ out_score$summary()
 ### Asymmetric Laplace
 
 ```{r}
-out_asym_laplace$summary("beta")
+out_asym_laplace$summary(c("beta", "sigma"))
 ```
 
 ### Quantreg
@@ -191,22 +187,11 @@ summary(out_freq, se = "boot")
 
 ### Modified Score
 
-We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, let's see what modifying the weight matrix for the intercept does. We'd like the estimate to correspond to shrinking standard deviations with increasing $N$. It seems that the method converges with more accurate standard errors at a rate of $N / 2$ . The modification being
-
-``` stan
-  matrix make_w (matrix x, real q) {
-    int N = rows(x);
-    int P = cols(x);
-    real alpha = 1 / (q * (1 - q));
-    matrix[P, P] x_out = crossprod(x);
-  
-    return alpha * inverse_spd(x_out) * N * 0.5; // modified here
-  }
-```
+We see that the frequentist estimate from `quantreg` and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn't even include -1 and the coefficient for $x$ seems to be over-estimated. Noticing this behavior, let's see about adding `sigma` the standard deviation to the estimation.
 
 Let's re-estimate the above with the modification.
 
-```{cmdstan, echo=FALSE, eval=TRUE, output.var="score_qr_modified", class.source = 'foldable'}
+```{cmdstan, eval=TRUE, output.var="score_qr_modified", class.source = 'foldable'}
 functions{
   vector q_loss(real q, vector u){
     return 0.5 * (abs(u) + (2 * q - 1) * u);
@@ -222,7 +207,7 @@ functions{
     real alpha = 1 / (q * (1 - q));
     matrix[P, P] x_out = crossprod(x);
 
-   return alpha * inverse_spd(x_out) * (N * 0.5);
+   return alpha * inverse_spd(x_out) * N;
 
   }
 }
@@ -238,13 +223,14 @@ transformed data {
 }
 parameters {
   vector[P] beta;
+  real<lower=0> sigma;
 }
 model {
-  vector[P] score_vec = score(q, y, x, beta);
+  vector[P] score_vec = score( q, y, x, beta ) / sigma ;
 
   beta ~ normal(0, 4);
 
-  target += -quad_form(W, score_vec) / (2 * N);
+  target += -quad_form(W, score_vec) / (2 * N) - N * log(sigma);
 }
 ```
 
@@ -257,15 +243,15 @@ out_score_modified <- score_qr_modified$sample(
               x = as.matrix(data.frame(alpha = 1, x = x))),
   seed = 12123123, 
   parallel_chains = 4,
-  iter_warmup = 1000,
-  iter_sampling = 1000,
+  iter_warmup = 500,
+  iter_sampling = 500,
     refresh = 0,
   show_messages = FALSE
 )
-out_score_modified$summary()
+out_score_modified$summary() 
 ```
 
-We now have estimates which line up a bit closer with the frequentist estimate but is completely unprincipled. Out of curiosity let's see how this compares on simulated data with $N = 10000$.
+The estimates are basically the same but the standard errors increased. We'll see that the increased in standard errors makes more reasonable posterior intervals.
 
 ### Simulated data with N = 10000
 
@@ -286,8 +272,8 @@ out_score <- score_qr$sample(
               x = as.matrix(data.frame(alpha = 1, x = x))),
   seed = 12123123, 
   parallel_chains = 4,
-  iter_warmup = 1000,
-  iter_sampling = 1000,
+  iter_warmup = 500,
+  iter_sampling = 500,
     refresh = 0,
   show_messages = FALSE
 )
@@ -300,8 +286,8 @@ out_score_modified <- score_qr_modified$sample(
               x = as.matrix(data.frame(alpha = 1, x = x))),
   seed = 12123123, 
   parallel_chains = 4,
-  iter_warmup = 1000,
-  iter_sampling = 1000,
+  iter_warmup = 500,
+  iter_sampling = 500,
     refresh = 0,
   show_messages = FALSE
 )
@@ -338,7 +324,7 @@ out_score_modified$summary()
 ### Quantreg
 
 ```{r}
-print(summary(out_freq, se = "boot"))
+print(summary(out_freq, se = "iid"))
 ```
 
 ### Asymmetric Laplace
@@ -370,8 +356,8 @@ out_score <- score_qr$sample(
               x = as.matrix(dat[, 2:4])),
   seed = 12123123, 
   parallel_chains = 4,
-  iter_warmup = 1000,
-  iter_sampling = 1000,
+  iter_warmup = 500,
+  iter_sampling = 500,
     refresh = 0,
   show_messages = FALSE
 )
@@ -384,8 +370,8 @@ out_score_mod <- score_qr_modified$sample(
               x = as.matrix(dat[, 2:4])),
   seed = 12123123, 
   parallel_chains = 4,
-  iter_warmup = 1000,
-  iter_sampling = 1000,
+  iter_warmup = 500,
+  iter_sampling = 500,
     refresh = 0,
   show_messages = FALSE
 )
@@ -426,7 +412,7 @@ out_score_mod$summary()
 ### Quantreg:
 
 ```{r}
-summary(out_freq, se = "boot")
+summary(out_freq, se = "iid")
 ```
 
 ### Asymmetric Laplace:

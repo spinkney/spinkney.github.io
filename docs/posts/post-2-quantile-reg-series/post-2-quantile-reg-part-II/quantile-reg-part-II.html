@@ -287,7 +287,7 @@ W = (Q \otimes G )^{-1}, \text{ where } Q = (\min(\tau_i, \tau_j) - \tau_i \tau_
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span> score(<span class="dt">real</span> q, <span class="dt">vector</span> y, <span class="dt">matrix</span> x, <span class="dt">vector</span> beta) {</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> transpose(x) * q_loss(q, y - x * beta);</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> transpose(x) * q_loss(q, y - x * beta );</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> make_w (<span class="dt">matrix</span> x, <span class="dt">real</span> q) {</span>
@@ -325,19 +325,6 @@ W = (Q \otimes G )^{-1}, \text{ where } Q = (\min(\tau_i, \tau_j) - \tau_i \tau_
 
 </div>
 <p>Let’s simulate some data and see how well it performs.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>I have to dial up the iterations a bit for the score method as it’s less efficient from an ESS perspective.</p>
-</div>
-</div>
 <div class="cell">
 <details open="">
 <summary>Show the code</summary>
@@ -361,8 +348,8 @@ Note
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(<span class="fu">data.frame</span>(<span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">x =</span> x))),</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">500</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">500</span>,</span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -370,14 +357,14 @@ Note
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.6 seconds.
-Chain 2 finished in 0.6 seconds.
-Chain 3 finished in 0.6 seconds.
-Chain 4 finished in 0.6 seconds.
+Chain 1 finished in 0.3 seconds.
+Chain 2 finished in 0.3 seconds.
+Chain 3 finished in 0.3 seconds.
+Chain 4 finished in 0.3 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.6 seconds.
-Total execution time: 0.7 seconds.</code></pre>
+Mean chain execution time: 0.3 seconds.
+Total execution time: 0.5 seconds.</code></pre>
 </div>
 <details open="">
 <summary>Show the code</summary>
@@ -419,9 +406,9 @@ Total execution time: 0.4 seconds.</code></pre>
 <pre><code># A tibble: 3 × 10
   variable    mean  median     sd    mad      q5     q95  rhat ess_bulk ess_tail
   &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -832.   -831.   0.987  0.640  -834.   -831.    1.00    1172.     892.
-2 beta[1]    -1.41   -1.41 0.169  0.173    -1.68   -1.14  1.00     678.     600.
-3 beta[2]     1.30    1.30 0.0266 0.0278    1.26    1.34  1.00     712.     641.</code></pre>
+1 lp__     -832.   -831.   0.965  0.636  -833.   -831.    1.00     657.     804.
+2 beta[1]    -1.42   -1.41 0.164  0.165    -1.69   -1.15  1.01     438.     417.
+3 beta[2]     1.30    1.30 0.0260 0.0261    1.26    1.34  1.01     444.     420.</code></pre>
 </div>
 </div>
 </section>
@@ -430,14 +417,15 @@ Total execution time: 0.4 seconds.</code></pre>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>out_asym_laplace<span class="sc">$</span><span class="fu">summary</span>(<span class="st">"beta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>out_asym_laplace<span class="sc">$</span><span class="fu">summary</span>(<span class="fu">c</span>(<span class="st">"beta"</span>, <span class="st">"sigma"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 10
-  variable  mean median     sd    mad    q5    q95  rhat ess_bulk ess_tail
-  &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-1 beta[1]  -1.07  -1.06 0.0811 0.0816 -1.21 -0.957  1.01     777.     862.
-2 beta[2]   1.24   1.24 0.0181 0.0181  1.21  1.27   1.00     790.     809.</code></pre>
+<pre><code># A tibble: 3 × 10
+  variable   mean median      sd     mad     q5    q95  rhat ess_bulk ess_tail
+  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 beta[1]  -1.07  -1.06  0.0811  0.0816  -1.21  -0.957  1.01     777.     862.
+2 beta[2]   1.24   1.24  0.0181  0.0181   1.21   1.27   1.00     790.     809.
+3 sigma     0.248  0.248 0.00825 0.00825  0.235  0.262  1.01     979.    1046.</code></pre>
 </div>
 </div>
 </section>
@@ -463,18 +451,52 @@ x            1.23539  0.03639   33.95156  0.00000</code></pre>
 </section>
 <section id="modified-score" class="level3">
 <h3 class="anchored" data-anchor-id="modified-score">Modified Score</h3>
-<p>We see that the frequentist estimate from <code>quantreg</code> and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn’t even include -1 and the coefficient for <span class="math inline">\(x\)</span> seems to be over-estimated. Noticing this behavior, let’s see what modifying the weight matrix for the intercept does. We’d like the estimate to correspond to shrinking standard deviations with increasing <span class="math inline">\(N\)</span>. It seems that the method converges with more accurate standard errors at a rate of <span class="math inline">\(N / 2\)</span> . The modification being</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> make_w (<span class="dt">matrix</span> x, <span class="dt">real</span> q) {</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(x);</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> P = cols(x);</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> alpha = <span class="dv">1</span> / (q * (<span class="dv">1</span> - q));</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[P, P] x_out = crossprod(x);</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> alpha * inverse_spd(x_out) * N * <span class="fl">0.5</span>; <span class="co">// modified here</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We see that the frequentist estimate from <code>quantreg</code> and the asymmetric Laplace outputs are similar. The score method under-estimates the intercept where the credible interval doesn’t even include -1 and the coefficient for <span class="math inline">\(x\)</span> seems to be over-estimated. Noticing this behavior, let’s see about adding <code>sigma</code> the standard deviation to the estimation.</p>
 <p>Let’s re-estimate the above with the modification.</p>
 <div class="cell" data-output.var="score_qr_modified">
-
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode stan foldable code-with-copy"><code class="sourceCode stan"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span>{</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span> q_loss(<span class="dt">real</span> q, <span class="dt">vector</span> u){</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.5</span> * (abs(u) + (<span class="dv">2</span> * q - <span class="dv">1</span>) * u);</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span> score(<span class="dt">real</span> q, <span class="dt">vector</span> y, <span class="dt">matrix</span> x, <span class="dt">vector</span> beta) {</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> transpose(x) * q_loss(q, y - x * beta);</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> make_w (<span class="dt">matrix</span> x, <span class="dt">real</span> q) {</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(x);</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> P = cols(x);</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> alpha = <span class="dv">1</span> / (q * (<span class="dv">1</span> - q));</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[P, P] x_out = crossprod(x);</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>   <span class="cf">return</span> alpha * inverse_spd(x_out) * N;</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> N;                 <span class="co">// Number of observation</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> P;                 <span class="co">// Number of predictors</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> q;</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;           <span class="co">// Response variable sorted</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, P] x;</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[P, P] W = make_w(x, q);</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[P] beta;</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[P] score_vec = score( q, y, x, beta ) / sigma ;</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="dv">4</span>);</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> -quad_form(W, score_vec) / (<span class="dv">2</span> * N) - N * log(sigma);</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
 <details>
@@ -487,8 +509,8 @@ x            1.23539  0.03639   33.95156  0.00000</code></pre>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(<span class="fu">data.frame</span>(<span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">x =</span> x))),</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">500</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">500</span>,</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -496,29 +518,30 @@ x            1.23539  0.03639   33.95156  0.00000</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.6 seconds.
-Chain 2 finished in 0.6 seconds.
-Chain 3 finished in 0.6 seconds.
-Chain 4 finished in 0.6 seconds.
+Chain 1 finished in 0.4 seconds.
+Chain 2 finished in 0.4 seconds.
+Chain 3 finished in 0.4 seconds.
+Chain 4 finished in 0.5 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.6 seconds.
-Total execution time: 0.7 seconds.</code></pre>
+Mean chain execution time: 0.4 seconds.
+Total execution time: 0.6 seconds.</code></pre>
 </div>
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>out_score_modified<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>out_score_modified<span class="sc">$</span><span class="fu">summary</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 10
+<pre><code># A tibble: 4 × 10
   variable    mean  median     sd    mad      q5     q95  rhat ess_bulk ess_tail
   &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -416.   -416.   0.996  0.755  -418.   -415.    1.00    1185.    1302.
-2 beta[1]    -1.43   -1.42 0.243  0.248    -1.85   -1.06  1.01     674.     738.
-3 beta[2]     1.30    1.30 0.0376 0.0384    1.25    1.37  1.01     678.     844.</code></pre>
+1 lp__     -755.   -755.   1.25   1.02   -758.   -754.    1.01     717.     972.
+2 beta[1]    -1.42   -1.40 0.222  0.231    -1.80   -1.08  1.00     631.     784.
+3 beta[2]     1.30    1.30 0.0346 0.0359    1.25    1.36  1.00     639.     685.
+4 sigma       1.29    1.29 0.0303 0.0302    1.24    1.34  1.01     793.     873.</code></pre>
 </div>
 </div>
-<p>We now have estimates which line up a bit closer with the frequentist estimate but is completely unprincipled. Out of curiosity let’s see how this compares on simulated data with <span class="math inline">\(N = 10000\)</span>.</p>
+<p>The estimates are basically the same but the standard errors increased. We’ll see that the increased in standard errors makes more reasonable posterior intervals.</p>
 </section>
 <section id="simulated-data-with-n-10000" class="level3">
 <h3 class="anchored" data-anchor-id="simulated-data-with-n-10000">Simulated data with N = 10000</h3>
@@ -537,9 +560,9 @@ Total execution time: 0.7 seconds.</code></pre>
 <pre><code># A tibble: 3 × 10
   variable      mean    median      sd     mad        q5      q95  rhat ess_bulk
   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -9621.    -9620.    1.02    0.801   -9623.    -9.62e+3  1.00    1487.
-2 beta[1]     -0.914    -0.912 0.0357  0.0354     -0.977 -8.60e-1  1.00    1168.
-3 beta[2]      1.15      1.15  0.00668 0.00658     1.14   1.16e+0  1.00    1070.
+1 lp__     -9621.    -9620.    1.05    0.815   -9623.    -9.62e+3  1.01     716.
+2 beta[1]     -0.915    -0.913 0.0367  0.0353     -0.976 -8.56e-1  1.00     501.
+3 beta[2]      1.15      1.15  0.00684 0.00655     1.14   1.16e+0  1.01     477.
 # … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
 </div>
 </div>
@@ -552,12 +575,13 @@ Total execution time: 0.7 seconds.</code></pre>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>out_score_modified<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 10
+<pre><code># A tibble: 4 × 10
   variable      mean    median      sd     mad       q5       q95  rhat ess_bulk
   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -4811.    -4811.    0.955   0.741   -4813.   -4810.     1.00    1339.
-2 beta[1]     -0.921    -0.916 0.0520  0.0502     -1.01    -0.842  1.00     830.
-3 beta[2]      1.15      1.15  0.00953 0.00952     1.14     1.17   1.00     861.
+1 lp__     -8273.    -8273.    1.23    1.02    -8275.   -8272.     1.00     911.
+2 beta[1]     -0.922    -0.917 0.0515  0.0499     -1.02    -0.845  1.00     615.
+3 beta[2]      1.15      1.15  0.00920 0.00930     1.14     1.17   1.00     695.
+4 sigma        1.39      1.39  0.00997 0.0102      1.37     1.40   1.00    1264.
 # … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
 </div>
 </div>
@@ -567,7 +591,7 @@ Total execution time: 0.7 seconds.</code></pre>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"boot"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"iid"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -576,9 +600,9 @@ Call: quantreg::rq(formula = y ~ x, tau = q)
 tau: [1] 0.05
 
 Coefficients:
-            Value      Std. Error t value    Pr(&gt;|t|)  
-(Intercept)   -0.99120    0.00865 -114.64031    0.00000
-x              1.16937    0.01477   79.18662    0.00000</code></pre>
+            Value     Std. Error t value   Pr(&gt;|t|) 
+(Intercept)  -0.99120   0.02167  -45.74656   0.00000
+x             1.16937   0.00374  312.48513   0.00000</code></pre>
 </div>
 </div>
 </section>
@@ -623,8 +647,8 @@ x              1.16937    0.01477   79.18662    0.00000</code></pre>
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
 <span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">500</span>,</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">500</span>,</span>
 <span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
 <span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
 <span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -637,8 +661,8 @@ x              1.16937    0.01477   79.18662    0.00000</code></pre>
 <span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> <span class="fu">as.matrix</span>(dat[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])),</span>
 <span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">12123123</span>, </span>
 <span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">500</span>,</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">500</span>,</span>
 <span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,</span>
 <span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span></span>
 <span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -674,12 +698,12 @@ x              1.16937    0.01477   79.18662    0.00000</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 10
-  variable    mean  median     sd    mad       q5      q95  rhat ess_bulk
-  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -89.5   -89.2   1.33   1.12   -92.2    -88.0     1.00     902.
-2 beta[1]    0.638   0.670 0.327  0.343    0.0655   1.14    1.00     609.
-3 beta[2]    1.23    1.23  0.276  0.272    0.776    1.68    1.00     556.
-4 beta[3]   -0.141  -0.141 0.0444 0.0433  -0.213   -0.0688  1.01     587.
+  variable    mean  median     sd    mad      q5      q95  rhat ess_bulk
+  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -89.4   -89.1   1.23   1.07   -91.9   -88.0     1.01     483.
+2 beta[1]    0.670   0.702 0.301  0.307    0.135   1.12    1.02     283.
+3 beta[2]    1.21    1.20  0.244  0.238    0.803   1.60    1.02     256.
+4 beta[3]   -0.138  -0.137 0.0395 0.0378  -0.201  -0.0733  1.01     268.
 # … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
 </div>
 </div>
@@ -692,13 +716,14 @@ x              1.16937    0.01477   79.18662    0.00000</code></pre>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>out_score_mod<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 10
-  variable    mean  median     sd    mad       q5      q95  rhat ess_bulk
-  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-1 lp__     -45.6   -45.3   1.26   1.13   -48.1    -44.2     1.00    1156.
-2 beta[1]    0.667   0.705 0.419  0.427   -0.0661   1.32    1.01     594.
-3 beta[2]    1.16    1.18  0.385  0.380    0.492    1.76    1.01     536.
-4 beta[3]   -0.132  -0.135 0.0644 0.0618  -0.232   -0.0178  1.01     575.
+<pre><code># A tibble: 5 × 10
+  variable    mean  median     sd    mad      q5      q95  rhat ess_bulk
+  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -72.6   -72.2   1.55   1.38   -75.6   -70.7     1.01     603.
+2 beta[1]    0.686   0.709 0.249  0.254    0.254   1.06    1.02     334.
+3 beta[2]    1.21    1.20  0.198  0.192    0.878   1.52    1.02     274.
+4 beta[3]   -0.137  -0.137 0.0312 0.0297  -0.188  -0.0852  1.02     289.
+5 sigma      0.775   0.775 0.0324 0.0324   0.724   0.830   1.00     760.
 # … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
 </div>
 </div>
@@ -708,7 +733,7 @@ x              1.16937    0.01477   79.18662    0.00000</code></pre>
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"boot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(out_freq, <span class="at">se =</span> <span class="st">"iid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -718,9 +743,9 @@ tau: [1] 0.05
 
 Coefficients:
             Value    Std. Error t value  Pr(&gt;|t|)
-(Intercept)  0.76514  0.44303    1.72707  0.08520
-x            1.19143  0.49945    2.38550  0.01769
-xsq         -0.13371  0.08580   -1.55837  0.12022</code></pre>
+(Intercept)  0.76514  0.30477    2.51058  0.01259
+x            1.19143  0.24792    4.80577  0.00000
+xsq         -0.13371  0.04037   -3.31187  0.00104</code></pre>
 </div>
 </div>
 </section>
