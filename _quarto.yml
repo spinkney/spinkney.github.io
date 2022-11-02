@@ -15,6 +15,8 @@ website:
         href: https://www.linkedin.com/in/sean-pinkney123/
       - icon: twitter
         href: https://twitter.com/thatpinkney
+      - icon: mastodon
+        href: https://fosstodon.org/@spinkney
 format:
   html:
     theme: 
