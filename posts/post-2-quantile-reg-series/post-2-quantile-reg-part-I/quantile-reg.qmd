@@ -73,12 +73,13 @@ out_asym_laplace <- asymetric_laplace$sample(
               q = 0.05,
               y = ImmunogG$IgG,
               x = as.matrix(data.frame(alpha = 1, x = ImmunogG$Age, xsq = ImmunogG$Age^2))),
-  seed = 12123123, 
+  seed = 12123123,
   parallel_chains = 4,
   iter_warmup = 500,
   iter_sampling = 500,
-    refresh = 0,
-  show_messages = FALSE
+  refresh = 0,
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 out_asym_laplace$summary()
 
@@ -154,12 +155,13 @@ out_envelope <- asymetric_laplace_envelope$sample(
               q = 0.05,
               y = ImmunogG$IgG,
               x = as.matrix(data.frame(x = ImmunogG$Age, xsq = ImmunogG$Age^2))),
-  seed = 12123123, 
+  seed = 12123123,
   parallel_chains = 4,
   iter_warmup = 500,
   iter_sampling = 500,
-    refresh = 0,
-  show_messages = FALSE
+  refresh = 0,
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_envelope$summary(c("alpha", "beta", "sigma"))
@@ -224,12 +226,13 @@ out_aug_laplace <- augmented_laplace$sample(
               q = 0.05,
               y = ImmunogG$IgG,
               x = as.matrix(data.frame(alpha = 1, x = ImmunogG$Age, xsq = ImmunogG$Age^2))),
-  seed = 12123123, 
+  seed = 12123123,
   parallel_chains = 4,
   iter_warmup = 500,
   iter_sampling = 500,
-    refresh = 0,
-  show_messages = FALSE
+  refresh = 0,
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 out_aug_laplace$summary(c("beta"))
 ```
@@ -238,10 +241,17 @@ Ouch! Divergences. Although the parameter estimates look comparable. Let's inspe
 
 ```{r}
 library(bayesplot)
+source("../../../R/theme_blog.R")
+use_blog_bayesplot()
+pairs_np_style <- bayesplot::pairs_style_np(
+  div_color = blog_colors$red,
+  td_color = blog_colors$gold
+)
+
 np_aug_laplace <- nuts_params(out_aug_laplace)
 np_asym_laplace <- nuts_params(out_asym_laplace)
-mcmc_pairs(out_aug_laplace$draws(c("beta", "sigma")), np = np_aug_laplace)
-mcmc_pairs(out_asym_laplace$draws(c("beta", "sigma")), np = np_asym_laplace)
+mcmc_pairs(out_aug_laplace$draws(c("beta", "sigma")), np = np_aug_laplace, np_style = pairs_np_style)
+mcmc_pairs(out_asym_laplace$draws(c("beta", "sigma")), np = np_asym_laplace, np_style = pairs_np_style)
 ```
 
 The pairs plots don't appear to show the divergence originating be due to `beta` or `sigma`. It's most likely the augmentation variables `z`. As I'm up for time on this, I'd be curious to test out alternative specifications or see if anyone has encountered these issues with the augmented version and found a solution.
@@ -288,12 +298,13 @@ out_student_aug_laplace <- student_augmented_laplace$sample(
               q = 0.05,
               y = ImmunogG$IgG,
               x = as.matrix(data.frame(alpha = 1, x = ImmunogG$Age, xsq = ImmunogG$Age^2))),
-  seed = 12123123, 
+  seed = 12123123,
   parallel_chains = 4,
   iter_warmup = 500,
   iter_sampling = 500,
-    refresh = 0,
-  show_messages = FALSE
+  refresh = 0,
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 out_student_aug_laplace$summary(c("beta"))
 ```

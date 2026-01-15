@@ -1,7 +1,7 @@
 ---
 title: "Quantile Regressions in Stan: Part III"
 author: "Sean Pinkney"
-date: last-modified
+date: "2022-10-23"
 categories: [stan, quantile]
 bibliography: references.bib
 draft: false
@@ -17,7 +17,7 @@ check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
 register_knitr_engine(override = FALSE)
 ```
 
-This is part III of the quantile regression series. [Part I](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) and [part II](/posts/post-2-quantile-reg-part-II/quantile-reg-part-II.qmd) show the Bayesian quantile regression using the asymmetric Laplace distribution, augmented scheme, and score. In this post I'm going to show the multiple quantile regression given in @score, which is a follow up to part II.
+This is part III of the quantile regression series. [Part I](/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html) and [part II](/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html) show the Bayesian quantile regression using the asymmetric Laplace distribution, augmented scheme, and score. In this post I'm going to show the multiple quantile regression given in @score, which is a follow up to part II.
 
 
 # Multiple quantile regression with score
@@ -160,7 +160,8 @@ out_score <- multiple_score_qr$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_score$summary()
@@ -188,7 +189,8 @@ out_score_mod <- multiple_score_qr$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_freq_1 <- rq(y ~ x + xsq, 
@@ -220,4 +222,3 @@ summary(out_freq_1, se = "iid")
 summary(out_freq_2, se = "iid")
 summary(out_freq_3, se = "iid")
 ```
-

@@ -17,7 +17,7 @@ check_cmdstan_toolchain(fix = TRUE, quiet = TRUE)
 register_knitr_engine(override = FALSE)
 ```
 
-[Part I](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) showed the basic Bayesian quantile regression using the asymmetric Laplace distribution and augmented scheme. In this post I'm going to show an approximate likelihood, score method proposed in @score.
+[Part I](/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html) showed the basic Bayesian quantile regression using the asymmetric Laplace distribution and augmented scheme. In this post I'm going to show an approximate likelihood, score method proposed in @score.
 
 # First, why not use the asymmetric Laplace?
 
@@ -149,7 +149,8 @@ out_score <- score_qr$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_asym_laplace <- asym_laplace$sample(
@@ -163,7 +164,8 @@ out_asym_laplace <- asym_laplace$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 ```
 
@@ -246,7 +248,8 @@ out_score_modified <- score_qr_modified$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 out_score_modified$summary() 
 ```
@@ -275,7 +278,8 @@ out_score <- score_qr$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_score_modified <- score_qr_modified$sample(
@@ -289,7 +293,8 @@ out_score_modified <- score_qr_modified$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_asym_laplace <- asym_laplace$sample(
@@ -303,7 +308,8 @@ out_asym_laplace <- asym_laplace$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_freq <- quantreg::rq(y ~ x, tau = q)
@@ -359,7 +365,8 @@ out_score <- score_qr$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_score_mod <- score_qr_modified$sample(
@@ -373,7 +380,8 @@ out_score_mod <- score_qr_modified$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_al <- asym_laplace$sample(
@@ -387,7 +395,8 @@ out_al <- asym_laplace$sample(
   iter_warmup = 500,
   iter_sampling = 500,
     refresh = 0,
-  show_messages = FALSE
+  show_messages = FALSE,
+  show_exceptions = FALSE
 )
 
 out_freq <- rq(y ~ x + xsq, 

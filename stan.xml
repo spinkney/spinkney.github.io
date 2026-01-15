@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language name="Stan" version="1" kateversion="5.0" section="Scientific" extensions="*.stan" mimetype="text/x-stan" author="Converted from WardBrian/vscode-stan-extension" license="MIT">
+  <highlighting>
+    <list name="block_declarations">
+      <item>functions</item>
+      <item>data</item>
+      <item>parameters</item>
+      <item>model</item>
+    </list>
+    <list name="control">
+      <item>for</item>
+      <item>in</item>
+      <item>while</item>
+      <item>if</item>
+      <item>else</item>
+      <item>return</item>
+      <item>break</item>
+      <item>continue</item>
+    </list>
+    <list name="types">
+      <item>int</item>
+      <item>real</item>
+      <item>complex</item>
+      <item>array</item>
+      <item>tuple</item>
+      <item>vector</item>
+      <item>simplex</item>
+      <item>unit_vector</item>
+      <item>ordered</item>
+      <item>positive_ordered</item>
+      <item>sum_to_zero_vector</item>
+      <item>sum_to_zero_matrix</item>
+      <item>row_vector</item>
+      <item>matrix</item>
+      <item>complex_vector</item>
+      <item>complex_matrix</item>
+      <item>complex_row_vector</item>
+      <item>corr_matrix</item>
+      <item>cov_matrix</item>
+      <item>cholesky_factor_cov</item>
+      <item>cholesky_factor_corr</item>
+      <item>column_stochastic_matrix</item>
+      <item>row_stochastic_matrix</item>
+      <item>void</item>
+    </list>
+    <list name="special_keywords">
+      <item>target</item>
+      <item>jacobian</item>
+      <item>print</item>
+      <item>reject</item>
+      <item>fatal_error</item>
+      <item>lower</item>
+      <item>upper</item>
+      <item>offset</item>
+      <item>multiplier</item>
+    </list>
+    <list name="distributions">
+      <item>bernoulli</item>
+      <item>bernoulli_logit</item>
+      <item>bernoulli_logit_glm</item>
+      <item>beta</item>
+      <item>beta_binomial</item>
+      <item>beta_neg_binomial</item>
+      <item>binomial</item>
+      <item>binomial_logit</item>
+      <item>binomial_logit_glm</item>
+      <item>categorical</item>
+      <item>categorical_logit</item>
+      <item>categorical_logit_glm</item>
+      <item>cauchy</item>
+      <item>chi_square</item>
+      <item>dirichlet</item>
+      <item>dirichlet_multinomial</item>
+      <item>discrete_range</item>
+      <item>double_exponential</item>
+      <item>exp_mod_normal</item>
+      <item>exponential</item>
+      <item>frechet</item>
+      <item>gamma</item>
+      <item>gaussian_dlm_obs</item>
+      <item>gumbel</item>
+      <item>hypergeometric</item>
+      <item>inv_chi_square</item>
+      <item>inv_gamma</item>
+      <item>inv_wishart</item>
+      <item>inv_wishart_cholesky</item>
+      <item>lkj_corr</item>
+      <item>lkj_corr_cholesky</item>
+      <item>logistic</item>
+      <item>loglogistic</item>
+      <item>lognormal</item>
+      <item>multi_gp</item>
+      <item>multi_gp_cholesky</item>
+      <item>multi_normal</item>
+      <item>multi_normal_cholesky</item>
+      <item>multi_normal_prec</item>
+      <item>multi_student_t</item>
+      <item>multi_student_t_cholesky</item>
+      <item>multinomial</item>
+      <item>multinomial_logit</item>
+      <item>neg_binomial</item>
+      <item>neg_binomial_2</item>
+      <item>neg_binomial_2_log</item>
+      <item>neg_binomial_2_log_glm</item>
+      <item>normal</item>
+      <item>normal_id_glm</item>
+      <item>ordered_logistic</item>
+      <item>ordered_logistic_glm</item>
+      <item>ordered_probit</item>
+      <item>pareto</item>
+      <item>pareto_type_2</item>
+      <item>poisson</item>
+      <item>poisson_log</item>
+      <item>poisson_log_glm</item>
+      <item>rayleigh</item>
+      <item>scaled_inv_chi_square</item>
+      <item>skew_double_exponential</item>
+      <item>skew_normal</item>
+      <item>std_normal</item>
+      <item>student_t</item>
+      <item>uniform</item>
+      <item>von_mises</item>
+      <item>weibull</item>
+      <item>wiener</item>
+      <item>wishart</item>
+      <item>wishart_cholesky</item>
+    </list>
+    <list name="functions">
+      <item>Phi</item>
+      <item>Phi_approx</item>
+      <item>abs</item>
+      <item>acos</item>
+      <item>acosh</item>
+      <item>add_diag</item>
+      <item>algebra_solver</item>
+      <item>algebra_solver_newton</item>
+      <item>append_array</item>
+      <item>append_col</item>
+      <item>append_row</item>
+      <item>arg</item>
+      <item>asin</item>
+      <item>asinh</item>
+      <item>atan</item>
+      <item>atan2</item>
+      <item>atanh</item>
+      <item>bessel_first_kind</item>
+      <item>bessel_second_kind</item>
+      <item>block</item>
+      <item>cbrt</item>
+      <item>ceil</item>
+      <item>chol2inv</item>
+      <item>cholesky_decompose</item>
+      <item>choose</item>
+      <item>col</item>
+      <item>cols</item>
+      <item>columns_dot_product</item>
+      <item>columns_dot_self</item>
+      <item>conj</item>
+      <item>cos</item>
+      <item>cosh</item>
+      <item>cov_exp_quad</item>
+      <item>crossprod</item>
+      <item>cumulative_sum</item>
+      <item>determinant</item>
+      <item>diag_matrix</item>
+      <item>diag_post_multiply</item>
+      <item>diag_pre_multiply</item>
+      <item>diagonal</item>
+      <item>digamma</item>
+      <item>dims</item>
+      <item>distance</item>
+      <item>dot_product</item>
+      <item>dot_self</item>
+      <item>e</item>
+      <item>eigenvalues_sym</item>
+      <item>eigenvectors_sym</item>
+      <item>erf</item>
+      <item>erfc</item>
+      <item>exp</item>
+      <item>exp2</item>
+      <item>expm1</item>
+      <item>fabs</item>
+      <item>falling_factorial</item>
+      <item>fdim</item>
+      <item>fft</item>
+      <item>fft2</item>
+      <item>floor</item>
+      <item>fma</item>
+      <item>fmax</item>
+      <item>fmin</item>
+      <item>fmod</item>
+      <item>gamma_p</item>
+      <item>gamma_q</item>
+      <item>generalized_inverse</item>
+      <item>get_imag</item>
+      <item>get_real</item>
+      <item>head</item>
+      <item>hypot</item>
+      <item>identity_matrix</item>
+      <item>inc_beta</item>
+      <item>int_step</item>
+      <item>integrate_1d</item>
+      <item>inv</item>
+      <item>inv_Phi</item>
+      <item>inv_cloglog</item>
+      <item>inv_erfc</item>
+      <item>inv_fft</item>
+      <item>inv_fft2</item>
+      <item>inv_inc_beta</item>
+      <item>inv_logit</item>
+      <item>inv_sqrt</item>
+      <item>inv_square</item>
+      <item>inverse</item>
+      <item>inverse_spd</item>
+      <item>is_inf</item>
+      <item>is_nan</item>
+      <item>lambert_w0</item>
+      <item>lambert_wm1</item>
+      <item>lbeta</item>
+      <item>lchoose</item>
+      <item>ldexp</item>
+      <item>lgamma</item>
+      <item>lmgamma</item>
+      <item>lmultiply</item>
+      <item>log</item>
+      <item>log10</item>
+      <item>log1m</item>
+      <item>log1m_exp</item>
+      <item>log1m_inv_logit</item>
+      <item>log1p</item>
+      <item>log1p_exp</item>
+      <item>log2</item>
+      <item>log_determinant</item>
+      <item>log_diff_exp</item>
+      <item>log_falling_factorial</item>
+      <item>log_inv_logit</item>
+      <item>log_inv_logit_diff</item>
+      <item>log_mix</item>
+      <item>log_modified_bessel_first_kind</item>
+      <item>log_rising_factorial</item>
+      <item>log_softmax</item>
+      <item>log_sum_exp</item>
+      <item>logit</item>
+      <item>machine_precision</item>
+      <item>matrix_exp</item>
+      <item>matrix_exp_multiply</item>
+      <item>matrix_power</item>
+      <item>max</item>
+      <item>mdivide_left_spd</item>
+      <item>mdivide_left_tri_low</item>
+      <item>mdivide_right_spd</item>
+      <item>mdivide_right_tri_low</item>
+      <item>mean</item>
+      <item>min</item>
+      <item>modified_bessel_first_kind</item>
+      <item>modified_bessel_second_kind</item>
+      <item>negative_infinity</item>
+      <item>norm</item>
+      <item>norm1</item>
+      <item>norm2</item>
+      <item>not_a_number</item>
+      <item>num_elements</item>
+      <item>ode_adams</item>
+      <item>ode_adams_tol</item>
+      <item>ode_adjoint_tol_ctl</item>
+      <item>ode_bdf</item>
+      <item>ode_bdf_tol</item>
+      <item>ode_ckrk</item>
+      <item>ode_ckrk_tol</item>
+      <item>ode_rk45</item>
+      <item>ode_rk45_tol</item>
+      <item>one_hot_array</item>
+      <item>one_hot_int_array</item>
+      <item>one_hot_row_vector</item>
+      <item>one_hot_vector</item>
+      <item>ones_array</item>
+      <item>ones_int_array</item>
+      <item>ones_row_vector</item>
+      <item>ones_vector</item>
+      <item>owens_t</item>
+      <item>pi</item>
+      <item>polar</item>
+      <item>positive_infinity</item>
+      <item>pow</item>
+      <item>prod</item>
+      <item>proj</item>
+      <item>qr</item>
+      <item>qr_Q</item>
+      <item>qr_R</item>
+      <item>qr_thin</item>
+      <item>qr_thin_Q</item>
+      <item>qr_thin_R</item>
+      <item>quad_form</item>
+      <item>quad_form_diag</item>
+      <item>quad_form_sym</item>
+      <item>quantile</item>
+      <item>rank</item>
+      <item>reduce_sum</item>
+      <item>rep_array</item>
+      <item>rep_matrix</item>
+      <item>rep_row_vector</item>
+      <item>rep_vector</item>
+      <item>reverse</item>
+      <item>rising_factorial</item>
+      <item>round</item>
+      <item>row</item>
+      <item>rows</item>
+      <item>rows_dot_product</item>
+      <item>rows_dot_self</item>
+      <item>scale_matrix_exp_multiply</item>
+      <item>sd</item>
+      <item>segment</item>
+      <item>sin</item>
+      <item>singular_values</item>
+      <item>sinh</item>
+      <item>size</item>
+      <item>softmax</item>
+      <item>solve_newton</item>
+      <item>solve_newton_tol</item>
+      <item>solve_powell</item>
+      <item>solve_powell_tol</item>
+      <item>sort_asc</item>
+      <item>sort_desc</item>
+      <item>sort_indices_asc</item>
+      <item>sort_indices_desc</item>
+      <item>sqrt</item>
+      <item>sqrt2</item>
+      <item>square</item>
+      <item>squared_distance</item>
+      <item>step</item>
+      <item>sub_col</item>
+      <item>sub_row</item>
+      <item>sum</item>
+      <item>svd</item>
+      <item>svd_U</item>
+      <item>svd_V</item>
+      <item>symmetrize_from_lower_tri</item>
+      <item>tail</item>
+      <item>tan</item>
+      <item>tanh</item>
+      <item>tcrossprod</item>
+      <item>tgamma</item>
+      <item>to_array_1d</item>
+      <item>to_array_2d</item>
+      <item>to_complex</item>
+      <item>to_int</item>
+      <item>to_matrix</item>
+      <item>to_row_vector</item>
+      <item>to_vector</item>
+      <item>trace</item>
+      <item>trace_gen_quad_form</item>
+      <item>trace_quad_form</item>
+      <item>trigamma</item>
+      <item>trunc</item>
+      <item>uniform_simplex</item>
+      <item>variance</item>
+      <item>zeros_array</item>
+      <item>zeros_int_array</item>
+      <item>zeros_row_vector</item>
+      <item>zeros_vector</item>
+    </list>
+    <list name="jacobian_functions">
+      <item>cholesky_factor_corr_jacobian</item>
+      <item>cholesky_factor_cov_jacobian</item>
+      <item>corr_matrix_jacobian</item>
+      <item>cov_matrix_jacobian</item>
+      <item>lower_bound_jacobian</item>
+      <item>lower_upper_bound_jacobian</item>
+      <item>offset_multiplier_jacobian</item>
+      <item>ordered_jacobian</item>
+      <item>positive_ordered_jacobian</item>
+      <item>simplex_jacobian</item>
+      <item>stochastic_column_jacobian</item>
+      <item>stochastic_row_jacobian</item>
+      <item>sum_to_zero_jacobian</item>
+      <item>unit_vectors_jacobian</item>
+      <item>upper_bound_jacobian</item>
+    </list>
+    <contexts>
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <!-- Include directive -->
+        <RegExpr attribute="Preprocessor" context="#stay" String="^\s*#\s*include\b.*$"/>
+
+        <!-- Block declarations -->
+        <RegExpr attribute="Keyword" context="#stay" String="\b(functions|data|transformed\s+data|parameters|transformed\s+parameters|model|generated\s+quantities)\b"/>
+
+        <!-- Comments -->
+        <Detect2Chars attribute="Comment" context="BlockComment" char="/" char1="*"/>
+        <Detect2Chars attribute="Comment" context="LineComment" char="/" char1="/"/>
+        <DetectChar attribute="Comment" context="LineComment" char="#"/>
+
+        <!-- Strings -->
+        <DetectChar attribute="String" context="String" char="&quot;"/>
+
+        <!-- Numbers -->
+        <RegExpr attribute="Float" context="#stay" String="\b[0-9]+\.[0-9]*([eE][+-]?[0-9]+)?\b"/>
+        <RegExpr attribute="Float" context="#stay" String="\b\.[0-9]+([eE][+-]?[0-9]+)?\b"/>
+        <RegExpr attribute="Float" context="#stay" String="\b[0-9]+[eE][+-]?[0-9]+\b"/>
+        <RegExpr attribute="DecVal" context="#stay" String="\b[0-9]+\b"/>
+
+        <!-- Jacobian functions (special highlight) -->
+        <keyword attribute="BuiltIn" context="#stay" String="jacobian_functions"/>
+
+        <!-- User-defined jacobian functions -->
+        <RegExpr attribute="BuiltIn" context="#stay" String="\b[A-Za-z][A-Za-z0-9_]*_jacobian\b"/>
+
+        <!-- Types -->
+        <keyword attribute="DataType" context="#stay" String="types"/>
+
+        <!-- Control flow -->
+        <keyword attribute="ControlFlow" context="#stay" String="control"/>
+
+        <!-- Special keywords -->
+        <keyword attribute="Keyword" context="#stay" String="special_keywords"/>
+
+        <!-- Distributions after ~ -->
+        <RegExpr attribute="Operator" context="Distribution" String="~\s*"/>
+
+        <!-- Built-in functions -->
+        <keyword attribute="Function" context="#stay" String="functions"/>
+        <keyword attribute="Function" context="#stay" String="distributions"/>
+
+        <!-- Operators -->
+        <RegExpr attribute="Operator" context="#stay" String="\|\||&amp;&amp;|==|!=|&lt;=?|&gt;=?"/>
+        <RegExpr attribute="Operator" context="#stay" String="[+\-]=|\.[*/]=|="/>
+        <RegExpr attribute="Operator" context="#stay" String="[+\-]|\.\*|\./|[*/%\\^']"/>
+        <DetectChar attribute="Operator" context="#stay" char="!"/>
+        <DetectChar attribute="Operator" context="#stay" char="?"/>
+        <DetectChar attribute="Operator" context="#stay" char=":"/>
+      </context>
+
+      <context name="Distribution" attribute="Function" lineEndContext="#pop">
+        <keyword attribute="Function" context="#pop" String="distributions"/>
+        <RegExpr attribute="Normal Text" context="#pop" String="\S"/>
+      </context>
+
+      <context name="BlockComment" attribute="Comment" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="#pop" char="*" char1="/"/>
+      </context>
+
+      <context name="LineComment" attribute="Comment" lineEndContext="#pop">
+      </context>
+
+      <context name="String" attribute="String" lineEndContext="#pop">
+        <DetectChar attribute="String" context="#pop" char="&quot;"/>
+      </context>
+    </contexts>
+
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Keyword" defStyleNum="dsKeyword"/>
+      <itemData name="DataType" defStyleNum="dsDataType"/>
+      <itemData name="ControlFlow" defStyleNum="dsControlFlow"/>
+      <itemData name="Function" defStyleNum="dsFunction"/>
+      <itemData name="BuiltIn" defStyleNum="dsBuiltIn"/>
+      <itemData name="DecVal" defStyleNum="dsDecVal"/>
+      <itemData name="Float" defStyleNum="dsFloat"/>
+      <itemData name="String" defStyleNum="dsString"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+      <itemData name="Operator" defStyleNum="dsOperator"/>
+      <itemData name="Preprocessor" defStyleNum="dsPreprocessor"/>
+    </itemDatas>
+  </highlighting>
+
+  <general>
+    <comments>
+      <comment name="singleLine" start="//"/>
+      <comment name="multiLine" start="/*" end="*/"/>
+    </comments>
+    <keywords casesensitive="1"/>
+  </general>
+</language>

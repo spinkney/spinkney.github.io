@@ -1,6 +1,34 @@
-
-.vscode/extensions.json
-.Rproj.user
-
+# Quarto
 /.quarto/
+/_site/
+/docs/
+**/*.quarto_ipynb
+*_cache/
+*_files/
+
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+*.log

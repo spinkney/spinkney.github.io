@@ -12,3 +12,34 @@ $font-size-root: 11.5pt;
 }
 
 /*-- scss:rules --*/
+
+// Wider content area
+.page-columns .content {
+  max-width: 1100px;
+}
+
+.body-content {
+  max-width: 1100px;
+}
+
+// Wider code blocks
+pre.sourceCode {
+  max-width: 100%;
+}
+
+// Adjust main column width
+.column-body {
+  max-width: 1100px;
+}
+
+// Subtle background for Stan code blocks
+div.sourceCode[data-lang="stan"] pre,
+pre.stan,
+code.sourceCode.stan {
+  background-color: #f0f2f5;
+}
+
+div.sourceCode[data-lang="stan"] {
+  background-color: #f0f2f5;
+  border-left: 3px solid #6f42c1;
+}

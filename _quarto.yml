@@ -3,29 +3,35 @@ project:
   output-dir: docs
 
 website:
-  title: "Ruler"
+  title: "Pinkney's Sufficient Stats"
+  comments:
+    giscus:
+      repo: spinkney/spinkney.github.io
+      mapping: pathname
+      reactions-enabled: true
+      input-position: top
+      loading: lazy
+      theme: light
   navbar:
     left:
-      - "Measure Twice Cut Once"
+      - href: index.qmd
+        text: Home
     right:
       - about.qmd
       - icon: github
         href: https://github.com/spinkney
       - icon: linkedin
         href: https://www.linkedin.com/in/sean-pinkney123/
-      - icon: twitter
-        href: https://twitter.com/thatpinkney
-      - icon: mastodon
-        href: https://fosstodon.org/@spinkney
 format:
   html:
-    theme: 
-      light: [litera, styles.scss]
-      dark: [darkly, styles-dark.scss]
-    highlight-style: 
-      light: pygments
-      dark: my.theme
+    theme: [litera, styles.scss]
+    highlight-style: my-light.theme
+    syntax-definitions:
+      - stan.xml
     mainfont: "Atkinson Hyperlegible"
+    grid:
+      body-width: 1000px
+      margin-width: 200px
 editor: visual
 
 # Change the background to a different color.

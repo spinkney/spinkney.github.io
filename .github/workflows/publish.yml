@@ -1,0 +1,56 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+name: Quarto Publish
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Clean rendered site output
+        shell: bash
+        run: |
+          rm -rf docs
+
+      - name: Ensure gh-pages branch exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            echo "gh-pages branch already exists"
+            exit 0
+          fi
+
+          echo "Creating gh-pages branch on origin"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          EMPTY_TREE="$(git hash-object -t tree /dev/null)"
+          COMMIT="$(echo "Initializing gh-pages branch" | git commit-tree "$EMPTY_TREE")"
+          git push origin "$COMMIT:refs/heads/gh-pages"
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install minimal R packages for Quarto
+        shell: bash
+        run: |
+          Rscript -e 'install.packages(c("knitr","rmarkdown"), repos="https://cloud.r-project.org")'
+
+      - name: Render and Publish
+        uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,12 +1,10 @@
 ---
 title: "About"
 image: profile.jpg
+comments: false
 about:
   template: jolla
   links:
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com/thatpinkney
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/sean-pinkney123/
@@ -15,7 +13,7 @@ about:
       href: https://github.com/spinkney
 ---
 
-I'm Sean and I do statistics. I'm a Group Director at Omnicom Media Group focused on TV analytics. In my spare time I try to contribute to the Stan project. Connect with me on one of the platforms below. 
+I'm Sean, a Stan dev, and interested in making Bayesian inference better. My day job is leading global marketing measurement and analytics. Connect with me on one of the platforms below.
 
 ```{=html}
 <!--

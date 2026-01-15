@@ -1,6 +1,7 @@
 ---
-title: "Ruler"
-subtitle: "Measure What Matters"
+title: "Pinkney's Sufficient Stats"
+subtitle: "Practical Theory for Modern Inference"
+comments: false
 listing:
   contents: posts/**/*.qmd
   sort: "date desc"
@@ -8,20 +9,91 @@ listing:
   categories: true
   sort-ui: false
   filter-ui: true
-page-layout: full
+page-layout: article
+format:
+  html:
+    include-after-body:
+      - includes/index-sidebar.html
+      - text: |
+          <script>
+          // Fix Quarto category filtering bug
+          window.addEventListener('load', function() {
+            function filterByCategory(category) {
+              // Decode the clicked category (e.g., "c3Rhbg==" -> "stan")
+              const clickedCat = category ? atob(category) : '';
+
+              // Filter posts manually
+              document.querySelectorAll('.quarto-post').forEach(function(post) {
+                const encoded = post.getAttribute('data-categories');
+                if (!encoded && category !== '') {
+                  post.style.display = 'none';
+                  return;
+                }
+                try {
+                  // Decode: base64 -> url-decode -> split by comma
+                  const decoded = atob(encoded);
+                  const categories = decodeURIComponent(decoded).split(',');
+
+                  if (category === '' || categories.includes(clickedCat)) {
+                    post.style.display = '';
+                  } else {
+                    post.style.display = 'none';
+                  }
+                } catch(e) {
+                  if (category === '') {
+                    post.style.display = '';
+                  } else {
+                    post.style.display = 'none';
+                  }
+                }
+              });
+
+              // Update active state on sidebar
+              document.querySelectorAll('.quarto-listing-category .category').forEach(function(el) {
+                el.classList.remove('active');
+                if (el.getAttribute('data-category') === category) {
+                  el.classList.add('active');
+                }
+              });
+            }
+
+            // Re-attach click handlers to category elements
+            document.querySelectorAll('.quarto-listing-category .category').forEach(function(el) {
+              el.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                filterByCategory(el.getAttribute('data-category'));
+                return false;
+              };
+            });
+          });
+          </script>
+    include-in-header:
+      - text: |
+          <style>
+            @media (min-width: 992px) {
+              body .page-columns {
+                grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(600px, calc(1050px - 3em)) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end];
+              }
+            }
+
+            /* Hide the Series block until JS moves it into the margin */
+            #series-sidebar-block { display: none; }
+
+            /* Spacing for the margin controls */
+            #quarto-margin-sidebar .quarto-margin-filter { margin-bottom: 0.75rem; }
+            #quarto-margin-sidebar #series-sidebar-block { margin-top: 1rem; }
+          </style>
 # highlight-style: 
 #   dark: my.theme
 #   light: pygments
 title-block-banner: true
 ---
 
-:::: {.grid}
+::: {#series-sidebar-block}
+## Series
 
-::: {.g-col-12 .g-col-md-6}
-# Series
+[quantile regression](quantile-reg-series.html)
 
-##### [quantile regression](quantile-reg-series.html)
 This series is all about quantile regressions using Stan.
 :::
-
-:::: 

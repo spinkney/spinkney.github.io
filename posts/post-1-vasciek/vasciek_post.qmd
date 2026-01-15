@@ -89,6 +89,7 @@ fit_stan <- mod$sample(
               tau = 0.5),
   refresh = 0,
   show_messages = FALSE,
+  show_exceptions = FALSE,
   parallel_chains = 4
 )
 fit_stan$summary()
@@ -117,6 +118,7 @@ fit_stan_vector <- mod_vector$sample(
               tau = c(0.1,0.25, 0.5, 0.75, 0.9)),
   refresh = 0,
   show_messages = FALSE,
+  show_exceptions = FALSE,
   parallel_chains = 4
 )
 ```
@@ -151,20 +153,24 @@ Lastly, we can plot the effects. Here are the intercepts and beta coefficients
 library(posterior)
 library(tidybayes)
 library(ggplot2)
-theme_set(theme_tidybayes())
+source("../../R/theme_blog.R")
 
 fit_stan_vector |>
   spread_draws(alpha[K]) |>
   ggplot(aes(y = K, x = alpha))  +
-  stat_slabh()
+  stat_slabh(fill = blog_colors$teal) +
+  theme_blog() +
+  labs(title = "Posterior distribution of alpha by quantile")
 
 fit_stan_vector |>
   spread_draws(beta[K]) |>
   ggplot(aes(y = K, x = beta))  +
-  stat_slabh()
+  stat_slabh(fill = blog_colors$purple) +
+  theme_blog() +
+  labs(title = "Posterior distribution of beta by quantile")
 ```
 
-In my next post, [quantile regression post](/posts/post-2-quantile-reg-part-I/quantile-reg.qmd) I'll show various ways to represent a quantile regression in Stan where the outcome, however, is continuous on the real line.
+In my next post, [quantile regression post](/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html) I'll show various ways to represent a quantile regression in Stan where the outcome, however, is continuous on the real line.
 
 ## Appendix
 
