@@ -5,6 +5,32 @@
   const ensureListing = () =>
     window["quarto-listings"] && window["quarto-listings"]["listing-listing"];
 
+  const getCategoryFromHash = () => {
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    return params.get("category") || "";
+  };
+
+  const resolveCategoryToken = (token) => {
+    if (!token) return "";
+    const categoryEls = window.document.querySelectorAll(
+      ".quarto-listing-category .category"
+    );
+    for (const categoryEl of categoryEls) {
+      const value = categoryEl.getAttribute("data-category");
+      if (value === token) {
+        return value;
+      }
+    }
+    const normalizedToken = token.trim().toLowerCase();
+    for (const categoryEl of categoryEls) {
+      const label = categoryEl.textContent || "";
+      if (label.trim().toLowerCase() === normalizedToken) {
+        return categoryEl.getAttribute("data-category") || token;
+      }
+    }
+    return token;
+  };
+
   const setCategoryHash = (category) => {
     const base = window.location.pathname + window.location.search;
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
@@ -121,6 +147,13 @@
     const sidebar = ensureMarginSidebar();
     if (!sidebar) return;
 
+    const applyHashCategory = (listing) => {
+      const categoryToken = getCategoryFromHash();
+      if (!categoryToken) return;
+      const resolved = resolveCategoryToken(categoryToken);
+      applyCategoryFilter(resolved, listing);
+    };
+
     const setup = () => {
       const listing = ensureListing();
       if (!listing) {
@@ -131,6 +164,11 @@
       placeFilterAboveCategories(sidebar, listing);
       placeSeriesUnderCategories(sidebar);
       wireCategoryHandlers(listing);
+      applyHashCategory(listing);
+
+      window.addEventListener("hashchange", () => {
+        applyHashCategory(listing);
+      });
     };
 
     setup();
