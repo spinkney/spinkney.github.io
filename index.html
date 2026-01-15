@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.26">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Pinkney’s Sufficient Stats – Ruler</title>
+<title>Pinkney’s Sufficient Stats</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -34,17 +34,19 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2a8cf7522f8198697e4c6ad805935efb.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet" class="quarto-color-scheme-extra">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-68c8bffd90dad8f2b55c52d7b6410dc0.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-72d6df27e33ee55eeb2d025b16af142f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-68c8bffd90dad8f2b55c52d7b6410dc0.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-7e6aeb0058a9a1c6e472b9821c3445eb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-f101e0e3fc8860fd1fced9aa6e32c484.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-7e6aeb0058a9a1c6e472b9821c3445eb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-cacff4fe24e74be567f0b51ed18e714f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-057ba137ed22c8ec91f9e78023d2585b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-cacff4fe24e74be567f0b51ed18e714f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -116,7 +118,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -304,7 +306,7 @@ window.Quarto = {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Ruler</span>
+    <span class="navbar-title">Pinkney’s Sufficient Stats</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -405,7 +407,7 @@ window.Quarto = {
     </div>
 </div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1768478989000" data-listing-file-modified-sort="1768478989279" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1332">
+<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1768481606000" data-listing-file-modified-sort="1768481606687" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1332">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -437,7 +439,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1716436800000" data-listing-file-modified-sort="1768480868216" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1270">
+<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1768481606687" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1270">
 <div class="thumbnail"><a href="./posts/post-3-better-unit-vector/a-better-unit-vector.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-3-better-unit-vector/a-better-unit-vector_files/figure-html/uniformity-plot-1.png"  class="thumbnail-image card-img"/></p>
@@ -461,7 +463,7 @@ Parameterizing unit vectors (points on a hypersphere <span class="math inline">\
 <div class="metadata">
 <a href="./posts/post-3-better-unit-vector/a-better-unit-vector.html" class="no-external">
 <div class="listing-date">
-May 23, 2024
+Jan 15, 2026
 </div>
 <div class="listing-author">
 Sean Pinkney
@@ -469,7 +471,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666065600000" data-listing-file-modified-sort="1768478989277" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2426">
+<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1768481606686" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2426">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -501,7 +503,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665806400000" data-listing-file-modified-sort="1768478989269" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1538">
+<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1768481606670" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1538">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg_files/figure-html/unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
@@ -533,7 +535,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665720000000" data-listing-file-modified-sort="1768478988967" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1845">
+<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1768481606055" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1845">
 <div class="thumbnail"><a href="./posts/post-1-vasciek/vasciek_post.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-1-vasciek/vasciek_post_files/figure-html/unnamed-chunk-6-1.png"  class="thumbnail-image card-img"/></p>
@@ -632,13 +634,14 @@ Sean Pinkney
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -653,7 +656,7 @@ Sean Pinkney
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/spinkney\.github\.io\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
