@@ -103,6 +103,11 @@ ul.task-list li input[type="checkbox"] {
     }
   })
   </script>
+<style>
+  /* Spacing for the margin controls */
+  #quarto-margin-sidebar .quarto-margin-filter { margin-bottom: 0.75rem; }
+  #quarto-margin-sidebar #series-sidebar-block { margin-top: 1rem; }
+</style>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -378,23 +383,25 @@ window.Quarto = {
         
     <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="cGFyYW1ldGVyaXphdGlvbnM=">parameterizations <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cXVhbnRpbGU=">quantile <span class="quarto-category-count">(4)</span></div><div class="category" data-category="c3Rhbg==">stan <span class="quarto-category-count">(5)</span></div></div></div>
 <!-- main -->
-<main class="content quarto-banner-title-block page-columns page-full column-page-left" id="quarto-document-content">
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
 
 
 
 
 
-
-
-
-
-
-<div class="no-row-height column-margin column-container"><section id="series" class="level2">
+<div id="series-sidebar-block">
+<section id="series" class="level2">
 <h2 class="anchored" data-anchor-id="series">Series</h2>
 <p><a href="quantile-reg-series.html">quantile regression</a></p>
 <p>This series is all about quantile regressions using Stan.</p>
-</section></div><div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+</section>
+</div>
+
+
+
+
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="listing-actions-group">
     <div class="input-group input-group-sm quarto-listing-filter">
       <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -402,7 +409,7 @@ window.Quarto = {
     </div>
 </div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1768484515912" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1270">
+<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1768485160861" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1270">
 <div class="thumbnail"><a href="./posts/post-3-better-unit-vector/a-better-unit-vector.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-3-better-unit-vector/a-better-unit-vector_files/figure-html/uniformity-plot-1.png"  class="thumbnail-image card-img"/></p>
@@ -434,7 +441,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666483200000" data-listing-file-modified-sort="1768484515911" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1332">
+<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666483200000" data-listing-file-modified-sort="1768485160860" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1332">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -466,7 +473,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1768484515911" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2426">
+<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1768485160859" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2426">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -498,7 +505,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1768484515895" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1538">
+<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1768485160843" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1538">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg_files/figure-html/unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
@@ -530,7 +537,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1768484515276" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1845">
+<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1768485160219" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1845">
 <div class="thumbnail"><a href="./posts/post-1-vasciek/vasciek_post.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-1-vasciek/vasciek_post_files/figure-html/unnamed-chunk-6-1.png"  class="thumbnail-image card-img"/></p>
@@ -565,6 +572,79 @@ Sean Pinkney
 </div>
 <div class="listing-no-matching d-none">No matching items</div>
 </div></main> <!-- /main -->
+(() =&gt; {
+  const ensureMarginSidebar = () =&gt; document.getElementById("quarto-margin-sidebar");
+
+  const ensureListing = () =&gt;
+    window["quarto-listings"] &amp;&amp; window["quarto-listings"]["listing-listing"];
+
+  const buildMarginFilter = () =&gt; {
+    const wrapper = document.createElement("div");
+    wrapper.className = "quarto-margin-filter";
+    wrapper.innerHTML = `
+      <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" placeholder="Filter posts">
+      </div>
+    `;
+    return wrapper;
+  };
+
+  const placeSeriesUnderCategories = (sidebar) =&gt; {
+    const series = document.getElementById("series-sidebar-block");
+    if (!series) return;
+
+    const categories = sidebar.querySelector(".quarto-listing-category");
+    if (categories) {
+      categories.insertAdjacentElement("afterend", series);
+    } else {
+      sidebar.appendChild(series);
+    }
+    series.style.display = "";
+  };
+
+  const placeFilterAboveCategories = (sidebar, listing) =&gt; {
+    const categoriesTitle = sidebar.querySelector(".quarto-listing-category-title");
+    if (!categoriesTitle) return;
+
+    const existing = sidebar.querySelector(".quarto-margin-filter");
+    const filter = existing || buildMarginFilter();
+
+    if (!existing) {
+      sidebar.insertBefore(filter, categoriesTitle);
+    }
+
+    const input = filter.querySelector("input");
+    if (!input) return;
+
+    const builtInFilter = window.document.querySelector(
+      "#listing-listing .quarto-listing-filter"
+    );
+    if (builtInFilter) builtInFilter.style.display = "none";
+
+    input.addEventListener("input", () =&gt; {
+      listing.search(input.value);
+    });
+  };
+
+  window.document.addEventListener("DOMContentLoaded", () =&gt; {
+    const sidebar = ensureMarginSidebar();
+    if (!sidebar) return;
+
+    const setup = () =&gt; {
+      const listing = ensureListing();
+      if (!listing) {
+        window.setTimeout(setup, 50);
+        return;
+      }
+
+      placeFilterAboveCategories(sidebar, listing);
+      placeSeriesUnderCategories(sidebar);
+    };
+
+    setup();
+  });
+})();
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
