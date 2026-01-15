@@ -5,6 +5,67 @@
   const ensureListing = () =>
     window["quarto-listings"] && window["quarto-listings"]["listing-listing"];
 
+  const setCategoryHash = (category) => {
+    const base = window.location.pathname + window.location.search;
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    if (category) {
+      params.set("category", category);
+    } else {
+      params.delete("category");
+    }
+    const nextHash = params.toString();
+    window.history.pushState(null, "", nextHash ? `${base}#${nextHash}` : base);
+  };
+
+  const applyCategoryFilter = (category, listing) => {
+    const categoryEls = window.document.querySelectorAll(
+      ".quarto-listing-category .category"
+    );
+    for (const categoryEl of categoryEls) {
+      const value = categoryEl.getAttribute("data-category");
+      categoryEl.classList.toggle("active", value === category);
+    }
+
+    if (category === "") {
+      listing.filter();
+      return;
+    }
+
+    listing.filter((item) => {
+      const itemValues = item.values();
+      if (itemValues.categories !== null) {
+        const categories = itemValues.categories.split(",");
+        return categories.includes(category);
+      }
+      return false;
+    });
+  };
+
+  const wireCategoryHandlers = (listing) => {
+    window.quartoListingCategory = (category) => {
+      applyCategoryFilter(category, listing);
+      setCategoryHash(category);
+      return false;
+    };
+
+    const categoryEls = window.document.querySelectorAll(
+      ".quarto-listing-category .category"
+    );
+    for (const categoryEl of categoryEls) {
+      categoryEl.onclick = () => {
+        const category = categoryEl.getAttribute("data-category");
+        window.quartoListingCategory(category);
+      };
+    }
+
+    const categoryTitleEls = window.document.querySelectorAll(
+      ".quarto-listing-category-title"
+    );
+    for (const categoryTitleEl of categoryTitleEls) {
+      categoryTitleEl.onclick = () => window.quartoListingCategory("");
+    }
+  };
+
   const buildMarginFilter = () => {
     const wrapper = document.createElement("div");
     wrapper.className = "quarto-margin-filter";
@@ -69,6 +130,7 @@
 
       placeFilterAboveCategories(sidebar, listing);
       placeSeriesUnderCategories(sidebar);
+      wireCategoryHandlers(listing);
     };
 
     setup();
