@@ -4,7 +4,7 @@
     "href": "quantile-reg-series.html",
     "title": "Series: Quantile Regression in Stan",
     "section": "",
-    "text": "Quantile Regressions in Stan: Part III\n\n\n\n\n\n\n\n\nJan 15, 2026\n\n7 min\n\n\n\n\n\n\nQuantile Regressions in Stan: Part II\n\n\n\n\n\n\n\n\nOct 18, 2022\n\n13 min\n\n\n\n\n\n\nQuantile Regressions in Stan: Part I\n\n\n\n\n\n\n\n\nOct 15, 2022\n\n8 min\n\n\n\n\nNo matching items"
+    "text": "Quantile Regressions in Stan: Part III\n\n\n\n\n\n\n\n\nOct 23, 2022\n\n7 min\n\n\n\n\n\n\nQuantile Regressions in Stan: Part II\n\n\n\n\n\n\n\n\nOct 18, 2022\n\n13 min\n\n\n\n\n\n\nQuantile Regressions in Stan: Part I\n\n\n\n\n\n\n\n\nOct 15, 2022\n\n8 min\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "css/highlight/DIGESTS.html",
@@ -60,7 +60,7 @@
     "href": "index.html",
     "title": "Pinkney’s Sufficient Stats",
     "section": "",
-    "text": "Series\n\nquantile regression\nThis series is all about quantile regressions using Stan.\n\n\n\n\n\n\n\n\n\n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nQuantile Regressions in Stan: Part III\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nJan 15, 2026\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nThe Hyper-Tanh Peel: A Novel Parameterization for Bayesian Spheres\n\n\n\nstan\n\nparameterizations\n\n\n\n\n\n\n\n\n\nJan 15, 2026\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nQuantile Regressions in Stan: Part II\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 18, 2022\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nQuantile Regressions in Stan: Part I\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 15, 2022\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nVasicek Quantile Regression in Stan\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 14, 2022\n\n\nSean Pinkney\n\n\n\n\n\nNo matching items"
+    "text": "Series\n\nquantile regression\nThis series is all about quantile regressions using Stan.\n\n\n\n\n\n\n\n\n\n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nThe Hyper-Tanh Peel: A Novel Parameterization for Bayesian Spheres\n\n\n\nstan\n\nparameterizations\n\n\n\n\n\n\n\n\n\nJan 15, 2026\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nQuantile Regressions in Stan: Part III\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 23, 2022\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nQuantile Regressions in Stan: Part II\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 18, 2022\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nQuantile Regressions in Stan: Part I\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 15, 2022\n\n\nSean Pinkney\n\n\n\n\n\n\n\n\n\n\n\n\nVasicek Quantile Regression in Stan\n\n\n\nstan\n\nquantile\n\n\n\n\n\n\n\n\n\nOct 14, 2022\n\n\nSean Pinkney\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/post-1-vasciek/vasciek_post.html",
