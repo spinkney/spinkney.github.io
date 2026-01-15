@@ -398,16 +398,15 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="introduction">1. Introduction</h2>
 <p>Parameterizing unit vectors (points on a hypersphere <span class="math inline">\(S^{K-1}\)</span>) in Bayesian models presents unique challenges.</p>
 <ol type="1">
-<li><strong>Hyperspherical Coordinates</strong> (angles) involve boundaries (<span class="math inline">\(0, \pi\)</span>) that hinder Hamiltonian Monte Carlo (HMC) sampling.</li>
-<li><strong>Muller’s Method</strong> (normalizing standard Gaussians) is isotropic but over-parameterized (<span class="math inline">\(K\)</span> parameters for <span class="math inline">\(K-1\)</span> dimensions) and suffers from a gradient singularity at the origin.</li>
+<li>Hyperspherical coordinates (angles) involve boundaries (<span class="math inline">\(0, \pi\)</span>) that hinder Hamiltonian Monte Carlo (HMC) sampling.</li>
+<li>Muller’s method (normalizing standard Gaussians, how Stan parameterizes <code>unit_vector</code>) is isotropic but over-parameterized (<span class="math inline">\(K\)</span> parameters for <span class="math inline">\(K-1\)</span> dimensions) and suffers from a gradient singularity at the origin.</li>
 </ol>
-<p>This document introduces the <strong>Hyper-Tanh Peel</strong>, a novel, bijective parameterization mapping <span class="math inline">\(\mathbb{R}^{K-1} \to S^{K-1}\)</span>. It uses “Logistic Geometry” to create a smooth, unconstrained manifold that is numerically stable and avoids the singularities of traditional methods.</p>
+<p>I’m calling this the <strong>hyper-tanh peel</strong> bijective parameterization. It is a mapping <span class="math inline">\(\mathbb{R}^{K-1} \to S^{K-1}\)</span>. It uses “Logistic Geometry” to create a smooth, unconstrained manifold that is numerically stable and avoids the singularities of traditional methods.</p>
 </section>
 <section id="mathematical-formulation" class="level2">
 <h2 class="anchored" data-anchor-id="mathematical-formulation">2. Mathematical Formulation</h2>
 <section id="the-transformation" class="level3">
 <h3 class="anchored" data-anchor-id="the-transformation">The Transformation</h3>
-<p>We map an unconstrained vector <span class="math inline">\(\mathbf{x} \in \mathbb{R}^{K-1}\)</span> to a unit vector <span class="math inline">\(\mathbf{y} \in S^{K-1}\)</span>.</p>
 <p>The method “peels” dimensions one by one using the hyperbolic tangent function (<span class="math inline">\(\tanh\)</span>), which maps <span class="math inline">\((-\infty, \infty) \to (-1, 1)\)</span>, and closes the remaining 2D subspace with a stereographic projection.</p>
 <p><strong>Algorithm:</strong></p>
 <p>Let <span class="math inline">\(r_1 = 1\)</span>. For <span class="math inline">\(i = 1, \dots, K-2\)</span>:</p>
@@ -417,7 +416,7 @@ y_i &amp;= r_i \cdot \tanh(x_i) \\
 r_{i+1} &amp;= r_i \cdot \text{sech}(x_i) \quad \text{where } \text{sech}(x) = \frac{1}{\cosh(x)} = \sqrt{1 - \tanh^2(x)}
 \end{aligned}
 \]</span></p>
-<p>For the final two dimensions (The Core), we use <span class="math inline">\(x_{K-1}\)</span> as the stereographic coordinate:</p>
+<p>The final two dimensions are parameterized as a stereographic coordinate:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \theta &amp;= 2 \arctan(x_{K-1}) \\
@@ -428,22 +427,22 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </section>
 <section id="the-jacobian-adjustment" class="level3">
 <h3 class="anchored" data-anchor-id="the-jacobian-adjustment">The Jacobian Adjustment</h3>
-<p>To enforce a uniform prior on the sphere, we must account for the change of volume. The log-determinant of the Jacobian is:</p>
+<p>The log-determinant of the Jacobian is:</p>
 <p><span class="math display">\[
 \log |J| = \sum_{i=1}^{K-2} -(K-i) \log(\cosh(x_i)) + \log(2) - \log(1 + x_{K-1}^2)
 \]</span></p>
-<p>This implies that: 1. The peeling parameters follow a <strong>Sech Distribution</strong>: <span class="math inline">\(p(x_i) \propto \text{sech}^{K-i}(x_i)\)</span>. 2. The core parameter follows a <strong>Cauchy Distribution</strong>: <span class="math inline">\(p(x_{K-1}) \propto (1+x_{K-1}^2)^{-1}\)</span>.</p>
+<p>This implies that: 1. The peeling parameters follow a sech distribution: <span class="math inline">\(p(x_i) \propto \text{sech}^{K-i}(x_i)\)</span>. 2. The core parameter follows a cauchy distribution: <span class="math inline">\(p(x_{K-1}) \propto (1+x_{K-1}^2)^{-1}\)</span>.</p>
 </section>
 </section>
 <section id="logistic-geometry-gradient-stability" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-geometry-gradient-stability">3. Logistic Geometry &amp; Gradient Stability</h2>
-<p>A critical flaw in Muller’s method is the <strong>Singularity at the Origin</strong>. In Muller’s parameterization, <span class="math inline">\(\mathbf{y} = \mathbf{z} / \|\mathbf{z}\|\)</span>. As <span class="math inline">\(\mathbf{z} \to 0\)</span>, the gradient <span class="math inline">\(\nabla_\mathbf{z} \mathbf{y}\)</span> explodes to infinity. This creates a “funnel” that traps HMC samplers.</p>
-<p><strong>The Hyper-Tanh Advantage:</strong> The Hyper-Tanh Peel maps the origin of the parameter space <span class="math inline">\(\mathbf{x}=\mathbf{0}\)</span> to the “North Pole” of the sphere <span class="math inline">\(\mathbf{y}=(1, 0, \dots, 0)\)</span>.</p>
+<p>A problem with Muller’s method when used with HMC is the singularity at the origin. In Muller’s parameterization, <span class="math inline">\(\mathbf{y} = \mathbf{z} / \|\mathbf{z}\|\)</span>. As <span class="math inline">\(\mathbf{z} \to 0\)</span>, the gradient <span class="math inline">\(\nabla_\mathbf{z} \mathbf{y}\)</span> explodes to infinity. This creates a “funnel” that traps HMC samplers.</p>
+<p>Advantages of this parameterization: The Hyper-Tanh Peel maps the origin of the parameter space <span class="math inline">\(\mathbf{x}=\mathbf{0}\)</span> to the “North Pole” of the sphere <span class="math inline">\(\mathbf{y}=(1, 0, \dots, 0)\)</span>.</p>
 <p>The derivative of the mapping is governed by <span class="math inline">\(\frac{d}{dx} \tanh(x) = \text{sech}^2(x)\)</span>. * At <span class="math inline">\(x=0\)</span>, <span class="math inline">\(\text{sech}^2(0) = 1\)</span>. * The gradient is linear and bounded. There is no singularity.</p>
 </section>
 <section id="visual-verification" class="level2">
 <h2 class="anchored" data-anchor-id="visual-verification">4. Visual Verification</h2>
-<p>We demonstrate two key properties using R: 1. <strong>Uniformity:</strong> With Jacobian correction, Hyper-Tanh matches Muller’s isotropy. 2. <strong>Stability:</strong> Hyper-Tanh has bounded gradients where Muller explodes.</p>
+<p>This demonstrates two key properties using R: 1. Uniformity: With Jacobian correction, Hyper-Tanh matches Muller’s isotropy. 2. Stability: Hyper-Tanh has bounded gradients where Muller explodes.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -493,7 +492,7 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </div>
 <section id="experiment-a-uniformity-check" class="level3">
 <h3 class="anchored" data-anchor-id="experiment-a-uniformity-check">Experiment A: Uniformity Check</h3>
-<p>We generate 2,000 points on a 3D sphere (<span class="math inline">\(S^2\)</span>) using both methods and verify that they cover the projected disk uniformly.</p>
+<p>I generate 2,000 points on a 3D sphere (<span class="math inline">\(S^2\)</span>) using both methods and verify that they cover the projected disk uniformly.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -540,14 +539,14 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </div>
 </div>
 </div>
-<p><strong>Result:</strong> The Hyper-Tanh parameterization, when sampled with the correct Jacobian prior, is indistinguishable from Muller’s method. It is perfectly uniform.</p>
+<p>Result: The Hyper-Tanh parameterization, when sampled with the correct Jacobian prior, is indistinguishable from Muller’s method. It is perfectly uniform.</p>
 </section>
 <section id="experiment-b-gradient-stability-the-y0-singularity" class="level3">
 <h3 class="anchored" data-anchor-id="experiment-b-gradient-stability-the-y0-singularity">Experiment B: Gradient Stability (The “y=0” Singularity)</h3>
-<p>Here we calculate the magnitude of the gradient <span class="math inline">\(\left\| \frac{d\mathbf{y}}{dp} \right\|\)</span> as the parameter <span class="math inline">\(p\)</span> passes through the origin.</p>
+<p>Here I calculate the magnitude of the gradient <span class="math inline">\(\left\| \frac{d\mathbf{y}}{dp} \right\|\)</span> as the parameter <span class="math inline">\(p\)</span> passes through the origin.</p>
 <ol type="1">
-<li><strong>Muller:</strong> <span class="math inline">\(p=z\)</span>. <span class="math inline">\(\mathbf{y} = z/|z|\)</span>. Gradient <span class="math inline">\(\propto 1/|z|\)</span>.</li>
-<li><strong>Hyper-Tanh:</strong> <span class="math inline">\(p=x\)</span>. <span class="math inline">\(y = \tanh(x)\)</span>. Gradient <span class="math inline">\(\propto \text{sech}^2(x)\)</span>.</li>
+<li>Muller: <span class="math inline">\(p=z\)</span>. <span class="math inline">\(\mathbf{y} = z/|z|\)</span>. Gradient <span class="math inline">\(\propto 1/|z|\)</span>.</li>
+<li>Hyper-Tanh: <span class="math inline">\(p=x\)</span>. <span class="math inline">\(y = \tanh(x)\)</span>. Gradient <span class="math inline">\(\propto \text{sech}^2(x)\)</span>.</li>
 </ol>
 <div class="cell">
 <details class="code-fold">
@@ -587,7 +586,7 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </div>
 </div>
 </div>
-<p><strong>Result:</strong> The Hyper-Tanh Peel eliminates the topological singularity. The sampler can pass through the origin without experiencing infinite forces.</p>
+<p>Result: The Hyper-Tanh Peel eliminates the topological singularity. The sampler can pass through the origin without experiencing infinite forces.</p>
 </section>
 </section>
 <section id="stan-implementation" class="level2">
@@ -644,12 +643,7 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">6. Conclusion</h2>
-<p>The <strong>Hyper-Tanh Peel</strong> offers a robust alternative to Muller’s method for Bayesian modeling. By mapping the infinite support of <span class="math inline">\(\mathbb{R}^{K-1}\)</span> to the sphere using logistic and stereographic functions, it achieves:</p>
-<ol type="1">
-<li><strong>Minimal Parameterization:</strong> Uses exactly <span class="math inline">\(K-1\)</span> parameters.</li>
-<li><strong>Topological Stability:</strong> No gradient explosion at the origin.</li>
-<li><strong>Flexibility:</strong> Can model uniform spheres (via Jacobian) or naturally sparse spheres (via Normal priors).</li>
-</ol>
+<p>The hyper-tanh peel parameterization offers a robust alternative to Muller’s method for Bayesian modeling. It uses exactly <span class="math inline">\(K-1\)</span> parameters, avoids the singularity at the origin by mapping from the pole, and might offer some interesting priors on the pullback.</p>
 
 
 </section>
