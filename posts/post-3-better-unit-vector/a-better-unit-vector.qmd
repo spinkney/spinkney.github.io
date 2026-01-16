@@ -148,30 +148,29 @@ p1 <- ggplot(df_all, aes(x=y1, y=y2)) +
   geom_point(aes(color=Method), size=0.8, alpha=0.5) +
   facet_wrap(~Method) +
   scale_color_manual(values=c(blog_colors$teal, blog_colors$purple)) +
-  scale_x_continuous(limits=xlims) +
-  scale_y_continuous(limits=xlims) +
-  coord_fixed() +
+  scale_x_continuous(limits=xlims, expand=c(0,0)) +
+  scale_y_continuous(limits=xlims, expand=c(0,0)) +
   theme_blog() +
   labs(title="Isotropy Comparison",
        subtitle="Both methods uniformly fill the sphere projection",
        x=NULL, y="y2") +
   theme(legend.position="none",
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+        axis.ticks.x=element_blank(),
+        aspect.ratio=1)
 
 # Marginal Histogram
 p2 <- ggplot(df_all, aes(x=y1, fill=Method)) +
   geom_histogram(aes(y=after_stat(density)), bins=30, alpha=0.6, position="identity") +
   facet_wrap(~Method) +
   scale_fill_manual(values=c(blog_colors$teal, blog_colors$purple)) +
-  scale_x_continuous(limits=xlims) +
+  scale_x_continuous(limits=xlims, expand=c(0,0)) +
   theme_blog() +
-  labs(title="Marginal Distribution (y1)",
-       subtitle="Archimedes' Thm: Marginals of S^2 are Uniform",
-       x="y1", y="Density") +
-  theme(legend.position="none")
+  labs(x="y1", y="Density") +
+  theme(legend.position="none",
+        strip.text=element_blank())
 
-p1 / p2 + plot_layout(axes = "collect")
+p1 / p2
 ```
 
 Result: The Hyper-Tanh parameterization, when sampled with the correct Jacobian prior, is indistinguishable from Muller's method. It is perfectly uniform.
