@@ -240,7 +240,7 @@ window.Quarto = {
     </div>
 </div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1768528748921" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1223">
+<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1768528822888" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1223">
 <div class="thumbnail"><a href="./posts/post-3-better-unit-vector/a-better-unit-vector.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-3-better-unit-vector/a-better-unit-vector_files/figure-html/uniformity-plot-1.png"  class="thumbnail-image card-img"/></p>
@@ -272,7 +272,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666483200000" data-listing-file-modified-sort="1768528748920" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1332">
+<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666483200000" data-listing-file-modified-sort="1768528822888" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1332">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -304,7 +304,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1768528748920" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2426">
+<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1768528822887" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2426">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -336,7 +336,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1768528748904" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1538">
+<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1768528822871" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1538">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg_files/figure-html/unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
@@ -368,7 +368,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1768528748275" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1845">
+<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1768528822237" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1845">
 <div class="thumbnail"><a href="./posts/post-1-vasciek/vasciek_post.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/post-1-vasciek/vasciek_post_files/figure-html/unnamed-chunk-6-1.png"  class="thumbnail-image card-img"/></p>
@@ -807,22 +807,54 @@ Sean Pinkney
 </div> <!-- /content -->
 <script>
 // Fix Quarto category filtering bug
-// data-categories is base64(url-encoded-comma-separated) instead of comma-separated-base64
-document.addEventListener('DOMContentLoaded', function() {
-  // Fix the data-categories attributes on all posts
-  document.querySelectorAll('.quarto-post[data-categories]').forEach(function(post) {
-    const encoded = post.getAttribute('data-categories');
-    try {
-      // Decode base64 to get "cat1%2Ccat2" format
-      const decoded = atob(encoded);
-      // URL decode to get "cat1,cat2"
-      const urlDecoded = decodeURIComponent(decoded);
-      // Split by comma, base64 encode each, rejoin
-      const fixedCategories = urlDecoded.split(',').map(c => btoa(c)).join(',');
-      post.setAttribute('data-categories', fixedCategories);
-    } catch(e) {
-      console.log('Category decode error:', e);
-    }
+window.addEventListener('load', function() {
+  function filterByCategory(category) {
+    // Decode the clicked category (e.g., "c3Rhbg==" -> "stan")
+    const clickedCat = category ? atob(category) : '';
+
+    // Filter posts manually
+    document.querySelectorAll('.quarto-post').forEach(function(post) {
+      const encoded = post.getAttribute('data-categories');
+      if (!encoded && category !== '') {
+        post.style.display = 'none';
+        return;
+      }
+      try {
+        // Decode: base64 -> url-decode -> split by comma
+        const decoded = atob(encoded);
+        const categories = decodeURIComponent(decoded).split(',');
+
+        if (category === '' || categories.includes(clickedCat)) {
+          post.style.display = '';
+        } else {
+          post.style.display = 'none';
+        }
+      } catch(e) {
+        if (category === '') {
+          post.style.display = '';
+        } else {
+          post.style.display = 'none';
+        }
+      }
+    });
+
+    // Update active state on sidebar
+    document.querySelectorAll('.quarto-listing-category .category').forEach(function(el) {
+      el.classList.remove('active');
+      if (el.getAttribute('data-category') === category) {
+        el.classList.add('active');
+      }
+    });
+  }
+
+  // Re-attach click handlers to category elements
+  document.querySelectorAll('.quarto-listing-category .category').forEach(function(el) {
+    el.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      filterByCategory(el.getAttribute('data-category'));
+      return false;
+    };
   });
 });
 </script>
