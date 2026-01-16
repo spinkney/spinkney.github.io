@@ -998,10 +998,12 @@ Wu, Teng, and Naveen N. Narisetty. 2021. <span>“<span class="nocase">Bayesian 
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.quarto-category').forEach(function(cat) {
     const categoryName = cat.textContent.trim();
-    const encodedCategory = btoa(categoryName);
+    const encodedCategory = encodeURIComponent(btoa(categoryName));
     cat.style.cursor = 'pointer';
     cat.addEventListener('click', function() {
-      window.location.href = '/#category=' + encodedCategory;
+      // Get site root from current URL
+      const siteRoot = window.location.origin + '/';
+      window.location.href = siteRoot + '#category=' + encodedCategory;
     });
   });
 });
