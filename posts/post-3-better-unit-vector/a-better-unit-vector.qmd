@@ -142,35 +142,52 @@ df_all <- rbind(df_muller, df_ht)
 # So total width = 2 / 0.8 = 2.5, meaning xlim = c(-1.25, 1.25)
 xlims <- c(-1.25, 1.25)
 
-# Scatter Plot
-p1 <- ggplot(df_all, aes(x=y1, y=y2)) +
+# Split data by method for individual plots
+df_ht_only <- df_all[df_all$Method == "Hyper-Tanh", ]
+df_muller_only <- df_all[df_all$Method == "Muller (1959)", ]
+
+# Hyper-Tanh scatter
+p1a <- ggplot(df_ht_only, aes(x=y1, y=y2)) +
   annotate("path", x=cos(seq(0,2*pi,0.01)), y=sin(seq(0,2*pi,0.01)), color="grey50") +
-  geom_point(aes(color=Method), size=0.8, alpha=0.5) +
-  facet_wrap(~Method) +
-  scale_color_manual(values=c(blog_colors$teal, blog_colors$purple)) +
-  scale_x_continuous(limits=xlims, expand=c(0,0)) +
-  scale_y_continuous(limits=xlims, expand=c(0,0)) +
+  geom_point(color=blog_colors$teal, size=0.8, alpha=0.5) +
+  scale_x_continuous(limits=xlims) +
+  scale_y_continuous(limits=xlims) +
+  coord_fixed() +
   theme_blog() +
-  labs(title="Isotropy Comparison",
-       subtitle="Both methods uniformly fill the sphere projection",
-       x=NULL, y="y2") +
-  theme(legend.position="none",
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        aspect.ratio=1)
+  labs(title="Hyper-Tanh", x=NULL, y="y2") +
+  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        plot.title=element_text(hjust=0.5))
 
-# Marginal Histogram
-p2 <- ggplot(df_all, aes(x=y1, fill=Method)) +
-  geom_histogram(aes(y=after_stat(density)), bins=30, alpha=0.6, position="identity") +
-  facet_wrap(~Method) +
-  scale_fill_manual(values=c(blog_colors$teal, blog_colors$purple)) +
-  scale_x_continuous(limits=xlims, expand=c(0,0)) +
+# Muller scatter
+p1b <- ggplot(df_muller_only, aes(x=y1, y=y2)) +
+  annotate("path", x=cos(seq(0,2*pi,0.01)), y=sin(seq(0,2*pi,0.01)), color="grey50") +
+  geom_point(color=blog_colors$purple, size=0.8, alpha=0.5) +
+  scale_x_continuous(limits=xlims) +
+  scale_y_continuous(limits=xlims) +
+  coord_fixed() +
   theme_blog() +
-  labs(x="y1", y="Density") +
-  theme(legend.position="none",
-        strip.text=element_blank())
+  labs(title="Muller (1959)", x=NULL, y=NULL) +
+  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(), axis.ticks.y=element_blank(),
+        plot.title=element_text(hjust=0.5))
 
-p1 / p2
+# Hyper-Tanh histogram
+p2a <- ggplot(df_ht_only, aes(x=y1)) +
+  geom_histogram(aes(y=after_stat(density)), bins=30, fill=blog_colors$teal, alpha=0.6) +
+  scale_x_continuous(limits=xlims) +
+  theme_blog() +
+  labs(x="y1", y="Density")
+
+# Muller histogram
+p2b <- ggplot(df_muller_only, aes(x=y1)) +
+  geom_histogram(aes(y=after_stat(density)), bins=30, fill=blog_colors$purple, alpha=0.6) +
+  scale_x_continuous(limits=xlims) +
+  theme_blog() +
+  labs(x="y1", y=NULL) +
+  theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
+
+# Align and combine using patchwork
+(p1a | p1b) / (p2a | p2b)
 ```
 
 Result: The Hyper-Tanh parameterization, when sampled with the correct Jacobian prior, is indistinguishable from Muller's method. It is perfectly uniform.
