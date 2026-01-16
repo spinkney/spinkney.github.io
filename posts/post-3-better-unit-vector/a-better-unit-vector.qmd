@@ -146,48 +146,42 @@ xlims <- c(-1.25, 1.25)
 df_ht_only <- df_all[df_all$Method == "Hyper-Tanh", ]
 df_muller_only <- df_all[df_all$Method == "Muller (1959)", ]
 
-# Hyper-Tanh scatter
-p1a <- ggplot(df_ht_only, aes(x=y1, y=y2)) +
+# Use facet_grid for proper alignment
+# Reshape data for combined plot
+df_scatter <- df_all %>%
+  mutate(plot_type = "Isotropy")
+
+df_hist <- df_all %>%
+  mutate(plot_type = "Marginal")
+
+# Scatter plot with facets
+p_scatter <- ggplot(df_all, aes(x=y1, y=y2)) +
   annotate("path", x=cos(seq(0,2*pi,0.01)), y=sin(seq(0,2*pi,0.01)), color="grey50") +
-  geom_point(color=blog_colors$teal, size=0.8, alpha=0.5) +
-  scale_x_continuous(limits=xlims) +
-  scale_y_continuous(limits=xlims) +
-  coord_fixed() +
+  geom_point(aes(color=Method), size=0.8, alpha=0.5) +
+  facet_wrap(~Method, nrow=1) +
+  scale_color_manual(values=c(blog_colors$teal, blog_colors$purple)) +
+  scale_x_continuous(limits=xlims, breaks=seq(-1, 1, 0.5)) +
+  scale_y_continuous(limits=xlims, breaks=seq(-1, 1, 0.5)) +
   theme_blog() +
-  labs(title="Hyper-Tanh", x=NULL, y="y2") +
-  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        plot.title=element_text(hjust=0.5))
+  labs(x="y1", y="y2") +
+  theme(legend.position="none",
+        aspect.ratio=1,
+        panel.spacing = unit(1, "lines"))
 
-# Muller scatter
-p1b <- ggplot(df_muller_only, aes(x=y1, y=y2)) +
-  annotate("path", x=cos(seq(0,2*pi,0.01)), y=sin(seq(0,2*pi,0.01)), color="grey50") +
-  geom_point(color=blog_colors$purple, size=0.8, alpha=0.5) +
-  scale_x_continuous(limits=xlims) +
-  scale_y_continuous(limits=xlims) +
-  coord_fixed() +
+# Histogram with facets
+p_hist <- ggplot(df_all, aes(x=y1, fill=Method)) +
+  geom_histogram(aes(y=after_stat(density)), bins=30, alpha=0.6) +
+  facet_wrap(~Method, nrow=1) +
+  scale_fill_manual(values=c(blog_colors$teal, blog_colors$purple)) +
+  scale_x_continuous(limits=xlims, breaks=seq(-1, 1, 0.5)) +
   theme_blog() +
-  labs(title="Muller (1959)", x=NULL, y=NULL) +
-  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(), axis.ticks.y=element_blank(),
-        plot.title=element_text(hjust=0.5))
+  labs(x="y1", y="Density") +
+  theme(legend.position="none",
+        strip.text=element_blank(),
+        panel.spacing = unit(1, "lines"))
 
-# Hyper-Tanh histogram
-p2a <- ggplot(df_ht_only, aes(x=y1)) +
-  geom_histogram(aes(y=after_stat(density)), bins=30, fill=blog_colors$teal, alpha=0.6) +
-  scale_x_continuous(limits=xlims) +
-  theme_blog() +
-  labs(x="y1", y="Density")
-
-# Muller histogram
-p2b <- ggplot(df_muller_only, aes(x=y1)) +
-  geom_histogram(aes(y=after_stat(density)), bins=30, fill=blog_colors$purple, alpha=0.6) +
-  scale_x_continuous(limits=xlims) +
-  theme_blog() +
-  labs(x="y1", y=NULL) +
-  theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-# Align and combine using patchwork
-(p1a | p1b) / (p2a | p2b)
+# Stack with patchwork
+p_scatter / p_hist + plot_layout(heights = c(1, 0.5))
 ```
 
 Result: The Hyper-Tanh parameterization, when sampled with the correct Jacobian prior, is indistinguishable from Muller's method. It is perfectly uniform.
