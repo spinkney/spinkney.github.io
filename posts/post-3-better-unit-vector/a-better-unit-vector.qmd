@@ -256,7 +256,7 @@ functions {
       jacobian += -power * log(cosh_val);
     }
 
-    real last_x = x[K-1];
+    real last_x = x[K - 1];
     jacobian += log(2.0) - log1p(square(last_x));
   
     real denom = 1.0 + square(last_x);
