@@ -73,7 +73,7 @@ This demonstrates two key properties using R: 1. Uniformity: With Jacobian corre
 #| message: false
 
 library(ggplot2)
-library(gridExtra)
+library(patchwork)
 library(dplyr)
 library(tidyr)
 
@@ -162,7 +162,7 @@ p2 <- ggplot(df_all, aes(x=y1, fill=Method)) +
        x="y1") +
   theme(legend.position="none")
 
-grid.arrange(p1, p2, nrow=2)
+p1 / p2
 ```
 
 Result: The Hyper-Tanh parameterization, when sampled with the correct Jacobian prior, is indistinguishable from Muller's method. It is perfectly uniform.
