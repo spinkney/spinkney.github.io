@@ -291,7 +291,7 @@ Q(\tau \mid \alpha, \theta) &amp;= F^{-1}(\tau \mid \alpha, \theta) = \Phi \bigg
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">expose_cmdstanr_functions</span>(<span class="st">"vasicek.stan"</span>, <span class="at">expose_to_global_env =</span> T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(temp_cpp_file): incomplete final line found on
-'/var/folders/dm/p14hjty57hndjp4f4n_y1dz00000gn/T//RtmpnGJoTA/model-15e81768ee904.cpp'</code></pre>
+'/var/folders/dm/p14hjty57hndjp4f4n_y1dz00000gn/T//Rtmpi6b9Jh/model-168ba6b250a7c.cpp'</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>stan_lpdf <span class="ot">&lt;-</span> <span class="fu">vasicek_quantile_lpdf</span>(x, <span class="at">theta =</span> <span class="fl">0.69</span>, <span class="at">mu =</span> <span class="fl">0.5</span>, <span class="at">tau =</span> <span class="fl">0.5</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>r_lpdf <span class="ot">&lt;-</span> <span class="fu">dVASIQ</span>(x, <span class="at">mu =</span> <span class="fl">0.5</span>, <span class="at">sigma =</span> <span class="fl">0.69</span>, <span class="at">log =</span> T)</span>
