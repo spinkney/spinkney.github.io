@@ -57,7 +57,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -231,7 +251,7 @@ window.Quarto = {
 <p>Parameterizing unit vectors (points on a hypersphere <span class="math inline">\(S^{K-1}\)</span>) in Bayesian models presents unique challenges.</p>
 <ol type="1">
 <li>Hyperspherical coordinates (angles) involve boundaries (<span class="math inline">\(0, \pi\)</span>) that hinder Hamiltonian Monte Carlo (HMC) sampling.</li>
-<li>Muller’s method (normalizing standard Gaussians, how Stan parameterizes <code>unit_vector</code>) is isotropic but over-parameterized (<span class="math inline">\(K\)</span> parameters for <span class="math inline">\(K-1\)</span> dimensions) and suffers from a gradient singularity at the origin.</li>
+<li><span class="citation" data-cites="muller1959">Muller (<a href="#ref-muller1959" role="doc-biblioref">1959</a>)</span>’s method (normalizing standard Gaussians, how Stan parameterizes <code>unit_vector</code>) is isotropic but over-parameterized (<span class="math inline">\(K\)</span> parameters for <span class="math inline">\(K-1\)</span> dimensions) and suffers from a gradient singularity at the origin.</li>
 </ol>
 <p>I’m calling this the <strong>hyper-tanh peel</strong> bijective parameterization. It is a mapping <span class="math inline">\(\mathbb{R}^{K-1} \to S^{K-1}\)</span>. It uses “Logistic Geometry” to create a smooth, unconstrained manifold that is numerically stable and avoids the singularities of traditional methods.</p>
 </section>
@@ -268,13 +288,13 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </section>
 <section id="logistic-geometry-gradient-stability" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-geometry-gradient-stability">3. Logistic Geometry &amp; Gradient Stability</h2>
-<p>A problem with Muller’s method when used with HMC is the singularity at the origin. In Muller’s parameterization, <span class="math inline">\(\mathbf{y} = \mathbf{z} / \|\mathbf{z}\|\)</span>. As <span class="math inline">\(\mathbf{z} \to 0\)</span>, the gradient <span class="math inline">\(\nabla_\mathbf{z} \mathbf{y}\)</span> explodes to infinity. This creates a “funnel” that traps HMC samplers.</p>
+<p>A problem with <span class="citation" data-cites="muller1959">Muller (<a href="#ref-muller1959" role="doc-biblioref">1959</a>)</span>’s method when used with HMC is the singularity at the origin. In Muller’s parameterization, <span class="math inline">\(\mathbf{y} = \mathbf{z} / \|\mathbf{z}\|\)</span>. As <span class="math inline">\(\mathbf{z} \to 0\)</span>, the gradient <span class="math inline">\(\nabla_\mathbf{z} \mathbf{y}\)</span> explodes to infinity. This creates a “funnel” that traps HMC samplers.</p>
 <p>Advantages of this parameterization: The Hyper-Tanh Peel maps the origin of the parameter space <span class="math inline">\(\mathbf{x}=\mathbf{0}\)</span> to the “North Pole” of the sphere <span class="math inline">\(\mathbf{y}=(1, 0, \dots, 0)\)</span>.</p>
 <p>The derivative of the mapping is governed by <span class="math inline">\(\frac{d}{dx} \tanh(x) = \text{sech}^2(x)\)</span>. * At <span class="math inline">\(x=0\)</span>, <span class="math inline">\(\text{sech}^2(0) = 1\)</span>. * The gradient is linear and bounded. There is no singularity.</p>
 </section>
 <section id="visual-verification" class="level2">
 <h2 class="anchored" data-anchor-id="visual-verification">4. Visual Verification</h2>
-<p>This demonstrates two key properties using R: 1. Uniformity: With Jacobian correction, Hyper-Tanh matches Muller’s isotropy. 2. Stability: Hyper-Tanh has bounded gradients where Muller explodes.</p>
+<p>This demonstrates two key properties using R: 1. Uniformity: With Jacobian correction, Hyper-Tanh matches <span class="citation" data-cites="muller1959">Muller (<a href="#ref-muller1959" role="doc-biblioref">1959</a>)</span>’s isotropy. 2. Stability: Hyper-Tanh has bounded gradients where Muller explodes.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -478,12 +498,17 @@ y_{K} &amp;= r_{K-1} \sin(\theta) = r_{K-1} \frac{2 x_{K-1}}{1 + x_{K-1}^2}
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">6. Conclusion</h2>
-<p>The hyper-tanh peel parameterization offers a robust alternative to Muller’s method for Bayesian modeling. It uses exactly <span class="math inline">\(K-1\)</span> parameters, avoids the singularity at the origin by mapping from the pole, and might offer some interesting priors on the pullback.</p>
+<p>The hyper-tanh peel parameterization offers a robust alternative to <span class="citation" data-cites="muller1959">Muller (<a href="#ref-muller1959" role="doc-biblioref">1959</a>)</span>’s method for Bayesian modeling. It uses exactly <span class="math inline">\(K-1\)</span> parameters, avoids the singularity at the origin by mapping from the pole, and might offer some interesting priors on the pullback.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-muller1959" class="csl-entry" role="listitem">
+Muller, Mervin E. 1959. <span>“A Note on a Method for Generating Points Uniformly on n-Dimensional Spheres.”</span> <em>Commun. ACM</em> 2 (4): 19–20. <a href="https://doi.org/10.1145/377939.377946">https://doi.org/10.1145/377939.377946</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
