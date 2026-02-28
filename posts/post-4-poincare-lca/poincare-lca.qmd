@@ -23,6 +23,7 @@ from scipy.special import expit as sigmoid
 from cmdstanpy import CmdStanModel
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.colors import LinearSegmentedColormap
 import subprocess
 import textwrap
 import shutil
@@ -703,18 +704,18 @@ $$ This prior shrinks most $\delta_{kj}$ values toward zero and only allows larg
 
 Class identification still comes from ordered radii. Departures then act as diagnostics for item-class cells that need extra flexibility.
 
-This extension is optional in this document. The departure chunks below are set to `#| eval: false`. Set them to `true` only if `lca_poincare_departure.stan` and `arviz` are available.
+This extension is enabled in this document (`#| eval: true` for all departure chunks). Expect longer runtime because it fits a second model and runs additional diagnostics.
 
 ```{python}
 #| label: departure-compile
-#| eval: false
+#| eval: true
 #| output: false
 model_dep = CmdStanModel(stan_file="lca_poincare_departure.stan")
 ```
 
 ```{python}
 #| label: departure-helpers
-#| eval: false
+#| eval: true
 #| code-fold: true
 #| output: false
 def random_init_departure(K, J, rng):
@@ -764,7 +765,7 @@ def opt_to_nuts_init_departure(opt, K, J, jitter=0.02, rng=None):
 
 ```{python}
 #| label: departure-fit
-#| eval: false
+#| eval: true
 best_opt_dep = find_best_optimum_departure(model_dep, stan_data, n_starts=20, seed=42)
 d_dep = best_opt_dep.optimized_params_dict
 print(f"Geometric model MAP lp__:  {d['lp__']:.2f}")
@@ -796,7 +797,7 @@ fit_dep = model_dep.sample(
 
 ```{python}
 #| label: departure-diagnostics
-#| eval: false
+#| eval: true
 diag_dep = fit_dep.diagnose()
 for line in diag_dep.split('\n'):
     if line.strip():
@@ -809,7 +810,7 @@ The regularized horseshoe does not hard-threshold coefficients, but it should sh
 
 ```{python}
 #| label: l1-budget
-#| eval: false
+#| eval: true
 delta_post = fit_dep.stan_variable('sigma_delta')  # K×J departure (= delta)
 l1_norm = np.abs(delta_post).sum(axis=(1, 2))  # per-draw L1 norm
 q = np.percentile(l1_norm, [5, 50, 95])
@@ -826,15 +827,19 @@ print(f"Entries with |δ| > 0.05 (of {K*J}): {q_mat[1]:.0f} [{q_mat[0]:.0f}, {q_
 
 ```{python}
 #| label: fig-delta-heatmap
-#| eval: false
+#| eval: true
 #| fig-cap: "Posterior mean departures δ[k,j] = logit(θ) − geometric prediction. Red = item-class pair endorses more than geometry predicts; blue = less."
 delta_post = fit_dep.stan_variable('delta')  # = sigma_delta
 delta_mean = delta_post.mean(axis=0)
 
 fig, ax = plt.subplots(figsize=(10, 3.5))
-style_axes(ax)
+style_axes(ax, grid=False)
 vmax = np.abs(delta_mean).max()
-im = ax.imshow(delta_mean, cmap='RdBu_r', vmin=-vmax, vmax=vmax, aspect='auto')
+blog_div = LinearSegmentedColormap.from_list(
+    "blog_div",
+    [blog["blue"], blog["background"], blog["red"]],
+)
+im = ax.imshow(delta_mean, cmap=blog_div, vmin=-vmax, vmax=vmax, aspect='auto')
 ax.set_xticks(range(J))
 ax.set_xticklabels([f"j{j+1}\n{item_labels[j]}" for j in range(J)], fontsize=7)
 ax.set_yticks(range(K))
@@ -843,7 +848,11 @@ for k in range(K):
     for j in range(J):
         ax.text(j, k, f"{delta_mean[k,j]:+.2f}", ha='center', va='center', fontsize=8,
                 color='white' if abs(delta_mean[k,j]) > vmax*0.6 else blog["text"])
-plt.colorbar(im, ax=ax, label="δ (logit scale)")
+cbar = plt.colorbar(im, ax=ax, label="δ (logit scale)")
+cbar.outline.set_edgecolor(blog["text_light"])
+cbar.ax.yaxis.label.set_color(blog["text"])
+cbar.ax.tick_params(color=blog["text_light"], labelcolor=blog["text_light"])
+cbar.ax.set_facecolor(blog["background"])
 ax.set_title("Departures from Geometric Prediction", fontweight="bold")
 plt.tight_layout()
 plt.show()
@@ -853,38 +862,43 @@ plt.show()
 
 ```{python}
 #| label: loo-comparison
-#| eval: false
-import arviz as az
+#| eval: true
+import importlib.util
 import warnings
 warnings.filterwarnings("ignore")
 
-def make_loo_idata(fit_obj, cnt):
-    ll_pattern = fit_obj.stan_variable('log_lik')
-    ll_obs = np.repeat(ll_pattern, cnt, axis=1)
-    n_chains = fit_obj.chains
-    n_draws = fit_obj.num_draws_sampling
-    ll_3d = ll_obs.reshape(n_chains, n_draws, -1)
-    return az.from_dict(
-        log_likelihood={"y": ll_3d},
-        posterior={"mu": np.zeros((n_chains, n_draws))}
-    )
+if importlib.util.find_spec("arviz") is None:
+    print("Skipping LOO comparison: 'arviz' is not installed in the active Python environment.")
+else:
+    import arviz as az
 
-idata_geo = make_loo_idata(fit, cnt)
-idata_dep = make_loo_idata(fit_dep, cnt)
+    def make_loo_idata(fit_obj, cnt):
+        ll_pattern = fit_obj.stan_variable('log_lik')
+        ll_obs = np.repeat(ll_pattern, cnt, axis=1)
+        n_chains = fit_obj.chains
+        n_draws = fit_obj.num_draws_sampling
+        ll_3d = ll_obs.reshape(n_chains, n_draws, -1)
+        return az.from_dict(
+            log_likelihood={"y": ll_3d},
+            posterior={"mu": np.zeros((n_chains, n_draws))}
+        )
 
-loo_geo = az.loo(idata_geo)
-loo_dep = az.loo(idata_dep)
+    idata_geo = make_loo_idata(fit, cnt)
+    idata_dep = make_loo_idata(fit_dep, cnt)
 
-print(f"Geometric model ELPD (LOO): {loo_geo.elpd_loo:.1f} ± {loo_geo.se:.1f}")
-print(f"Departure model ELPD (LOO): {loo_dep.elpd_loo:.1f} ± {loo_dep.se:.1f}")
-print(f"Difference:                 {loo_dep.elpd_loo - loo_geo.elpd_loo:.1f}")
+    loo_geo = az.loo(idata_geo)
+    loo_dep = az.loo(idata_dep)
+
+    print(f"Geometric model ELPD (LOO): {loo_geo.elpd_loo:.1f} ± {loo_geo.se:.1f}")
+    print(f"Departure model ELPD (LOO): {loo_dep.elpd_loo:.1f} ± {loo_dep.se:.1f}")
+    print(f"Difference:                 {loo_dep.elpd_loo - loo_geo.elpd_loo:.1f}")
 ```
 
 ### Three-Way Comparison: Class Proportions
 
 ```{python}
 #| label: class-comparison
-#| eval: false
+#| eval: true
 theta_dep_post = fit_dep.stan_variable('theta')
 theta_dep_mean = theta_dep_post.mean(axis=0)
 pi_dep_post = fit_dep.stan_variable('pi_w')
@@ -919,7 +933,7 @@ pd.DataFrame(class_rows).set_index("Class")
 
 ```{python}
 #| label: item-comparison
-#| eval: false
+#| eval: true
 for fk in range(K):
     bk = geo_for_freq[fk]
     depk = dep_for_freq[fk]
@@ -949,7 +963,7 @@ for fk in range(K):
 
 ```{python}
 #| label: fig-three-way
-#| eval: false
+#| eval: true
 #| fig-cap: "Three-way comparison: poLCA (gray), geometric (light), and departure model (saturated) item probabilities with 90% credible intervals."
 
 fig, axes = plt.subplots(1, K, figsize=(5*K, 4.5), sharey=True)
