@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Sean Pinkney">
-<meta name="dcterms.date" content="2026-01-15">
+<meta name="dcterms.date" content="2026-02-28">
 
 <title>Latent Class Analysis on a Restricted Poincaré Disk – Pinkney’s Sufficient Stats</title>
 <style>
@@ -231,7 +231,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">January 15, 2026</p>
+        <p class="date">February 28, 2026</p>
       </div>
     </div>
     
@@ -307,19 +307,20 @@ window.Quarto = {
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        spine.set_linewidth(<span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>In this post I fit a 3-class latent class model where classes live on a restricted Poincare disk and item probabilities are generated from that geometry. The main goals are:</p>
+<section id="why-this-model" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-model">1. Why This Model</h2>
+<p>This post fits a 3-class latent class model where each class is a point on a restricted Poincare disk. The geometry gives a direct interpretation of class differences, and an ordering constraint on radii gives identification without post-hoc relabeling.</p>
+<p>The goals are:</p>
 <ol type="1">
-<li>Build an identified Bayesian LCA without post-hoc relabeling.</li>
-<li>Keep the model interpretable (radius = severity, angle = profile direction).</li>
-<li>Use a fast marginalized likelihood on sufficient statistics.</li>
-<li>Check how close the geometric model is to a standard <code>poLCA</code> fit.</li>
+<li>Fit an identified Bayesian LCA with interpretable latent coordinates.</li>
+<li>Use a fast collapsed likelihood on sufficient statistics.</li>
+<li>Verify that the geometric model recovers clear class separation.</li>
+<li>Compare the fitted profiles to a standard <code>poLCA</code> baseline.</li>
 </ol>
 </section>
 <section id="data" class="level2">
-<h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>I use the synthetic drinking-behavior dataset from the <a href="https://stats.oarc.ucla.edu/sas/dae/latent-class-analysis/">UCLA OARC LCA tutorial</a> <span class="citation" data-cites="ucla_oarc_lca">(<a href="#ref-ucla_oarc_lca" role="doc-biblioref">UCLA Statistical Consulting Group 2026</a>)</span>. It has <span class="math inline">\(N = 1{,}000\)</span> respondents and <span class="math inline">\(J = 9\)</span> binary indicators:</p>
+<h2 class="anchored" data-anchor-id="data">2. Data</h2>
+<p>I use the synthetic drinking-behavior data from the <a href="https://stats.oarc.ucla.edu/sas/dae/latent-class-analysis/">UCLA OARC LCA tutorial</a> <span class="citation" data-cites="ucla_oarc_lca">(<a href="#ref-ucla_oarc_lca" role="doc-biblioref">UCLA Statistical Consulting Group 2026</a>)</span>. The dataset has <span class="math inline">\(N = 1{,}000\)</span> respondents and <span class="math inline">\(J = 9\)</span> binary items:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -385,7 +386,7 @@ window.Quarto = {
 </div>
 </div>
 <section id="descriptive-statistics" class="level3">
-<h3 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h3>
+<h3 class="anchored" data-anchor-id="descriptive-statistics">2.1 Descriptive Statistics</h3>
 <div id="cell-descriptives" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -471,11 +472,11 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Endorsement rates range from under 10% (morning drinking, drinking at work) to nearly 70% (liking to drink), suggesting that the items capture both normative and problematic drinking behaviors.</p>
+<p>Endorsement rates range from under 10% (morning drinking, drinking at work) to almost 70% (liking to drink). So the item set spans lower-risk and higher-risk behavior.</p>
 </section>
 <section id="sufficient-statistics" class="level3">
-<h3 class="anchored" data-anchor-id="sufficient-statistics">Sufficient Statistics</h3>
-<p>For speed, I collapse the <span class="math inline">\(N=1{,}000\)</span> individual response vectors into <span class="math inline">\(P\)</span> unique patterns with counts. This keeps the likelihood exact but avoids re-evaluating duplicated rows:</p>
+<h3 class="anchored" data-anchor-id="sufficient-statistics">2.2 Sufficient Statistics</h3>
+<p>For computational speed, I collapse the <span class="math inline">\(N=1{,}000\)</span> response vectors into <span class="math inline">\(P\)</span> unique patterns with counts. This keeps the likelihood exact but avoids repeated evaluations of identical rows:</p>
 <div id="suff-stats" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -495,63 +496,48 @@ Most common: 126 occurrences, 87 singletons</code></pre>
 </div>
 </section>
 </section>
-<section id="motivation" class="level2">
-<h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
-<p>Standard LCA has label-switching: with <span class="math inline">\(K\)</span> classes, the posterior has <span class="math inline">\(K!\)</span> equivalent modes under class permutations <span class="citation" data-cites="stephens2000 jasra2005">(<a href="#ref-stephens2000" role="doc-biblioref">Stephens 2000</a>; <a href="#ref-jasra2005" role="doc-biblioref">Jasra, Holmes, and Stephens 2005</a>)</span>. Without an identifying structure, MCMC can move across those modes and make class-level summaries unstable.</p>
-<p>My approach is geometric: embed classes on a restricted <strong>Poincaré disk</strong> <span class="citation" data-cites="nickel2017">(<a href="#ref-nickel2017" role="doc-biblioref">Nickel and Kiela 2017</a>)</span>, map those class positions to item probabilities, then identify classes by ordering radii. That gives an interpretable latent geometry and a clean identifiability constraint.</p>
+<section id="model" class="level2">
+<h2 class="anchored" data-anchor-id="model">3. Model</h2>
+<section id="identification-problem" class="level3">
+<h3 class="anchored" data-anchor-id="identification-problem">3.1 Identification Problem</h3>
+<p>Finite mixtures have label symmetry: with <span class="math inline">\(K\)</span> classes there are <span class="math inline">\(K!\)</span> equivalent posterior modes <span class="citation" data-cites="stephens2000 jasra2005">(<a href="#ref-stephens2000" role="doc-biblioref">Stephens 2000</a>; <a href="#ref-jasra2005" role="doc-biblioref">Jasra, Holmes, and Stephens 2005</a>)</span>. Without identifying structure, MCMC can jump across class permutations and make class summaries hard to interpret.</p>
+<p>I use a geometric identification strategy: classes are embedded on a restricted Poincare disk <span class="citation" data-cites="nickel2017">(<a href="#ref-nickel2017" role="doc-biblioref">Nickel and Kiela 2017</a>)</span>, and class labels are fixed by ordering radii.</p>
 </section>
-<section id="model-specification" class="level2">
-<h2 class="anchored" data-anchor-id="model-specification">Model Specification</h2>
-<section id="geometric-setup" class="level3">
-<h3 class="anchored" data-anchor-id="geometric-setup">Geometric Setup</h3>
+<section id="geometric-class-coordinates" class="level3">
+<h3 class="anchored" data-anchor-id="geometric-class-coordinates">3.2 Geometric Class Coordinates</h3>
 <p>Each class is a point on the open unit disk with polar coordinates <span class="math inline">\((r_k,\alpha_k)\)</span>, where <span class="math inline">\(r_k\in(0,1)\)</span> and <span class="math inline">\(\alpha_k\in(0,\pi/2)\)</span>. Item directions are fixed and evenly spaced: <span class="math display">\[
 \varphi_j = \frac{\pi}{2} \cdot \frac{j-1}{J-1}, \qquad j = 1, \ldots, J
-\]</span> so all items live in the same quadrant.</p>
+\]</span> so all items lie in the same quadrant.</p>
 </section>
 <section id="item-response-probabilities" class="level3">
-<h3 class="anchored" data-anchor-id="item-response-probabilities">Item-Response Probabilities</h3>
-<p>Class-<span class="math inline">\(k\)</span> endorsement probability for item <span class="math inline">\(j\)</span> is <span class="math display">\[
+<h3 class="anchored" data-anchor-id="item-response-probabilities">3.3 Item-Response Probabilities</h3>
+<p>The class-<span class="math inline">\(k\)</span> endorsement probability for item <span class="math inline">\(j\)</span> is <span class="math display">\[
 \theta_{kj} = \text{logit}^{-1}\!\Big(\alpha_j + \lambda_j \, r_k \cos(\alpha_k - \varphi_j)\Big)
-\]</span> with:</p>
+\]</span> where:</p>
 <ul>
-<li><span class="math inline">\(\alpha_j \in \mathbb{R}\)</span> is the <strong>item baseline</strong> (endorsement rate when <span class="math inline">\(r_k = 0\)</span>),</li>
-<li><span class="math inline">\(\lambda_j &gt; 0\)</span> is the <strong>item discrimination</strong> (sensitivity to the latent geometry),</li>
-<li><span class="math inline">\(r_k \cos(\alpha_k - \varphi_j)\)</span> is the projection of the class point onto the item direction.</li>
+<li><span class="math inline">\(\alpha_j \in \mathbb{R}\)</span> is the item baseline,</li>
+<li><span class="math inline">\(\lambda_j &gt; 0\)</span> is item discrimination,</li>
+<li><span class="math inline">\(r_k \cos(\alpha_k - \varphi_j)\)</span> is the projection of class position onto item direction.</li>
 </ul>
-<p>Because both angles are in <span class="math inline">\([0,\pi/2]\)</span>, <span class="math inline">\(\cos(\alpha_k-\varphi_j)\ge 0\)</span>. So increasing radius cannot push an item below its baseline <span class="math inline">\(\text{logit}^{-1}(\alpha_j)\)</span>, which removes one common source of multimodality.</p>
+<p>Because both angles are restricted to <span class="math inline">\([0,\pi/2]\)</span>, we have <span class="math inline">\(\cos(\alpha_k-\varphi_j)\ge 0\)</span>. Increasing radius therefore cannot lower an item below its baseline <span class="math inline">\(\text{logit}^{-1}(\alpha_j)\)</span>, which removes one common source of multimodality.</p>
+<p>The two coordinates have a direct interpretation:</p>
+<ul>
+<li>Radius <span class="math inline">\(r_k\)</span>: global severity (closer to 1 means higher overall propensity to endorse).</li>
+<li>Angle <span class="math inline">\(\alpha_k\)</span>: profile direction (which subset of items gets the strongest lift).</li>
+</ul>
 </section>
-<section id="mixing" class="level3">
-<h3 class="anchored" data-anchor-id="mixing">Mixing</h3>
-<p>The collapsed-pattern likelihood is the usual finite mixture: <span class="math display">\[
+<section id="mixture-likelihood-and-ordering-constraint" class="level3">
+<h3 class="anchored" data-anchor-id="mixture-likelihood-and-ordering-constraint">3.4 Mixture Likelihood and Ordering Constraint</h3>
+<p>The collapsed-pattern likelihood is: <span class="math display">\[
 p(\mathbf{y}_p) = \sum_{k=1}^K \pi_k \prod_{j=1}^J \theta_{kj}^{y_{pj}} (1 - \theta_{kj})^{1 - y_{pj}}
 \]</span></p>
-</section>
-<section id="identification-via-ordered-radii" class="level3">
-<h3 class="anchored" data-anchor-id="identification-via-ordered-radii">Identification via Ordered Radii</h3>
-<p>I break label symmetry by imposing <span class="math display">\[
+<p>I break label symmetry with ordered radii: <span class="math display">\[
 \text{logit}(r_1) &lt; \text{logit}(r_2) &lt; \cdots &lt; \text{logit}(r_K)
-\]</span> via Stan’s <code>ordered[K]</code> type <span class="citation" data-cites="carpenter2017">(<a href="#ref-carpenter2017" role="doc-biblioref">Carpenter et al. 2017</a>)</span>. Class 1 is always the most central and class <span class="math inline">\(K\)</span> is always the most extreme.</p>
+\]</span> implemented using Stan’s <code>ordered[K]</code> type <span class="citation" data-cites="carpenter2017">(<a href="#ref-carpenter2017" role="doc-biblioref">Carpenter et al. 2017</a>)</span>. Class 1 is always most central and class <span class="math inline">\(K\)</span> is always most extreme.</p>
 </section>
-</section>
-<section id="geometric-interpretation" class="level2">
-<h2 class="anchored" data-anchor-id="geometric-interpretation">Geometric Interpretation</h2>
-<p>The two class coordinates are easy to read:</p>
-<p><strong>Radius</strong> <span class="math inline">\(r_k\)</span> controls <em>severity</em>:</p>
-<ul>
-<li><span class="math inline">\(r_k \approx 0\)</span>: near-baseline endorsement across all items.</li>
-<li><span class="math inline">\(r_k \approx 1\)</span>: strongly elevated endorsement for items aligned with the class direction.</li>
-</ul>
-<p><strong>Angle</strong> <span class="math inline">\(\alpha_k\)</span> controls <em>profile shape</em>:</p>
-<ul>
-<li>Items with <span class="math inline">\(\varphi_j\)</span> near <span class="math inline">\(\alpha_k\)</span> get the largest lift.</li>
-<li>Items far away stay close to baseline.</li>
-</ul>
-</section>
-<section id="likelihood-computation" class="level2">
-<h2 class="anchored" data-anchor-id="likelihood-computation">Likelihood Computation</h2>
-<section id="blas-matrix-multiplication" class="level3">
-<h3 class="anchored" data-anchor-id="blas-matrix-multiplication">BLAS Matrix Multiplication</h3>
-<p>For each class, the Bernoulli log-probability for pattern <span class="math inline">\(\mathbf{y}_p\)</span> can be written as <span class="math display">\[
+<section id="blas-accelerated-likelihood-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="blas-accelerated-likelihood-evaluation">3.5 BLAS-Accelerated Likelihood Evaluation</h3>
+<p>For each class, the Bernoulli log-probability for pattern <span class="math inline">\(\mathbf{y}_p\)</span> can be written as: <span class="math display">\[
 \log p(\mathbf{y}_p \mid k) = \mathbf{y}_p^\top \boldsymbol{\eta}_k - \sum_{j=1}^J \log(1 + e^{\eta_{kj}})
 \]</span> where <span class="math inline">\(\eta_{kj} = \alpha_j + \lambda_j r_k \cos(\alpha_k - \varphi_j)\)</span>. This gives a fast three-step computation:</p>
 <ol type="1">
@@ -565,14 +551,13 @@ c_k = -\sum_{j=1}^J \log(1 + e^{\eta_{kj}})
 \text{target} \mathrel{+}= \sum_{p=1}^P n_p \log\!\sum_{k=1}^K \exp\!\big(\log \pi_k + S_{pk} + c_k\big)
 \]</span></p></li>
 </ol>
-<p>The key speed win is replacing the inner item loop with one <code>dgemm</code> call for <span class="math inline">\(\mathbf{Y}\eta^\top\)</span>.</p>
+<p>The key speed gain comes from replacing the inner item loop with one <code>dgemm</code> call for <span class="math inline">\(\mathbf{Y}\eta^\top\)</span>.</p>
 </section>
-</section>
-<section id="priors" class="level2">
-<h2 class="anchored" data-anchor-id="priors">Priors</h2>
+<section id="priors" class="level3">
+<h3 class="anchored" data-anchor-id="priors">3.6 Priors</h3>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 44%">
+<col style="width: 42%">
 <col style="width: 28%">
 <col style="width: 28%">
 </colgroup>
@@ -607,16 +592,17 @@ c_k = -\sum_{j=1}^J \log(1 + e^{\eta_{kj}})
 <tr class="odd">
 <td style="text-align: left;"><span class="math inline">\(\boldsymbol{\pi}\)</span></td>
 <td style="text-align: left;"><span class="math inline">\(\text{Dir}(2, \ldots, 2)\)</span></td>
-<td style="text-align: left;">Mild regularization toward balanced classes</td>
+<td style="text-align: left;">Mild regularization toward balanced class weights</td>
 </tr>
 </tbody>
 </table>
 </section>
+</section>
 <section id="inference" class="level2">
-<h2 class="anchored" data-anchor-id="inference">Inference</h2>
+<h2 class="anchored" data-anchor-id="inference">4. Inference</h2>
 <section id="compile-and-optimize" class="level3">
-<h3 class="anchored" data-anchor-id="compile-and-optimize">Compile and Optimize</h3>
-<p>I use a two-stage workflow: multi-start optimization for a good mode, then initialize NUTS near that mode.</p>
+<h3 class="anchored" data-anchor-id="compile-and-optimize">4.1 Compile and Optimize</h3>
+<p>I use a two-stage workflow: first multi-start optimization to locate a good mode, then NUTS initialized near that mode.</p>
 <div id="compile" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -685,46 +671,46 @@ c_k = -\sum_{j=1}^J \log(1 + e^{\eta_{kj}})
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"    C</span><span class="sc">{</span>k<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">: "</span> <span class="op">+</span> <span class="st">""</span>.join(<span class="ss">f"</span><span class="sc">{</span>t<span class="sc">:&gt;6.2f}</span><span class="ss">"</span> <span class="cf">for</span> t <span class="kw">in</span> theta_row) <span class="op">+</span> <span class="ss">f"  π=</span><span class="sc">{</span>pi_k<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:11 - cmdstanpy - INFO - Chain [1] start processing
-09:05:11 - cmdstanpy - INFO - Chain [1] done processing
-09:05:12 - cmdstanpy - INFO - Chain [1] start processing
-09:05:12 - cmdstanpy - INFO - Chain [1] done processing
-09:05:12 - cmdstanpy - INFO - Chain [1] start processing
-09:05:12 - cmdstanpy - INFO - Chain [1] done processing
-09:05:12 - cmdstanpy - INFO - Chain [1] start processing
-09:05:12 - cmdstanpy - INFO - Chain [1] done processing
-09:05:12 - cmdstanpy - INFO - Chain [1] start processing
-09:05:12 - cmdstanpy - INFO - Chain [1] done processing
-09:05:12 - cmdstanpy - INFO - Chain [1] start processing
-09:05:12 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
+<pre><code>09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Best lp__: -4246.63
@@ -738,7 +724,7 @@ MAP θ[k,j]:
 </div>
 </section>
 <section id="nuts-sampling" class="level3">
-<h3 class="anchored" data-anchor-id="nuts-sampling">NUTS Sampling</h3>
+<h3 class="anchored" data-anchor-id="nuts-sampling">4.2 NUTS Sampling</h3>
 <div id="sample" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -756,20 +742,20 @@ MAP θ[k,j]:
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>09:05:12 - cmdstanpy - INFO - CmdStan start processing
-09:05:12 - cmdstanpy - INFO - Chain [1] start processing
-09:05:12 - cmdstanpy - INFO - Chain [2] start processing
-09:05:12 - cmdstanpy - INFO - Chain [3] start processing
-09:05:12 - cmdstanpy - INFO - Chain [4] start processing
-09:05:31 - cmdstanpy - INFO - Chain [1] done processing
-09:05:32 - cmdstanpy - INFO - Chain [4] done processing
-09:05:33 - cmdstanpy - INFO - Chain [2] done processing
-09:05:34 - cmdstanpy - INFO - Chain [3] done processing</code></pre>
+<pre><code>09:15:01 - cmdstanpy - INFO - CmdStan start processing
+09:15:01 - cmdstanpy - INFO - Chain [1] start processing
+09:15:01 - cmdstanpy - INFO - Chain [2] start processing
+09:15:01 - cmdstanpy - INFO - Chain [3] start processing
+09:15:01 - cmdstanpy - INFO - Chain [4] start processing
+09:15:20 - cmdstanpy - INFO - Chain [1] done processing
+09:15:21 - cmdstanpy - INFO - Chain [4] done processing
+09:15:22 - cmdstanpy - INFO - Chain [2] done processing
+09:15:23 - cmdstanpy - INFO - Chain [3] done processing</code></pre>
 </div>
 </div>
 </section>
 <section id="diagnostics" class="level3">
-<h3 class="anchored" data-anchor-id="diagnostics">Diagnostics</h3>
+<h3 class="anchored" data-anchor-id="diagnostics">4.3 Diagnostics</h3>
 <div id="diagnostics" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -992,13 +978,13 @@ Processing complete, no problems detected.</code></pre>
 </div>
 </div>
 </div>
-<p>In this run (seed = 42), diagnostics are clean: no divergences, no treedepth warnings, and <span class="math inline">\(\hat{R}\)</span> values very close to 1 (largest about 1.004 on class weights), with bulk ESS in the thousands.</p>
+<p>In this run (seed = 42), diagnostics are clean: no divergences, no treedepth saturations, and rank-normalized <span class="math inline">\(\hat{R}\)</span> values near 1 (maximum about 1.004 on class weights). Bulk ESS values are in the thousands.</p>
 </section>
 </section>
-<section id="results" class="level2">
-<h2 class="anchored" data-anchor-id="results">Results</h2>
+<section id="posterior-results" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-results">5. Posterior Results</h2>
 <section id="posterior-item-probabilities" class="level3">
-<h3 class="anchored" data-anchor-id="posterior-item-probabilities">Posterior Item Probabilities</h3>
+<h3 class="anchored" data-anchor-id="posterior-item-probabilities">5.1 Posterior Item Probabilities</h3>
 <div id="cell-theta-table" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1093,7 +1079,7 @@ Processing complete, no problems detected.</code></pre>
 </div>
 </section>
 <section id="geometric-parameters" class="level3">
-<h3 class="anchored" data-anchor-id="geometric-parameters">Geometric Parameters</h3>
+<h3 class="anchored" data-anchor-id="geometric-parameters">5.2 Geometric Parameters</h3>
 <div id="cell-geometry" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1158,10 +1144,10 @@ Processing complete, no problems detected.</code></pre>
 </div>
 </div>
 </div>
-<p>For this fit, the three classes are radially well ordered and more clearly separated: median radii are about <span class="math inline">\(r_1=0.05\)</span>, <span class="math inline">\(r_2=0.43\)</span>, and <span class="math inline">\(r_3=0.93\)</span> (see 90% intervals in the table). Class 3 remains near the boundary (high severity), while Class 1 and Class 2 are distinct low/moderate groups.</p>
+<p>The fitted classes are radially ordered with clear gaps: median radii are about <span class="math inline">\(r_1=0.05\)</span>, <span class="math inline">\(r_2=0.43\)</span>, and <span class="math inline">\(r_3=0.93\)</span> (see the 90% intervals in the table). Class 3 is near the boundary, while Classes 1 and 2 are well separated low/moderate groups.</p>
 </section>
-<section id="poincaré-disk" class="level3">
-<h3 class="anchored" data-anchor-id="poincaré-disk">Poincaré Disk</h3>
+<section id="class-locations-on-the-disk" class="level3">
+<h3 class="anchored" data-anchor-id="class-locations-on-the-disk">5.3 Class Locations on the Disk</h3>
 <div id="cell-fig-disk" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1218,7 +1204,7 @@ Figure&nbsp;1: Posterior draws of latent class positions on the restricted Poinc
 </div>
 </section>
 <section id="item-probability-profiles" class="level3">
-<h3 class="anchored" data-anchor-id="item-probability-profiles">Item Probability Profiles</h3>
+<h3 class="anchored" data-anchor-id="item-probability-profiles">5.4 Item Probability Profiles</h3>
 <div id="cell-fig-profiles" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1259,7 +1245,7 @@ Figure&nbsp;2: Posterior mean item probabilities by class with 90% credible inte
 </div>
 </section>
 <section id="item-parameters" class="level3">
-<h3 class="anchored" data-anchor-id="item-parameters">Item Parameters</h3>
+<h3 class="anchored" data-anchor-id="item-parameters">5.5 Item Parameters</h3>
 <div id="cell-fig-item-params" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1305,24 +1291,24 @@ Figure&nbsp;3: Posterior distributions of item baselines (α) and discrimination
 </div>
 </section>
 </section>
-<section id="hyperbolic-distance-as-a-separation-diagnostic" class="level2">
-<h2 class="anchored" data-anchor-id="hyperbolic-distance-as-a-separation-diagnostic">Hyperbolic Distance as a Separation Diagnostic</h2>
+<section id="separation-diagnostics-in-hyperbolic-space" class="level2">
+<h2 class="anchored" data-anchor-id="separation-diagnostics-in-hyperbolic-space">6. Separation Diagnostics in Hyperbolic Space</h2>
 <p>The hyperbolic distance between two classes <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> on the Poincaré disk is <span class="citation" data-cites="nickel2017">(<a href="#ref-nickel2017" role="doc-biblioref">Nickel and Kiela 2017</a>)</span>: <span class="math display">\[
 d_{\mathbb{H}}(z_a, z_b) = 2\,\operatorname{arctanh}\!\left(\frac{|z_a - z_b|}{|1 - \bar{z}_a z_b|}\right)
 \]</span> where <span class="math inline">\(z_k = r_k e^{i\alpha_k}\)</span> is the complex representation of the class position.</p>
-<section id="what-hyperbolic-distances-tell-us" class="level3">
-<h3 class="anchored" data-anchor-id="what-hyperbolic-distances-tell-us">What hyperbolic distances tell us</h3>
-<p>Unlike Euclidean distance, hyperbolic distance grows <strong>exponentially</strong> near the boundary of the disk (<span class="math inline">\(r \to 1\)</span>). This has three important consequences:</p>
+<section id="why-this-metric-is-useful" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-metric-is-useful">6.1 Why This Metric Is Useful</h3>
+<p>Unlike Euclidean distance, hyperbolic distance grows quickly near the boundary (<span class="math inline">\(r \to 1\)</span>). That gives three practical diagnostics:</p>
 <ol type="1">
-<li><p><strong>Classes near the boundary have extreme profiles.</strong> A large <span class="math inline">\(d_{\mathbb{H}}\)</span> between two boundary classes means they endorse <em>different</em> items strongly—they are genuinely distinct subpopulations even when their radii are similar.</p></li>
-<li><p><strong>Classes near the origin are inherently close to everything.</strong> A class at <span class="math inline">\(r \approx 0\)</span> has small hyperbolic distance to all other classes, reflecting that its flat baseline profile is “between” all the extreme profiles.</p></li>
-<li><p><strong>Minimum hyperbolic distance is a model adequacy diagnostic.</strong> If <span class="math inline">\(\min d_{\mathbb{H}}\)</span> is small, two classes occupy nearly the same region of latent space and <span class="math inline">\(K\)</span> may be too large. If all pairwise distances are large, the geometry supports <span class="math inline">\(K\)</span> distinct classes.</p></li>
+<li><p><strong>Boundary classes can be strongly distinct.</strong> Large <span class="math inline">\(d_{\mathbb{H}}\)</span> values near the rim indicate genuinely different high-severity profiles.</p></li>
+<li><p><strong>Central classes are naturally close to all others.</strong> A class near <span class="math inline">\(r\approx0\)</span> tends to have small distance to every class because its profile is close to baseline.</p></li>
+<li><p><strong>The minimum pairwise distance is an adequacy check.</strong> Small <span class="math inline">\(\min d_{\mathbb{H}}\)</span> suggests redundant classes; larger values support distinct classes for the chosen <span class="math inline">\(K\)</span>.</p></li>
 </ol>
 </section>
-<section id="comparison-to-profile-distance" class="level3">
-<h3 class="anchored" data-anchor-id="comparison-to-profile-distance">Comparison to profile distance</h3>
-<p>Profile distance (<span class="math inline">\(\|\boldsymbol{\theta}_a - \boldsymbol{\theta}_b\|_2\)</span>) measures separation in observable probability space. Two classes could have similar <span class="math inline">\(\theta\)</span> vectors but sit at very different geometric positions—for instance, if a particular <span class="math inline">\(\alpha, \lambda\)</span> configuration makes two different angles produce similar projections across items. Hyperbolic distance captures the <em>structural</em> separation that profile distance can miss.</p>
-<p>Conversely, two geometrically distant classes could have similar profiles if <span class="math inline">\(\lambda\)</span> is small (the geometry has little effect). Profile distance catches this. The two metrics are complementary.</p>
+<section id="hyperbolic-vs-profile-distance" class="level3">
+<h3 class="anchored" data-anchor-id="hyperbolic-vs-profile-distance">6.2 Hyperbolic vs Profile Distance</h3>
+<p>Profile distance (<span class="math inline">\(\|\boldsymbol{\theta}_a - \boldsymbol{\theta}_b\|_2\)</span>) measures separation in observable item-probability space. Hyperbolic distance measures structural separation in latent space.</p>
+<p>The two can disagree. For example, weak discrimination can make geometrically distinct classes look similar in profile space. Using both gives a better separation diagnosis than either metric alone.</p>
 <div id="hyp-dist" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1353,7 +1339,7 @@ Min hyperbolic distance: 0.846  90% CI = [0.537, 1.253]
 Min profile distance:   0.491  90% CI = [0.326, 0.605]</code></pre>
 </div>
 </div>
-<p>In this run, separation diagnostics are strong: the minimum pairwise hyperbolic distance has posterior median 0.85 (90% interval [0.54, 1.25]) and the minimum profile distance has median 0.49 (90% interval [0.33, 0.61]).</p>
+<p>In this run, separation is strong: the minimum pairwise hyperbolic distance has posterior median 0.85 (90% interval [0.54, 1.25]), and the minimum profile distance has median 0.49 (90% interval [0.33, 0.61]).</p>
 <div id="cell-fig-hyp-dist" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1393,9 +1379,9 @@ Figure&nbsp;4: Posterior distributions of pairwise hyperbolic distances and mini
 </div>
 </section>
 </section>
-<section id="comparison-with-frequentist-results" class="level2">
-<h2 class="anchored" data-anchor-id="comparison-with-frequentist-results">Comparison with Frequentist Results</h2>
-<p>As a frequentist baseline, we fit the same <span class="math inline">\(K=3\)</span> model on <code>data/lca1.csv</code> using <a href="https://cran.r-project.org/package=poLCA"><code>poLCA</code></a> in R (multiple random starts) <span class="citation" data-cites="linzer2011">(<a href="#ref-linzer2011" role="doc-biblioref">Linzer and Lewis 2011</a>)</span>.</p>
+<section id="frequentist-cross-check-with-polca" class="level2">
+<h2 class="anchored" data-anchor-id="frequentist-cross-check-with-polca">7. Frequentist Cross-Check with poLCA</h2>
+<p>As a baseline, I fit the same <span class="math inline">\(K=3\)</span> model with <a href="https://cran.r-project.org/package=poLCA"><code>poLCA</code></a> in R using many random starts <span class="citation" data-cites="linzer2011">(<a href="#ref-linzer2011" role="doc-biblioref">Linzer and Lewis 2011</a>)</span>.</p>
 <div id="freq-comparison" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1537,32 +1523,23 @@ Figure&nbsp;5: Frequentist poLCA (gray) vs Bayesian geometric (color) item proba
 </div>
 </div>
 </div>
-<section id="key-findings" class="level3">
-<h3 class="anchored" data-anchor-id="key-findings">Key Findings</h3>
-<p><strong>What the current run supports:</strong></p>
-<ul>
-<li>Sampler diagnostics are strong (no divergences, <span class="math inline">\(\hat{R}\approx 1\)</span>), so posterior summaries are reliable.</li>
-<li>All three classes are now meaningfully separated in both geometry and profile space (larger minimum distance diagnostics).</li>
-<li>Class proportions are close to the frequentist baseline after matching (Bayes about 0.51, 0.41, 0.09 vs poLCA about 0.56, 0.37, 0.08).</li>
-</ul>
-<p><strong>Where geometric constraints are biting:</strong></p>
-<ul>
-<li>There is still structured shrinkage from the geometric surface, but mismatch to poLCA is now modest (mean absolute item-probability gap about 0.04; max about 0.19).</li>
-<li>This is expected from the low-rank parameterization: <span class="math inline">\(2K + 2J\)</span> geometric parameters generate <span class="math inline">\(KJ\)</span> item probabilities.</li>
-</ul>
-<p><strong>Practical takeaway:</strong></p>
-<ul>
-<li>The restricted Poincaré model now behaves as both an interpretable geometric representation and a competitive estimator on this dataset.</li>
-<li>You get class identification, uncertainty quantification, and a compact 2D latent structure with little loss relative to unconstrained LCA.</li>
-</ul>
 </section>
+<section id="what-this-run-shows" class="level2">
+<h2 class="anchored" data-anchor-id="what-this-run-shows">8. What This Run Shows</h2>
+<ul>
+<li>NUTS diagnostics are strong (no divergences, <span class="math inline">\(\hat{R}\)</span> near 1), so posterior summaries are stable.</li>
+<li>Class separation is now clear in both latent space and profile space.</li>
+<li>Matched class proportions are close to poLCA (Bayes about 0.51, 0.41, 0.09 vs poLCA about 0.56, 0.37, 0.08).</li>
+<li>Remaining mismatch to poLCA is modest (mean absolute item-probability gap about 0.04; maximum about 0.19).</li>
+</ul>
+<p>The practical result is that the restricted Poincare specification is now doing what it should: identifiable classes, interpretable geometry, and competitive fit on this dataset.</p>
 </section>
-<section id="model-extension-geometric-prior-with-departures" class="level2">
-<h2 class="anchored" data-anchor-id="model-extension-geometric-prior-with-departures">Model Extension: Geometric Prior with Departures</h2>
+<section id="optional-extension-geometric-mean-with-sparse-departures" class="level2">
+<h2 class="anchored" data-anchor-id="optional-extension-geometric-mean-with-sparse-departures">9. Optional Extension: Geometric Mean with Sparse Departures</h2>
 <p>The base model constrains all item-class logits to the cosine surface <span class="math display">\[
 \text{logit}(\theta_{kj}) = \alpha_j + \lambda_j r_k \cos(\alpha_k - \varphi_j).
-\]</span> That structure is useful for interpretation, but it can still be too rigid in some datasets.</p>
-<p>The departure extension keeps the geometric mean structure but adds sparse deviations with a regularized horseshoe prior <span class="citation" data-cites="piironen2017">(<a href="#ref-piironen2017" role="doc-biblioref">Piironen and Vehtari 2017</a>)</span>: <span class="math display">\[
+\]</span> This is interpretable, but it can be too rigid in some datasets.</p>
+<p>The extension keeps the geometric mean structure and adds sparse deviations with a regularized horseshoe prior <span class="citation" data-cites="piironen2017">(<a href="#ref-piironen2017" role="doc-biblioref">Piironen and Vehtari 2017</a>)</span>: <span class="math display">\[
 \text{logit}(\theta_{kj}) = \mu_{kj} + \delta_{kj}, \qquad
 \delta_{kj} = z_{kj}\,\tau\,\tilde{\lambda}_{kj}
 \]</span> where <span class="math inline">\(\mu_{kj} = \alpha_j + \lambda_j r_k \cos(\alpha_k - \varphi_j)\)</span> is the geometric prediction, <span class="math display">\[
@@ -1573,9 +1550,9 @@ z_{kj}\sim\mathcal{N}(0,1),\quad
 \tilde{\lambda}_{kj}
 =\sqrt{\frac{c^2\lambda_{kj}^2}{c^2+\tau^2\lambda_{kj}^2}},
 \qquad c^2\sim\text{Inv-Gamma}\!\left(\frac{\nu}{2},\frac{\nu}{2}\right).
-\]</span> This prior shrinks most <span class="math inline">\(\delta_{kj}\)</span> values toward zero and only allows large departures where the geometry is clearly missing local structure.</p>
-<p>Class identification still comes from ordered radii. The departures then act as diagnostics: they show which item-class cells need flexibility beyond the geometric surface.</p>
-<p>This extension is optional in this document. All departure-model chunks below are set with <code>#| eval: false</code>. Set those to <code>true</code> only if <code>lca_poincare_departure.stan</code> and <code>arviz</code> are available.</p>
+\]</span> This prior shrinks most <span class="math inline">\(\delta_{kj}\)</span> values toward zero and only allows larger departures where the pure geometry misses local structure.</p>
+<p>Class identification still comes from ordered radii. Departures then act as diagnostics for item-class cells that need extra flexibility.</p>
+<p>This extension is optional in this document. The departure chunks below are set to <code>#| eval: false</code>. Set them to <code>true</code> only if <code>lca_poincare_departure.stan</code> and <code>arviz</code> are available.</p>
 <div id="departure-compile" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -1874,8 +1851,8 @@ Figure&nbsp;7
 </div>
 </section>
 </section>
-<section id="stan-code" class="level2">
-<h2 class="anchored" data-anchor-id="stan-code">Stan Code</h2>
+<section id="appendix-stan-code" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-stan-code">Appendix: Stan Code</h2>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>lca_poincare.stan</strong></pre>
