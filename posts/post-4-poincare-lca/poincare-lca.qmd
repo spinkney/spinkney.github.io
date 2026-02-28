@@ -212,7 +212,7 @@ The key speed gain comes from replacing the inner item loop with one `dgemm` cal
 ### 3.6 Priors
 
 | Parameter | Prior | Notes |
-|:------------------------------|:--------------------|:--------------------|
+|:-----------------------------|:--------------------|:--------------------|
 | $\text{logit}(r_k)$ | $\mathcal{N}(0, 2)$ | Ordered in Stan for identification |
 | $\alpha_k^{\text{raw}}$ | $\mathcal{N}(0, 2)$ | Mapped to $(0, \pi/2)$ via $(\pi/2)\,\sigma(\cdot)$ |
 | $\alpha_j$ | $\mathcal{N}(0, 3)$ | Weakly informative item baselines |
@@ -704,8 +704,6 @@ $$ This prior shrinks most $\delta_{kj}$ values toward zero and only allows larg
 
 Class identification still comes from ordered radii. Departures then act as diagnostics for item-class cells that need extra flexibility.
 
-This extension is enabled in this document (`#| eval: true` for all departure chunks). Expect longer runtime because it fits a second model and runs additional diagnostics.
-
 ```{python}
 #| label: departure-compile
 #| eval: true
@@ -806,7 +804,7 @@ for line in diag_dep.split('\n'):
 
 ### Horseshoe Sparsity Diagnostics
 
-The regularized horseshoe does not hard-threshold coefficients, but it should shrink most departures toward zero and allow a few larger effects:
+The regularized horseshoe does not hard-threshold coefficients, but shrinks most departures toward zero and allows a few larger effects. Though this extension isn't helpful in this dataset, it might be useful for more complex data scenarios.
 
 ```{python}
 #| label: l1-budget
