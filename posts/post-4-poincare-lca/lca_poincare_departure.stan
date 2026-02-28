@@ -40,8 +40,8 @@ transformed data {
   // Using mildly lighter tails than half-Cauchy improves mixing
   // in small-N, higher-K settings while preserving sparse behavior.
   real hs_slab_df = 7.0;
-  real hs_slab_scale = 0.25;
-  real hs_global_scale = 0.03;
+  real hs_slab_scale = 0.50;
+  real hs_global_scale = 0.10;
 }
 
 parameters {
