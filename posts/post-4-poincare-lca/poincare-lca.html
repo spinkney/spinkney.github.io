@@ -404,7 +404,7 @@ window.Quarto = {
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>desc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="descriptives" class="cell-output cell-output-display" data-execution_count="61">
+<div id="descriptives" class="cell-output cell-output-display" data-execution_count="90">
 <div>
 
 
@@ -749,7 +749,7 @@ Processing complete, no problems detected.</code></pre>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(conv_rows)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="convergence" class="cell-output cell-output-display" data-execution_count="68">
+<div id="convergence" class="cell-output cell-output-display" data-execution_count="97">
 <div>
 
 
@@ -956,7 +956,7 @@ Processing complete, no problems detected.</code></pre>
 <span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(rows).set_index(<span class="st">"Class"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="theta-table" class="cell-output cell-output-display" data-execution_count="69">
+<div id="theta-table" class="cell-output cell-output-display" data-execution_count="98">
 <div>
 
 
@@ -1053,7 +1053,7 @@ Processing complete, no problems detected.</code></pre>
 <span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(geo_rows).set_index(<span class="st">"Class"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="geometry" class="cell-output cell-output-display" data-execution_count="70">
+<div id="geometry" class="cell-output cell-output-display" data-execution_count="99">
 <div>
 
 
@@ -1593,18 +1593,18 @@ z_{kj}\sim\mathcal{N}(0,1),\quad
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Geometric model MAP lp__:  -4246.63
-Departure model MAP lp__:  -4276.62
-Difference:                -29.99
+Departure model MAP lp__:  -4274.26
+Difference:                -27.63
 
-MAP total |δ|:            0.0296
-MAP horseshoe τ:           0.0315
-MAP horseshoe slab aux:    0.9999
+MAP total |δ|:            1.3205
+MAP horseshoe τ:           0.2048
+MAP horseshoe slab aux:    1.0727
 
 MAP departures δ[k,j] (regularized horseshoe):
                                       j1      j2      j3      j4      j5      j6      j7      j8      j9
-                              C1 -0.0009 -0.0001  0.0004  0.0012 -0.0009 -0.0012  0.0010  0.0005 -0.0031
-                              C2  0.0015  0.0003 -0.0012 -0.0023  0.0010  0.0021 -0.0014 -0.0008  0.0042
-                              C3 -0.0005 -0.0001  0.0008  0.0011 -0.0001 -0.0009  0.0004  0.0003 -0.0011</code></pre>
+                              C1 -0.0441 -0.0028  0.0204  0.0558 -0.0334 -0.0588  0.0366  0.0136 -0.1448
+                              C2  0.0673  0.0049 -0.0581 -0.1044  0.0332  0.1001 -0.0513 -0.0229  0.2180
+                              C3 -0.0232 -0.0021  0.0376  0.0486  0.0002 -0.0413  0.0147  0.0092 -0.0731</code></pre>
 </div>
 </div>
 <div id="departure-diagnostics" class="cell" data-execution_count="23">
@@ -1645,9 +1645,9 @@ Processing complete, no problems detected.</code></pre>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Entries with |δ| &gt; 0.05 (of </span><span class="sc">{</span>K<span class="op">*</span>J<span class="sc">}</span><span class="ss">): </span><span class="sc">{</span>q_mat[<span class="dv">1</span>]<span class="sc">:.0f}</span><span class="ss"> [</span><span class="sc">{</span>q_mat[<span class="dv">0</span>]<span class="sc">:.0f}</span><span class="ss">, </span><span class="sc">{</span>q_mat[<span class="dv">2</span>]<span class="sc">:.0f}</span><span class="ss">]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Posterior horseshoe τ: 0.0204 [0.0019, 0.0610]
-Posterior total |δ|:   0.2703 [0.0249, 0.9108]
-Entries with |δ| &gt; 0.05 (of 27): 0 [0, 6]</code></pre>
+<pre><code>Posterior horseshoe τ: 0.0912 [0.0097, 0.2326]
+Posterior total |δ|:   1.2429 [0.1282, 3.3400]
+Entries with |δ| &gt; 0.05 (of 27): 9 [0, 20]</code></pre>
 </div>
 </div>
 </section>
@@ -1688,7 +1688,7 @@ Entries with |δ| &gt; 0.05 (of 27): 0 [0, 6]</code></pre>
 <div id="fig-delta-heatmap" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-delta-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="poincare-lca_files/figure-html/fig-delta-heatmap-output-1.png" width="904" height="328" class="figure-img">
+<img src="poincare-lca_files/figure-html/fig-delta-heatmap-output-1.png" width="896" height="328" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-delta-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6: Posterior mean departures δ[k,j] = logit(θ) − geometric prediction. Red = item-class pair endorses more than geometry predicts; blue = less.
@@ -1735,8 +1735,8 @@ Figure&nbsp;6: Posterior mean departures δ[k,j] = logit(θ) − geometric predi
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Geometric model ELPD (LOO): -4261.6 ± 56.6
-Departure model ELPD (LOO): -4261.0 ± 56.6
-Difference:                 0.6</code></pre>
+Departure model ELPD (LOO): -4260.4 ± 56.6
+Difference:                 1.2</code></pre>
 </div>
 </div>
 </section>
@@ -1774,7 +1774,7 @@ Difference:                 0.6</code></pre>
 <span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(class_rows).set_index(<span class="st">"Class"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div id="class-comparison" class="cell-output cell-output-display" data-execution_count="85">
+<div id="class-comparison" class="cell-output cell-output-display" data-execution_count="114">
 <div>
 
 
@@ -1804,7 +1804,7 @@ Difference:                 0.6</code></pre>
 <td>C2</td>
 <td>0.403 [0.206, 0.617]</td>
 <td>C2</td>
-<td>0.409 [0.215, 0.617]</td>
+<td>0.426 [0.225, 0.626]</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">poLCA class 2</th>
@@ -1812,7 +1812,7 @@ Difference:                 0.6</code></pre>
 <td>C1</td>
 <td>0.510 [0.281, 0.710]</td>
 <td>C1</td>
-<td>0.508 [0.281, 0.700]</td>
+<td>0.488 [0.277, 0.690]</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">poLCA class 3</th>
@@ -1820,7 +1820,7 @@ Difference:                 0.6</code></pre>
 <td>C3</td>
 <td>0.084 [0.044, 0.151]</td>
 <td>C3</td>
-<td>0.082 [0.045, 0.145]</td>
+<td>0.082 [0.046, 0.144]</td>
 </tr>
 </tbody>
 </table>
@@ -1870,8 +1870,8 @@ Difference:                 0.6</code></pre>
          poLCA     0.909     0.338     0.065     0.066     0.219     0.321     0.113     0.141     0.326
      Geometric     0.865     0.372     0.105     0.107     0.250     0.305     0.143     0.162     0.273
         90% CI[0.77,0.95][0.29,0.47][0.06,0.17][0.07,0.15][0.16,0.38][0.26,0.35][0.11,0.19][0.12,0.22][0.24,0.30]
-     Departure     0.866     0.372     0.105     0.106     0.249     0.305     0.143     0.162     0.274
-        90% CI[0.77,0.95][0.29,0.47][0.06,0.16][0.07,0.15][0.16,0.36][0.26,0.35][0.11,0.19][0.12,0.21][0.25,0.31]
+     Departure     0.866     0.368     0.101     0.103     0.245     0.308     0.140     0.159     0.283
+        90% CI[0.78,0.94][0.29,0.46][0.06,0.15][0.07,0.15][0.16,0.36][0.26,0.36][0.11,0.18][0.12,0.21][0.25,0.33]
 
 ===============================================================================================
   poLCA class 2  (Geo=C1, Dep=C1)
@@ -1881,8 +1881,8 @@ Difference:                 0.6</code></pre>
          poLCA     0.313     0.164     0.036     0.056     0.045     0.183     0.098     0.110     0.188
      Geometric     0.501     0.184     0.028     0.040     0.072     0.227     0.085     0.108     0.261
         90% CI[0.35,0.61][0.13,0.23][0.01,0.05][0.02,0.06][0.04,0.11][0.19,0.26][0.06,0.11][0.08,0.13][0.23,0.29]
-     Departure     0.498     0.183     0.028     0.040     0.071     0.226     0.085     0.107     0.261
-        90% CI[0.35,0.60][0.13,0.23][0.01,0.04][0.02,0.06][0.04,0.11][0.19,0.26][0.06,0.11][0.08,0.13][0.23,0.29]
+     Departure     0.485     0.180     0.028     0.040     0.069     0.221     0.086     0.108     0.252
+        90% CI[0.33,0.60][0.13,0.23][0.01,0.04][0.02,0.06][0.04,0.10][0.18,0.26][0.06,0.11][0.08,0.13][0.21,0.29]
 
 ===============================================================================================
   poLCA class 3  (Geo=C3, Dep=C3)
@@ -1892,8 +1892,8 @@ Difference:                 0.6</code></pre>
          poLCA     0.923     0.549     0.428     0.421     0.775     0.468     0.517     0.619     0.345
      Geometric     0.949     0.565     0.341     0.332     0.775     0.509     0.467     0.578     0.393
         90% CI[0.90,0.98][0.46,0.67][0.23,0.47][0.23,0.46][0.60,0.92][0.40,0.62][0.32,0.64][0.40,0.78][0.29,0.52]
-     Departure     0.949     0.566     0.345     0.334     0.780     0.509     0.469     0.583     0.393
-        90% CI[0.90,0.98][0.47,0.67][0.23,0.48][0.23,0.45][0.61,0.93][0.40,0.63][0.33,0.63][0.41,0.78][0.30,0.51]</code></pre>
+     Departure     0.948     0.563     0.345     0.338     0.777     0.505     0.472     0.582     0.389
+        90% CI[0.90,0.98][0.46,0.67][0.23,0.48][0.23,0.46][0.62,0.92][0.39,0.62][0.34,0.64][0.41,0.77][0.29,0.51]</code></pre>
 </div>
 </div>
 <div id="cell-fig-three-way" class="cell" data-execution_count="29">
