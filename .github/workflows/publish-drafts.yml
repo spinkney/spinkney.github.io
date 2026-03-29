@@ -1,0 +1,40 @@
+name: Publish Scheduled Drafts
+
+on:
+  schedule:
+    - cron: '0 12 31 3 *'   # March 31 at noon UTC
+  workflow_dispatch:
+
+jobs:
+  publish-drafts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Remove draft flag from posts dated today or earlier
+        shell: bash
+        run: |
+          today=$(date +%Y-%m-%d)
+          for f in posts/**/*.qmd; do
+            post_date=$(grep -m1 '^date:' "$f" | sed 's/date: *"\?\([0-9-]*\)"\?/\1/')
+            if [[ "$post_date" <= "$today" ]]; then
+              sed -i '/^draft: true$/d' "$f"
+              echo "Undrafted: $f (date: $post_date)"
+            fi
+          done
+
+      - name: Commit and push if changed
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No drafts to publish"
+            exit 0
+          fi
+          git commit -m "Publish scheduled draft posts"
+          git push

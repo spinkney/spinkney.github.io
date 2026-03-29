@@ -2,6 +2,9 @@ project:
   type: website
   output-dir: docs
 
+execute:
+  freeze: true
+
 website:
   title: "Pinkney's Sufficient Stats"
   comments:
