@@ -2,46 +2,50 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://spinkney.github.io/posts/post-3-better-unit-vector/a-better-unit-vector.html</loc>
-    <lastmod>2026-03-29T19:45:04.752Z</lastmod>
+    <lastmod>2026-03-31T10:55:18.282Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html</loc>
-    <lastmod>2026-03-29T19:45:04.739Z</lastmod>
+    <lastmod>2026-03-31T10:55:18.269Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html</loc>
-    <lastmod>2026-03-29T19:45:04.751Z</lastmod>
+    <lastmod>2026-03-31T10:55:18.280Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-4-poincare-lca/poincare-lca.html</loc>
-    <lastmod>2026-03-29T19:45:04.779Z</lastmod>
+    <lastmod>2026-03-31T10:55:18.309Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/index.html</loc>
-    <lastmod>2026-03-29T19:45:04.159Z</lastmod>
+    <lastmod>2026-03-31T10:55:17.671Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/quantile-reg-series.html</loc>
-    <lastmod>2026-03-29T19:45:04.799Z</lastmod>
+    <lastmod>2026-03-31T10:55:18.328Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/about.html</loc>
-    <lastmod>2026-03-29T19:45:04.130Z</lastmod>
+    <lastmod>2026-03-31T10:55:17.653Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/css/highlight/DIGESTS.html</loc>
-    <lastmod>2026-03-29T19:45:04.130Z</lastmod>
+    <lastmod>2026-03-31T10:55:17.654Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/COMMENTING.html</loc>
-    <lastmod>2026-03-29T19:45:04.104Z</lastmod>
+    <lastmod>2026-03-31T10:55:17.630Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-1-vasciek/vasciek_post.html</loc>
-    <lastmod>2026-03-29T19:45:04.164Z</lastmod>
+    <lastmod>2026-03-31T10:55:17.676Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html</loc>
-    <lastmod>2026-03-29T19:45:04.752Z</lastmod>
+    <lastmod>2026-03-31T10:55:18.281Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/posts/post-5-compound-symmetric-block-toeplitz/compound-symmetric.html</loc>
+    <lastmod>2026-03-31T10:55:18.319Z</lastmod>
   </url>
 </urlset>

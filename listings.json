@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/post-5-compound-symmetric-block-toeplitz/compound-symmetric.html",
       "/posts/post-4-poincare-lca/poincare-lca.html",
       "/posts/post-3-better-unit-vector/a-better-unit-vector.html",
       "/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html",
