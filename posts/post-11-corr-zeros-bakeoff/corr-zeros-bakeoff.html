@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-85314cde386895b85e915c39ab98eb64.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -328,7 +328,51 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <li><p><strong>The Gram is small.</strong> Since <span class="math inline">\(T_F = I\)</span>, we have <span class="math inline">\(T'T = I + W'W\)</span> where <span class="math inline">\(W\)</span> holds only the <span class="math inline">\(n_z\)</span> forced-coordinate rows, so the crossprod works on length-<span class="math inline">\(n_z\)</span> vectors rather than length-<span class="math inline">\((i-1)\)</span> ones.</p></li>
 </ol>
 <p>Per constrained row, the entire construction is one <span class="math inline">\(d \times d\)</span> <code>cholesky_decompose</code> and some small matrix-vector products. No QR anywhere. I call this model <code>tri</code>; the full Stan code is in the appendix.</p>
-<p>I also tried a “donut” variant, one extra parameter per row, normalizing a free vector instead of using a compact chart. It kept the exact-constraint geometry but the <span class="math inline">\(|u_{\text{last}}|\)</span> fold puts a power-law barrier at the equator, and it diverged worse than anything else in the field. Not every overparameterization trick transfers.</p>
+<p>I also tried a “donut” variant, one extra parameter per row: normalize a free vector <span class="math inline">\(y\)</span>, take <span class="math inline">\(u = y / \lVert y \rVert\)</span>, and let <span class="math inline">\(-\tfrac{1}{2} y'y\)</span> keep the radius away from trouble. Or so I thought. With that implicit chi-distributed radius it diverged worse than anything else in the field — 2,531 across the five <span class="math inline">\(K = 7\)</span> patterns in the tables below, which report this <span class="math inline">\(m = 0\)</span> baseline.</p>
+<p>The fix, fittingly, also comes from Seth Axen, in the <em>A Better Unit Vector</em> Discourse thread <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span>: put an explicit prior on the radius that repels it from the origin singularity of the normalization map. I used his Gaussian-centered form, replacing <span class="math inline">\(-\tfrac{1}{2}\lVert y \rVert^2\)</span> with <span class="math inline">\(-\tfrac{1}{2}(\lVert y \rVert - m)^2\)</span>. The radial factor is independent of the direction, so the <span class="math inline">\(\Omega\)</span> posterior is untouched (verified against <code>carpenter</code>: max free-cell mean difference 0.0046). The effect on sampling is not subtle. Across the five <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span> patterns:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">radial prior</th>
+<th style="text-align: right;">total divergences</th>
+<th style="text-align: right;">median min ESS</th>
+<th style="text-align: right;">median ESS / 1k gradients</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(m = 0\)</span> (implicit chi)</td>
+<td style="text-align: right;">2,549</td>
+<td style="text-align: right;">4,778</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(m = 2\)</span></td>
+<td style="text-align: right;">349</td>
+<td style="text-align: right;">8,106</td>
+<td style="text-align: right;">80</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(m = 4\)</span></td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">10,778</td>
+<td style="text-align: right;">192</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(m = 6\)</span></td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">9,045</td>
+<td style="text-align: right;">162</td>
+</tr>
+</tbody>
+</table>
+<p>So the origin singularity, not the <span class="math inline">\(|u_{\text{last}}|\)</span> hemisphere fold, was nearly the whole problem: pushing the radial shell out to <span class="math inline">\(m = 6\)</span> joins the zero-divergence club outright, and <span class="math inline">\(m = 4\)</span> trades eight divergences in 40,000 transitions for the best raw ESS I measured at this size. I still prefer <code>tri</code> as the default — no tuning knob, <span class="math inline">\(K - 1\)</span> fewer parameters, and zero divergences without negotiation — but the donut’s rescue is a clean confirmation of Axen’s radial-prior argument, and it means the subspace family now has <em>two</em> working members.</p>
 </section>
 <section id="the-bake-off-at-k-7" class="level2">
 <h2 class="anchored" data-anchor-id="the-bake-off-at-k-7">5. The Bake-Off at K = 7</h2>
@@ -971,7 +1015,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </section>
 <section id="acknowledgments" class="level2">
 <h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
-<p>The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the <span class="math inline">\(\det R\)</span> Jacobian factor, is due to Seth Axen <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>. The <code>tri</code> model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as <code>carpenter</code>, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of <span class="citation" data-cites="joe2006">Joe (<a href="#ref-joe2006" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="lewandowski2009">Lewandowski et al. (<a href="#ref-lewandowski2009" role="doc-biblioref">2009</a>)</span>.</p>
+<p>The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the <span class="math inline">\(\det R\)</span> Jacobian factor, is due to Seth Axen <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>, who also supplied the radial-prior fix that rescued the donut variant <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span>. The <code>tri</code> model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as <code>carpenter</code>, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of <span class="citation" data-cites="joe2006">Joe (<a href="#ref-joe2006" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="lewandowski2009">Lewandowski et al. (<a href="#ref-lewandowski2009" role="doc-biblioref">2009</a>)</span>.</p>
 </section>
 <section id="appendix-stan-code-for-tri" class="level2">
 <h2 class="anchored" data-anchor-id="appendix-stan-code-for-tri">Appendix: Stan Code for <code>tri</code></h2>
@@ -1106,6 +1150,9 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-axen2022" class="csl-entry" role="listitem">
+Axen, Seth. 2022. <em>A Better Unit Vector</em>. Stan Discourse thread, post 30. <a href="https://discourse.mc-stan.org/t/a-better-unit-vector/26989/30">https://discourse.mc-stan.org/t/a-better-unit-vector/26989/30</a>.
+</div>
 <div id="ref-axen2023" class="csl-entry" role="listitem">
 Axen, Seth. 2023. <em>Working with Positive Definite Matrices with Structural Zeros</em>. TuringLang/Turing.jl GitHub discussion #2067. <a href="https://github.com/TuringLang/Turing.jl/discussions/2067">https://github.com/TuringLang/Turing.jl/discussions/2067</a>.
 </div>
