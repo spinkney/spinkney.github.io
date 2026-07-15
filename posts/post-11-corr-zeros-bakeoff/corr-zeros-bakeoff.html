@@ -60,7 +60,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -79,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-85314cde386895b85e915c39ab98eb64.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -191,6 +210,7 @@ window.Quarto = {
       <h1 class="title">Structural Zeros in Correlation Matrices: A Twelve-Parameterization Bake-Off</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">stan</div>
+                <div class="quarto-category">correlation</div>
                 <div class="quarto-category">parameterizations</div>
               </div>
                   </div>
@@ -228,27 +248,25 @@ window.Quarto = {
 
 
 
-<section id="the-problem" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
-<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero — a graphical structure, a confirmatory factor model, a physical constraint. You cannot just sample a correlation matrix from an LKJ prior and zero out cells: the result is generally not positive definite. The zeros have to be built into the parameterization itself.</p>
-<p>This post races twelve Stan parameterizations of “LKJ prior + hard zeros” against each other. All twelve target the same posterior (verified against each other within Monte Carlo error), so the comparison is purely about sampling geometry: divergences, effective sample size, and cost per gradient evaluation.</p>
-<p>The punchline: the two families of solutions make opposite trade-offs, and a hybrid — an exact-constraint subspace construction with a canonical triangular basis — gets the best of both: <strong>zero divergences across every run and the best ESS per gradient in the field</strong>.</p>
+<section id="the-problem-with-zeros-in-correlation-matrices" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-with-zeros-in-correlation-matrices">1. The Problem with Zeros in Correlation Matrices</h2>
+<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero. A graphical model tells you two variables are conditionally unrelated, a confirmatory factor structure forbids a cross-loading, a physical system rules out a coupling. The prior you want is “LKJ <span class="citation" data-cites="lewandowski2009">(<a href="#ref-lewandowski2009" role="doc-biblioref">Lewandowski et al. 2009</a>)</span>, restricted to the matrices that respect my zeros.”</p>
+<p>You cannot get there by sampling from the LKJ and zeroing out cells, as the result is generally not positive definite. The zeros have to be built into the parameterization itself, and how you build them in turns out to matter a great deal for the sampler. In this post I race twelve Stan <span class="citation" data-cites="carpenter2017">(<a href="#ref-carpenter2017" role="doc-biblioref">Carpenter et al. 2017</a>)</span> parameterizations of the same target posterior against each other. Since all twelve provably target the same distribution (and I verify this numerically), the comparison isolates exactly one thing: <strong>sampling geometry</strong>. Divergences, effective sample size, and cost per gradient evaluation.</p>
+<p>The punchline: the two families of solutions make opposite trade-offs, and a hybrid, an exact-constraint construction with a canonical triangular basis, refuses to trade at all. <strong>Zero divergences in every run, the best ESS per gradient in the field, and the fastest wall clock.</strong></p>
 </section>
 <section id="family-1-forced-zeros" class="level2">
-<h2 class="anchored" data-anchor-id="family-1-forced-zeros">Family 1: forced zeros</h2>
-<p>The construction I first saw from Bob Carpenter walks the Cholesky factor row by row. Writing <span class="math inline">\(\Omega = L L'\)</span> with unit-norm rows of <span class="math inline">\(L\)</span>, the correlation in cell <span class="math inline">\((i,j)\)</span> is</p>
-<p><span class="math display">\[
+<h2 class="anchored" data-anchor-id="family-1-forced-zeros">2. Family 1: Forced Zeros</h2>
+<p>Family 1 is the constrained-Cholesky approach I introduced in <span class="citation" data-cites="pinkney2024">Pinkney (<a href="#ref-pinkney2024" role="doc-biblioref">2024a</a>)</span> and presented at StanCon <span class="citation" data-cites="pinkneytalk">(<a href="#ref-pinkneytalk" role="doc-biblioref">Pinkney 2024b</a>)</span>. The original method is more general than zeros: it walks the Cholesky factor row by row and lets you pin any cell to a <em>known value</em> or restrict it to a <em>bounded range</em>. Writing <span class="math inline">\(\Omega = L L'\)</span> with unit-norm rows of <span class="math inline">\(L\)</span>, the correlation in cell <span class="math inline">\((i,j)\)</span> is <span class="math display">\[
 \Omega_{ij} = b_1 + L_{ij} L_{jj}, \qquad
 b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
-\]</span></p>
-<p>so a structural zero pins <span class="math inline">\(L_{ij} = -b_1 / L_{jj}\)</span> — no parameter needed. Conditioning the LKJ distribution on <span class="math inline">\(\Omega_{ij} = 0\)</span> (a delta function in <span class="math inline">\(\Omega\)</span> coordinates) contributes a density correction <span class="math inline">\(-\log L_{jj}\)</span> per zero.</p>
+\]</span> which is affine in <span class="math inline">\(L_{ij}\)</span>, so a known value — here zero — pins <span class="math inline">\(L_{ij} = -b_1 / L_{jj}\)</span> and consumes no parameter, while a bound on <span class="math inline">\(\Omega_{ij}\)</span> becomes a bound on <span class="math inline">\(L_{ij}\)</span>. Conditioning the LKJ distribution on <span class="math inline">\(\Omega_{ij} = 0\)</span>, a delta function in <span class="math inline">\(\Omega\)</span> coordinates, contributes a density correction of <span class="math inline">\(-\log L_{jj}\)</span> per zero. The <code>carpenter</code> variant below is Bob Carpenter’s compact formulation of the zeros-only case, from a <a href="https://discourse.mc-stan.org/t/new-users-guide-intro-sem-and-user-defined-constrained-parameters-chapters/41430">recent Stan Discourse exchange</a> about exactly this problem:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b <span class="op">=</span> <span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  L[i, j] <span class="op">=</span> <span class="op">-</span>b <span class="op">/</span> L[j, j];   <span class="co">// implies Omega[i, j] == 0</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[j, j]);</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The forced-zero trick composes with essentially any Cholesky-style parameterization of the free cells. I tested eight members of this family:</p>
+<p>The forced-zero trick composes with essentially any Cholesky-style parameterization of the free cells, which is how one idea becomes eight models:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -256,177 +274,65 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </colgroup>
 <thead>
 <tr class="header">
-<th>label</th>
-<th>free-cell parameterization</th>
+<th style="text-align: left;">label</th>
+<th style="text-align: left;">free-cell parameterization</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>carpenter</code></td>
-<td>direct Cholesky entries, bounded by the remaining stick</td>
+<td style="text-align: left;"><code>carpenter</code></td>
+<td style="text-align: left;">direct Cholesky entries, bounded by the remaining stick</td>
 </tr>
 <tr class="even">
-<td><code>pinkney</code></td>
-<td>correlation-scale value divided by <span class="math inline">\(L_{jj}\)</span>, multiplicative stick</td>
+<td style="text-align: left;"><code>pinkney</code></td>
+<td style="text-align: left;">correlation-scale value divided by <span class="math inline">\(L_{jj}\)</span>, multiplicative stick <span class="citation" data-cites="pinkney2024 pinkneytalk">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024a</a>, <a href="#ref-pinkneytalk" role="doc-biblioref">2024b</a>)</span></td>
 </tr>
 <tr class="odd">
-<td><code>ldl</code> / <code>ldl2</code> / <code>ldl3</code></td>
-<td><span class="math inline">\(LDL'\)</span> factorization; stick tracked by <code>log_diff_exp</code>, <code>log1m</code>-ratio, or natural scale</td>
+<td style="text-align: left;"><code>ldl</code> / <code>ldl2</code> / <code>ldl3</code></td>
+<td style="text-align: left;"><span class="math inline">\(LDL'\)</span> factorization <span class="citation" data-cites="pinkney2024">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024a</a>)</span>; stick tracked via <code>log_diff_exp</code>, a <code>log1m</code> ratio, or the natural scale</td>
 </tr>
 <tr class="even">
-<td><code>cvine</code></td>
-<td>C-vine partial correlations with the LKJ Beta factorization</td>
+<td style="text-align: left;"><code>cvine</code></td>
+<td style="text-align: left;">C-vine partial correlations with the LKJ Beta factorization <span class="citation" data-cites="joe2006 lewandowski2009">(<a href="#ref-joe2006" role="doc-biblioref">Joe 2006</a>; <a href="#ref-lewandowski2009" role="doc-biblioref">Lewandowski et al. 2009</a>)</span></td>
 </tr>
 <tr class="odd">
-<td><code>rowscale</code></td>
-<td>direct Cholesky entries, row-scaling stick</td>
+<td style="text-align: left;"><code>rowscale</code></td>
+<td style="text-align: left;">direct Cholesky entries, row-scaling stick</td>
 </tr>
 <tr class="even">
-<td><code>schur</code></td>
-<td>canonical partial correlations, <span class="math inline">\(L_{ij} = r \tanh(x)\)</span></td>
+<td style="text-align: left;"><code>schur</code></td>
+<td style="text-align: left;">canonical partial correlations, <span class="math inline">\(L_{ij} = r \tanh(x)\)</span></td>
 </tr>
 </tbody>
 </table>
-<p>They all share one flaw. The forced value <span class="math inline">\(-b_1/L_{jj}\)</span> can exceed the row’s remaining stick, <span class="math inline">\(\sqrt{1 - \sum_{k&lt;j} L_{ik}^2}\)</span>. When it does, a downstream <code>sqrt</code> of a negative number produces <code>NaN</code>, the proposal is rejected, and near that boundary the sampler diverges. Every member of the family runs at roughly a <strong>1% divergence rate</strong> on the test patterns below — a bias risk you have to manage with <code>adapt_delta</code> forever.</p>
-<p>The three LDL variants deserve a footnote: they define <em>identical</em> densities and differ only in floating-point arithmetic, yet their divergence totals span 356–466. That spread is a direct measurement of the noise floor for single-fit divergence counts, and it is wider than most gaps between genuinely different parameterizations. Beware of divergence league tables built from single runs.</p>
+<p>They all share one flaw. The forced value <span class="math inline">\(-b_1/L_{jj}\)</span> does not know about the row’s remaining stick, <span class="math inline">\(\sqrt{1 - \sum_{k&lt;j} L_{ik}^2}\)</span>, and nothing stops it from overshooting. When it does, a downstream <code>sqrt</code> goes negative, the log density is <code>NaN</code>, and the sampler is suddenly fighting a hard boundary it cannot see coming. Every member of this family runs at roughly a <strong>1% divergence rate</strong> on the benchmarks below. That is a bias risk you manage with <code>adapt_delta</code> forever, on every model you ever build with these blocks.</p>
+<p>Before moving on, a measurement lesson that the LDL trio taught me for free. The three variants define <em>identical</em> densities and differ only in floating-point arithmetic, yet their divergence totals across five patterns span 356 to 466. That spread is a direct read on the noise floor of single-fit divergence counts, and it is wider than most gaps between genuinely different parameterizations. <strong>Beware of divergence league tables built from single runs.</strong></p>
 </section>
 <section id="family-2-exact-constraint-subspaces" class="level2">
-<h2 class="anchored" data-anchor-id="family-2-exact-constraint-subspaces">Family 2: exact-constraint subspaces</h2>
-<p>The second idea eliminates the boundary entirely. I learned it from <strong>Seth Axen</strong>, in a <a href="https://github.com/TuringLang/Turing.jl/discussions/2067">Turing.jl discussion on positive definite matrices with structural zeros</a>:</p>
+<h2 class="anchored" data-anchor-id="family-2-exact-constraint-subspaces">3. Family 2: Exact-Constraint Subspaces</h2>
+<p>The second idea eliminates the boundary instead of policing it. I learned it from Seth Axen, in a Turing.jl discussion on positive definite matrices with structural zeros <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>:</p>
 <blockquote class="blockquote">
 <p>For each column j, each column i for i &lt; j that is orthogonal to column j decreases the dimensionality of the hemisphere by 1. So we simply construct a point on a lower dimensional hemisphere and use the QR decomposition of the orthogonal columns to lift it to a higher dimensional hemisphere.</p>
 </blockquote>
-<p>Row <span class="math inline">\(i\)</span> of a correlation Cholesky factor is a unit vector with positive last coordinate. Because row <span class="math inline">\(j\)</span> is zero beyond column <span class="math inline">\(j\)</span>, the constraint <span class="math inline">\(\Omega_{ij}=0\)</span> says row <span class="math inline">\(i\)</span> is <strong>orthogonal to row <span class="math inline">\(j\)</span> as a whole vector</strong>. So a row with <span class="math inline">\(n_z\)</span> zeros lives on a unit hemisphere inside the orthogonal complement of its zero-partner rows — a sphere of dimension <span class="math inline">\(d = i - 1 - n_z\)</span>. Sample there and the constraint holds <em>by construction</em>: no proposal can ever be infeasible, so the divergence mechanism of Family 1 does not exist. The joint delta over a row’s zeros contributes <span class="math inline">\(-\tfrac{1}{2}\log\det(A'A)\)</span>, where <span class="math inline">\(A\)</span> collects the zero-partner rows — Axen’s “divide by the determinant of the R factor.”</p>
-<p>My first two implementations (<code>qr</code>, <code>qr2</code>) followed the recipe literally: Householder QR of <span class="math inline">\(A\)</span>, complement basis from the full <span class="math inline">\(Q\)</span>, hemisphere chart via a gnomonic map or tanh sticks. They achieved exactly zero divergences — and about <strong>40% of the ESS</strong> of the forced-zero family. The chart didn’t matter; the basis did. Householder’s complement columns are an arbitrary orthonormal frame that <em>spins</em> as the earlier rows move, so the raw coordinates keep changing meaning underneath the sampler.</p>
+<p>Row <span class="math inline">\(i\)</span> of a correlation Cholesky factor is a unit vector with a positive last coordinate. Because row <span class="math inline">\(j\)</span> is zero beyond column <span class="math inline">\(j\)</span>, the constraint <span class="math inline">\(\Omega_{ij} = 0\)</span> says row <span class="math inline">\(i\)</span> is <strong>orthogonal to row</strong> <span class="math inline">\(j\)</span> <strong>as a whole vector</strong>. A row with <span class="math inline">\(n_z\)</span> zeros therefore lives on a unit hemisphere inside the orthogonal complement of its zero-partner rows, a sphere of dimension <span class="math inline">\(d = i - 1 - n_z\)</span>. Sample there and the constraint holds by construction. No proposal can ever be infeasible, so the divergence mechanism of Family 1 simply does not exist. The joint delta over a row’s zeros contributes <span class="math inline">\(-\tfrac{1}{2}\log\det(A'A)\)</span>, where the columns of <span class="math inline">\(A\)</span> are the zero-partner rows. This is Axen’s “divide by the determinant of the R factor.”</p>
+<p>My first two implementations (<code>qr</code>, <code>qr2</code>) followed the recipe literally: Householder QR of <span class="math inline">\(A\)</span>, complement basis from the trailing columns of the full <span class="math inline">\(Q\)</span>, hemisphere chart via a gnomonic map or <span class="math inline">\(\tanh\)</span> sticks. They achieved exactly zero divergences, and about <strong>40% of the ESS</strong> of the forced-zero family. Swapping the chart did nothing, which was the tell. The problem is the basis: Householder’s complement columns are an arbitrary orthonormal frame that <em>spins</em> as the earlier rows move, so the raw coordinates keep changing meaning underneath the sampler.</p>
 </section>
-<section id="the-fix-a-canonical-triangular-basis-tri" class="level2">
-<h2 class="anchored" data-anchor-id="the-fix-a-canonical-triangular-basis-tri">The fix: a canonical triangular basis (<code>tri</code>)</h2>
-<p>Replace the QR basis with one anchored to the matrix entries. For each free column <span class="math inline">\(k\)</span> of row <span class="math inline">\(i\)</span>, take <span class="math inline">\(e_k\)</span> and fill in the row’s forced columns by back-substitution through the zero constraints — Carpenter’s fill applied to <em>basis vectors</em> instead of the sampled row. Collect these as the columns of <span class="math inline">\(T\)</span>. Splitting coordinates into forced (<span class="math inline">\(Z\)</span>) and free (<span class="math inline">\(F\)</span>) sets, <span class="math inline">\(T_F = I\)</span> and <span class="math inline">\(T_Z = -(A_Z')^{-1} A_F'\)</span>, and orthonormalizing costs one small Cholesky: with <span class="math inline">\(S = \operatorname{chol}(T'T)\)</span>, the map <span class="math inline">\(v = T S'^{-T} z\)</span> satisfies <span class="math inline">\(\lVert v \rVert = \lVert z \rVert\)</span>, so the sphere-measure bookkeeping is unchanged.</p>
-<p>Two pleasant identities finish the job. First, because the zero-partner rows have triangular support, <span class="math inline">\(A_Z\)</span> is triangular with the partners’ diagonals on its diagonal, and Sylvester’s determinant identity gives</p>
-<p><span class="math display">\[
-\det(A'A) \;=\; \Big(\prod_{j \in Z} L_{jj}\Big)^{2} \, \det(T'T),
-\]</span></p>
-<p>so the delta term splits into Carpenter’s <span class="math inline">\(-\sum_j \log L_{jj}\)</span> — which now falls out <em>analytically</em>, no linear algebra required — plus <span class="math inline">\(-\sum_k \log S_{kk}\)</span>, which rides along free with the orthonormalization Cholesky. Second, since <span class="math inline">\(T_F = I\)</span>, the Gram is <span class="math inline">\(T'T = I + W'W\)</span> with <span class="math inline">\(W\)</span> just the <span class="math inline">\(n_z\)</span> forced-coordinate rows, so the crossprod works on length-<span class="math inline">\(n_z\)</span> vectors. Per constrained row, the entire construction costs one <span class="math inline">\(d \times d\)</span> Cholesky and some small matrix-vector products. No QR anywhere.</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>unitvec-tri-corr-zeros.stan</strong></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="unitvec-tri-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                                              <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> n_z <span class="op">=</span> <span class="dv">0</span>;</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> (zero_idx <span class="op">+</span> n_z <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;&amp;</span> zeros[zero_idx <span class="op">+</span> n_z, <span class="dv">1</span>] <span class="op">==</span> i) {</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        n_z <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      <span class="co">// subsphere coordinates via tanh sticks (cosh-form jacobian)</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d] z;</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x <span class="op">=</span> raw[raw_idx];</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> cosh_x <span class="op">=</span> <span class="fu">cosh</span>(x);</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        z[k] <span class="op">=</span> r <span class="op">*</span> <span class="fu">tanh</span>(x);</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">-</span> k <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(cosh_x);</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        r <span class="op">/=</span> cosh_x;</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> z<span class="op">'</span>;</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">array</span>[n_z] <span class="dt">int</span> zc;</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>          zc[m] <span class="op">=</span> zeros[zero_idx <span class="op">+</span> m <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>];</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the joint-delta term -0.5 * log det(Gram of zero-partner rows)</span></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">// factors: det(A'A) = prod(L[j,j])^2 * det(T'T) by Sylvester</span></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[zc[m], zc[m]]);</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>          <span class="dt">array</span>[d] <span class="dt">int</span> free_cols;</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>          {</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> fc <span class="op">=</span> <span class="dv">0</span>;</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> zp <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (c <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (zp <span class="op">&lt;=</span> n_z <span class="op">&amp;&amp;</span> zc[zp] <span class="op">==</span> c) {</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>                zp <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>              } <span class="cf">else</span> {</span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>                fc <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>                free_cols[fc] <span class="op">=</span> c;</span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>              }</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>          <span class="co">// triangular basis: unit at each free column, forced columns</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>          <span class="co">// filled by back-substitution so every column is orthogonal to</span></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the zero-partner rows</span></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, d] T <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, i <span class="op">-</span> <span class="dv">1</span>, d);</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> <span class="fu">col</span> <span class="op">=</span> free_cols[k];</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>            T[<span class="fu">col</span>, k] <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>              <span class="dt">int</span> j <span class="op">=</span> zc[m];</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (j <span class="op">&gt;</span> <span class="fu">col</span>) {</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>                T[j, k] <span class="op">=</span> <span class="op">-</span><span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], T[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>), k])</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>                          <span class="op">/</span> L[j, j];</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>              }</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>          <span class="co">// T's free-column rows are the identity, so T'T = I + W'W with</span></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>          <span class="co">// W the forced-column rows only</span></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[n_z, d] W;</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>            W[m, ] <span class="op">=</span> T[zc[m], ];</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[d, d] S <span class="op">=</span> <span class="fu">cholesky_decompose</span>(<span class="fu">add_diag</span>(<span class="fu">crossprod</span>(W), <span class="fl">1.0</span>));</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">diagonal</span>(S)));</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] t <span class="op">=</span> <span class="fu">mdivide_right_tri_low</span>(z<span class="op">'</span>, S)<span class="op">'</span>;</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (T <span class="op">*</span> t)<span class="op">'</span>;</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;</span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;  <span class="co">// lower triangular, row major order</span></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(K, raw, zeros);</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>I also tried a “donut” variant — one extra parameter per row, normalizing a free vector instead of using a compact chart. It kept the exact-constraint geometry but the <span class="math inline">\(|u_{\text{last}}|\)</span> fold put a power-law barrier at the equator and it diverged worse than anything else in the field (2,531 total). Not every overparameterization trick transfers.</p>
+<section id="a-canonical-triangular-basis" class="level2">
+<h2 class="anchored" data-anchor-id="a-canonical-triangular-basis">4. A Canonical Triangular Basis</h2>
+<p>The fix is to anchor the basis to the matrix entries. For each free column <span class="math inline">\(k\)</span> of row <span class="math inline">\(i\)</span>, take <span class="math inline">\(e_k\)</span> and fill in the row’s forced columns by back-substitution through the zero constraints. This is exactly the Family 1 forced-entry fill, applied to <em>basis vectors</em> instead of the sampled row. Collect these as the columns of <span class="math inline">\(T\)</span>. Splitting coordinates into forced (<span class="math inline">\(Z\)</span>) and free (<span class="math inline">\(F\)</span>) sets gives <span class="math inline">\(T_F = I\)</span> and <span class="math inline">\(T_Z = -(A_Z')^{-1} A_F'\)</span>, and orthonormalization costs one small Cholesky factor <span class="math inline">\(S = \operatorname{chol}(T'T)\)</span>: the map <span class="math inline">\(v = T (S')^{-1} z\)</span> satisfies <span class="math inline">\(\lVert v \rVert = \lVert z \rVert\)</span>, so the sphere-measure bookkeeping goes through untouched.</p>
+<p>Two identities then make the whole thing almost embarrassingly cheap.</p>
+<ol type="1">
+<li><p><strong>The delta term factors.</strong> The zero-partner rows have triangular support, so <span class="math inline">\(A_Z\)</span> is triangular with the partners’ diagonals on its diagonal, and Sylvester’s determinant identity gives <span class="math display">\[
+\det(A'A) = \Big(\prod_{j \in Z} L_{jj}\Big)^{2} \det(T'T).
+\]</span> The conditioning term <span class="math inline">\(-\tfrac{1}{2}\log\det(A'A)\)</span> splits into the familiar Family 1 correction <span class="math inline">\(-\sum_j \log L_{jj}\)</span>, which now falls out <em>analytically</em> with no linear algebra at all, plus <span class="math inline">\(-\sum_k \log S_{kk}\)</span>, which rides along free with the orthonormalization Cholesky. I find it satisfying that the correction I originally derived as a hand-computed Jacobian in the forced-value construction reappears here as the determinant of the triangular block of a Gram factorization.</p></li>
+<li><p><strong>The Gram is small.</strong> Since <span class="math inline">\(T_F = I\)</span>, we have <span class="math inline">\(T'T = I + W'W\)</span> where <span class="math inline">\(W\)</span> holds only the <span class="math inline">\(n_z\)</span> forced-coordinate rows, so the crossprod works on length-<span class="math inline">\(n_z\)</span> vectors rather than length-<span class="math inline">\((i-1)\)</span> ones.</p></li>
+</ol>
+<p>Per constrained row, the entire construction is one <span class="math inline">\(d \times d\)</span> <code>cholesky_decompose</code> and some small matrix-vector products. No QR anywhere. I call this model <code>tri</code>; the full Stan code is in the appendix.</p>
+<p>I also tried a “donut” variant, one extra parameter per row, normalizing a free vector instead of using a compact chart. It kept the exact-constraint geometry but the <span class="math inline">\(|u_{\text{last}}|\)</span> fold puts a power-law barrier at the equator, and it diverged worse than anything else in the field. Not every overparameterization trick transfers.</p>
 </section>
-<section id="results" class="level2">
-<h2 class="anchored" data-anchor-id="results">Results</h2>
-<p>Setup: <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span>, prior-only, five random zero patterns (about half of the 21 lower-triangular cells zeroed, seeds 1–5), 4 chains <span class="math inline">\(\times\)</span> 2000 draws after 1000 warmup, default <code>adapt_delta = 0.8</code>, CmdStan 2.39. Correctness was checked on a separate pattern: all twelve posteriors match the <code>carpenter</code> baseline within Monte Carlo error (max free-cell mean difference <span class="math inline">\(\le 0.008\)</span> at bulk ESS <span class="math inline">\(\ge\)</span> 3,700), and the constrained cells are numerically exact zeros (<span class="math inline">\(\sim 10^{-19}\)</span>).</p>
+<section id="the-bake-off-at-k-7" class="level2">
+<h2 class="anchored" data-anchor-id="the-bake-off-at-k-7">5. The Bake-Off at K = 7</h2>
+<p>Setup: <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span>, prior-only, five random zero patterns with roughly half of the 21 lower-triangular cells zeroed, 4 chains <span class="math inline">\(\times\)</span> 2000 draws after 1000 warmup, default <code>adapt_delta = 0.8</code>. Correctness was checked on a held-out pattern first: all twelve posteriors match the <code>carpenter</code> baseline within Monte Carlo error, and the constrained cells come back as numerically exact zeros (<span class="math inline">\(\sim 10^{-19}\)</span>).</p>
 <p><strong>Divergences</strong> out of 8,000 post-warmup transitions:</p>
 <table class="caption-top table">
 <colgroup>
@@ -446,111 +352,111 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </colgroup>
 <thead>
 <tr class="header">
-<th>pattern</th>
-<th>carpenter</th>
-<th>pinkney</th>
-<th>ldl</th>
-<th>ldl2</th>
-<th>cvine</th>
-<th>rowscale</th>
-<th>ldl3</th>
-<th>schur</th>
-<th>qr</th>
-<th>qr2</th>
-<th>tri</th>
-<th>donut</th>
+<th style="text-align: left;">pattern</th>
+<th style="text-align: right;">carpenter</th>
+<th style="text-align: right;">pinkney</th>
+<th style="text-align: right;">ldl</th>
+<th style="text-align: right;">ldl2</th>
+<th style="text-align: right;">cvine</th>
+<th style="text-align: right;">rowscale</th>
+<th style="text-align: right;">ldl3</th>
+<th style="text-align: right;">schur</th>
+<th style="text-align: right;">qr</th>
+<th style="text-align: right;">qr2</th>
+<th style="text-align: right;">tri</th>
+<th style="text-align: right;">donut</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>seed 1</td>
-<td>34</td>
-<td>53</td>
-<td>53</td>
-<td>26</td>
-<td>41</td>
-<td>44</td>
-<td>40</td>
-<td>40</td>
-<td>0</td>
-<td>0</td>
-<td><strong>0</strong></td>
-<td>522</td>
+<td style="text-align: left;">seed 1</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">522</td>
 </tr>
 <tr class="even">
-<td>seed 2</td>
-<td>61</td>
-<td>65</td>
-<td>74</td>
-<td>107</td>
-<td>64</td>
-<td>78</td>
-<td>104</td>
-<td>60</td>
-<td>0</td>
-<td>0</td>
-<td><strong>0</strong></td>
-<td>551</td>
+<td style="text-align: left;">seed 2</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">107</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">551</td>
 </tr>
 <tr class="odd">
-<td>seed 3</td>
-<td>77</td>
-<td>44</td>
-<td>67</td>
-<td>57</td>
-<td>69</td>
-<td>44</td>
-<td>68</td>
-<td>59</td>
-<td>0</td>
-<td>0</td>
-<td><strong>0</strong></td>
-<td>500</td>
+<td style="text-align: left;">seed 3</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">69</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">500</td>
 </tr>
 <tr class="even">
-<td>seed 4</td>
-<td>137</td>
-<td>157</td>
-<td>130</td>
-<td>112</td>
-<td>186</td>
-<td>155</td>
-<td>152</td>
-<td>123</td>
-<td>0</td>
-<td>0</td>
-<td><strong>0</strong></td>
-<td>418</td>
+<td style="text-align: left;">seed 4</td>
+<td style="text-align: right;">137</td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">112</td>
+<td style="text-align: right;">186</td>
+<td style="text-align: right;">155</td>
+<td style="text-align: right;">152</td>
+<td style="text-align: right;">123</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">418</td>
 </tr>
 <tr class="odd">
-<td>seed 5</td>
-<td>110</td>
-<td>94</td>
-<td>114</td>
-<td>54</td>
-<td>141</td>
-<td>114</td>
-<td>102</td>
-<td>29</td>
-<td>0</td>
-<td>0</td>
-<td><strong>0</strong></td>
-<td>540</td>
+<td style="text-align: left;">seed 5</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">94</td>
+<td style="text-align: right;">114</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">114</td>
+<td style="text-align: right;">102</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">540</td>
 </tr>
 <tr class="even">
-<td><strong>total</strong></td>
-<td>419</td>
-<td>413</td>
-<td>438</td>
-<td>356</td>
-<td>501</td>
-<td>435</td>
-<td>466</td>
-<td>311</td>
-<td><strong>0</strong></td>
-<td><strong>0</strong></td>
-<td><strong>0</strong></td>
-<td>2531</td>
+<td style="text-align: left;"><strong>total</strong></td>
+<td style="text-align: right;">419</td>
+<td style="text-align: right;">413</td>
+<td style="text-align: right;">438</td>
+<td style="text-align: right;">356</td>
+<td style="text-align: right;">501</td>
+<td style="text-align: right;">435</td>
+<td style="text-align: right;">466</td>
+<td style="text-align: right;">311</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">2531</td>
 </tr>
 </tbody>
 </table>
@@ -573,111 +479,111 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </colgroup>
 <thead>
 <tr class="header">
-<th>pattern</th>
-<th>carpenter</th>
-<th>pinkney</th>
-<th>ldl</th>
-<th>ldl2</th>
-<th>cvine</th>
-<th>rowscale</th>
-<th>ldl3</th>
-<th>schur</th>
-<th>qr</th>
-<th>qr2</th>
-<th>tri</th>
-<th>donut</th>
+<th style="text-align: left;">pattern</th>
+<th style="text-align: right;">carpenter</th>
+<th style="text-align: right;">pinkney</th>
+<th style="text-align: right;">ldl</th>
+<th style="text-align: right;">ldl2</th>
+<th style="text-align: right;">cvine</th>
+<th style="text-align: right;">rowscale</th>
+<th style="text-align: right;">ldl3</th>
+<th style="text-align: right;">schur</th>
+<th style="text-align: right;">qr</th>
+<th style="text-align: right;">qr2</th>
+<th style="text-align: right;">tri</th>
+<th style="text-align: right;">donut</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>seed 1</td>
-<td>11639</td>
-<td>10566</td>
-<td>9979</td>
-<td>10618</td>
-<td>10219</td>
-<td>11319</td>
-<td>9840</td>
-<td>11036</td>
-<td>3995</td>
-<td>3362</td>
-<td><strong>11430</strong></td>
-<td>4321</td>
+<td style="text-align: left;">seed 1</td>
+<td style="text-align: right;">11639</td>
+<td style="text-align: right;">10566</td>
+<td style="text-align: right;">9979</td>
+<td style="text-align: right;">10618</td>
+<td style="text-align: right;">10219</td>
+<td style="text-align: right;">11319</td>
+<td style="text-align: right;">9840</td>
+<td style="text-align: right;">11036</td>
+<td style="text-align: right;">3995</td>
+<td style="text-align: right;">3362</td>
+<td style="text-align: right;"><strong>11430</strong></td>
+<td style="text-align: right;">4321</td>
 </tr>
 <tr class="even">
-<td>seed 2</td>
-<td>10817</td>
-<td>9866</td>
-<td>10826</td>
-<td>9772</td>
-<td>10188</td>
-<td>10153</td>
-<td>10361</td>
-<td>10040</td>
-<td>4049</td>
-<td>3728</td>
-<td><strong>11427</strong></td>
-<td>5049</td>
+<td style="text-align: left;">seed 2</td>
+<td style="text-align: right;">10817</td>
+<td style="text-align: right;">9866</td>
+<td style="text-align: right;">10826</td>
+<td style="text-align: right;">9772</td>
+<td style="text-align: right;">10188</td>
+<td style="text-align: right;">10153</td>
+<td style="text-align: right;">10361</td>
+<td style="text-align: right;">10040</td>
+<td style="text-align: right;">4049</td>
+<td style="text-align: right;">3728</td>
+<td style="text-align: right;"><strong>11427</strong></td>
+<td style="text-align: right;">5049</td>
 </tr>
 <tr class="odd">
-<td>seed 3</td>
-<td>9344</td>
-<td>11014</td>
-<td>10244</td>
-<td>10314</td>
-<td>10946</td>
-<td>9420</td>
-<td>10625</td>
-<td>10787</td>
-<td>4334</td>
-<td>4304</td>
-<td>9574</td>
-<td>3795</td>
+<td style="text-align: left;">seed 3</td>
+<td style="text-align: right;">9344</td>
+<td style="text-align: right;">11014</td>
+<td style="text-align: right;">10244</td>
+<td style="text-align: right;">10314</td>
+<td style="text-align: right;">10946</td>
+<td style="text-align: right;">9420</td>
+<td style="text-align: right;">10625</td>
+<td style="text-align: right;">10787</td>
+<td style="text-align: right;">4334</td>
+<td style="text-align: right;">4304</td>
+<td style="text-align: right;">9574</td>
+<td style="text-align: right;">3795</td>
 </tr>
 <tr class="even">
-<td>seed 4</td>
-<td>8395</td>
-<td>9159</td>
-<td>8326</td>
-<td>9257</td>
-<td>8771</td>
-<td>9463</td>
-<td>8266</td>
-<td>9458</td>
-<td>3701</td>
-<td>3815</td>
-<td><strong>9582</strong></td>
-<td>5121</td>
+<td style="text-align: left;">seed 4</td>
+<td style="text-align: right;">8395</td>
+<td style="text-align: right;">9159</td>
+<td style="text-align: right;">8326</td>
+<td style="text-align: right;">9257</td>
+<td style="text-align: right;">8771</td>
+<td style="text-align: right;">9463</td>
+<td style="text-align: right;">8266</td>
+<td style="text-align: right;">9458</td>
+<td style="text-align: right;">3701</td>
+<td style="text-align: right;">3815</td>
+<td style="text-align: right;"><strong>9582</strong></td>
+<td style="text-align: right;">5121</td>
 </tr>
 <tr class="odd">
-<td>seed 5</td>
-<td>10381</td>
-<td>10010</td>
-<td>9268</td>
-<td>8760</td>
-<td>10301</td>
-<td>9218</td>
-<td>9896</td>
-<td>4770</td>
-<td>4267</td>
-<td>4153</td>
-<td><strong>11284</strong></td>
-<td>4454</td>
+<td style="text-align: left;">seed 5</td>
+<td style="text-align: right;">10381</td>
+<td style="text-align: right;">10010</td>
+<td style="text-align: right;">9268</td>
+<td style="text-align: right;">8760</td>
+<td style="text-align: right;">10301</td>
+<td style="text-align: right;">9218</td>
+<td style="text-align: right;">9896</td>
+<td style="text-align: right;">4770</td>
+<td style="text-align: right;">4267</td>
+<td style="text-align: right;">4153</td>
+<td style="text-align: right;"><strong>11284</strong></td>
+<td style="text-align: right;">4454</td>
 </tr>
 <tr class="even">
-<td><strong>median</strong></td>
-<td>10381</td>
-<td>10010</td>
-<td>9979</td>
-<td>9772</td>
-<td>10219</td>
-<td>9463</td>
-<td>9896</td>
-<td>10040</td>
-<td>4049</td>
-<td>3815</td>
-<td><strong>11284</strong></td>
-<td>4454</td>
+<td style="text-align: left;"><strong>median</strong></td>
+<td style="text-align: right;">10381</td>
+<td style="text-align: right;">10010</td>
+<td style="text-align: right;">9979</td>
+<td style="text-align: right;">9772</td>
+<td style="text-align: right;">10219</td>
+<td style="text-align: right;">9463</td>
+<td style="text-align: right;">9896</td>
+<td style="text-align: right;">10040</td>
+<td style="text-align: right;">4049</td>
+<td style="text-align: right;">3815</td>
+<td style="text-align: right;"><strong>11284</strong></td>
+<td style="text-align: right;">4454</td>
 </tr>
 </tbody>
 </table>
@@ -700,73 +606,420 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </colgroup>
 <thead>
 <tr class="header">
-<th></th>
-<th>carpenter</th>
-<th>pinkney</th>
-<th>ldl</th>
-<th>ldl2</th>
-<th>cvine</th>
-<th>rowscale</th>
-<th>ldl3</th>
-<th>schur</th>
-<th>qr</th>
-<th>qr2</th>
-<th>tri</th>
-<th>donut</th>
+<th style="text-align: left;"></th>
+<th style="text-align: right;">carpenter</th>
+<th style="text-align: right;">pinkney</th>
+<th style="text-align: right;">ldl</th>
+<th style="text-align: right;">ldl2</th>
+<th style="text-align: right;">cvine</th>
+<th style="text-align: right;">rowscale</th>
+<th style="text-align: right;">ldl3</th>
+<th style="text-align: right;">schur</th>
+<th style="text-align: right;">qr</th>
+<th style="text-align: right;">qr2</th>
+<th style="text-align: right;">tri</th>
+<th style="text-align: right;">donut</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>min ESS / 1000 gradients</td>
-<td>188.5</td>
-<td>179.6</td>
-<td>185.9</td>
-<td>182.2</td>
-<td>188.9</td>
-<td>176.3</td>
-<td>182.1</td>
-<td>182.0</td>
-<td>75.0</td>
-<td>72.5</td>
-<td><strong>207.3</strong></td>
-<td>18.7</td>
+<td style="text-align: left;">min ESS / 1000 gradients</td>
+<td style="text-align: right;">188.5</td>
+<td style="text-align: right;">179.6</td>
+<td style="text-align: right;">185.9</td>
+<td style="text-align: right;">182.2</td>
+<td style="text-align: right;">188.9</td>
+<td style="text-align: right;">176.3</td>
+<td style="text-align: right;">182.1</td>
+<td style="text-align: right;">182.0</td>
+<td style="text-align: right;">75.0</td>
+<td style="text-align: right;">72.5</td>
+<td style="text-align: right;"><strong>207.3</strong></td>
+<td style="text-align: right;">18.7</td>
 </tr>
 <tr class="even">
-<td>total wall clock, 5 fits (s)</td>
-<td>4.53</td>
-<td>4.10</td>
-<td>4.40</td>
-<td>4.51</td>
-<td>5.14</td>
-<td>4.21</td>
-<td>4.51</td>
-<td>4.15</td>
-<td>2.07</td>
-<td>2.06</td>
-<td><strong>1.95</strong></td>
-<td>9.72</td>
+<td style="text-align: left;">total wall clock, 5 fits (s)</td>
+<td style="text-align: right;">4.53</td>
+<td style="text-align: right;">4.10</td>
+<td style="text-align: right;">4.40</td>
+<td style="text-align: right;">4.51</td>
+<td style="text-align: right;">5.14</td>
+<td style="text-align: right;">4.21</td>
+<td style="text-align: right;">4.51</td>
+<td style="text-align: right;">4.15</td>
+<td style="text-align: right;">2.07</td>
+<td style="text-align: right;">2.06</td>
+<td style="text-align: right;"><strong>1.95</strong></td>
+<td style="text-align: right;">9.72</td>
 </tr>
 </tbody>
 </table>
-<p>The <code>tri</code> column is the whole story: zero divergences on every pattern, the highest median ESS in the table, the best ESS per gradient evaluation, and the lowest wall-clock time. The subspace family’s short trajectories (no boundary to fight) plus a well-anchored basis means it wins on <em>every</em> axis at once — the usual robustness-versus-speed trade simply dissolves.</p>
+<p>The <code>tri</code> column is the whole story: zero divergences on every pattern, the highest median ESS in the table, the best ESS per gradient, and the lowest wall clock. The subspace geometry means there is no boundary to fight, and the anchored basis means the sampler is not chasing a spinning frame. The usual robustness-versus-speed trade dissolves.</p>
 </section>
-<section id="caveats" class="level2">
-<h2 class="anchored" data-anchor-id="caveats">Caveats</h2>
-<ul>
-<li>Everything above is <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span>, prior-only, dense zero patterns. Larger <span class="math inline">\(K\)</span>, data likelihoods, and sparse patterns may reorder the forced-zero family — though the structural argument for <code>tri</code> (no infeasible region exists) is dimension-independent.</li>
-<li>Divergence counts from single fits are noisy; the identical-density LDL trio spans 356–466 on the same patterns. The forced-vs-subspace gap (hundreds vs.&nbsp;exactly zero) is far outside that noise; the within-family rankings are not.</li>
-<li>The <code>tri</code> construction needs the zero list sorted in row-major order and one <span class="math inline">\(d \times d\)</span> <code>cholesky_decompose</code> per constrained row per gradient — negligible at this size, worth profiling at <span class="math inline">\(K \gtrsim 50\)</span>.</li>
-</ul>
+<section id="does-it-hold-up-scaling-k-and-eta" class="level2">
+<h2 class="anchored" data-anchor-id="does-it-hold-up-scaling-k-and-eta">6. Does It Hold Up? Scaling K and <span class="math inline">\(\eta\)</span></h2>
+<p>A single <span class="math inline">\((K, \eta)\)</span> corner is not a benchmark, so I reran a representative subset over <span class="math inline">\(K \in \{5, 7, 9, 15, 25\}\)</span> and <span class="math inline">\(\eta \in \{1, 2, 3, 4\}\)</span>: six forced-zero models, the literal QR implementation <code>qr2</code>, and <code>tri</code>. One Bernoulli(0.5) zero pattern per <span class="math inline">\(K\)</span> (realized: 6 of 10 cells at <span class="math inline">\(K=5\)</span> up to 143 of 300 at <span class="math inline">\(K=25\)</span>), shared across <span class="math inline">\(\eta\)</span>, same sampler settings as before. One fit per configuration, so the single-fit noise caveat from Section 2 applies to small gaps; the patterns below are not small.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../../R/theme_blog.R"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>sweep <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"sweep-results.csv"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">case_when</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      model <span class="sc">==</span> <span class="st">"tri"</span> <span class="sc">~</span> <span class="st">"Subspace (triangular basis)"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      model <span class="sc">==</span> <span class="st">"qr2"</span> <span class="sc">~</span> <span class="st">"Subspace (QR basis)"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> <span class="st">"Forced zeros"</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">div_pct =</span> <span class="dv">100</span> <span class="sc">*</span> divergences <span class="sc">/</span> <span class="dv">8000</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">eta_lab =</span> <span class="fu">factor</span>(<span class="fu">paste0</span>(<span class="st">"eta == "</span>, eta),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">levels =</span> <span class="fu">paste0</span>(<span class="st">"eta == "</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(eta))))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>fam_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Forced zeros"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>gold,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (QR basis)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>purple,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (triangular basis)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>teal</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(sweep <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span>failed),</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> K, <span class="at">y =</span> div_pct, <span class="at">group =</span> model, <span class="at">color =</span> family)) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">linewidth =</span> family, <span class="at">alpha =</span> family)) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.6</span>) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>eta_lab, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">labeller =</span> label_parsed) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> fam_colors, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linewidth_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.1</span>, <span class="fl">1.3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_alpha_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.65</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">15</span>, <span class="dv">25</span>)) <span class="sc">+</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_blog</span>() <span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"K (matrix dimension)"</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Divergent transitions (%)"</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Divergences: Forced Zeros Degrade, the Triangular Basis Doesn't"</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"One Bernoulli(0.5) zero pattern per K, 8,000 post-warmup transitions per fit; missing points failed to initialize"</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-divergence-scaling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-divergence-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="corr-zeros-bakeoff_files/figure-html/fig-divergence-scaling-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-divergence-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Divergence rate by matrix dimension and LKJ concentration. Each thin gold line is one forced-zero parameterization; lines that stop mid-panel are models that failed to initialize at the next K. The teal line (tri) is exactly zero in every panel. The purple spike is qr2’s catastrophic run at K = 15, eta = 2: one chain stuck at 100% divergence.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(sweep <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span>failed),</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> K, <span class="at">y =</span> ess_per_1k_grad, <span class="at">group =</span> model, <span class="at">color =</span> family)) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">linewidth =</span> family, <span class="at">alpha =</span> family)) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.6</span>) <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>eta_lab, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">labeller =</span> label_parsed) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> fam_colors, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linewidth_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.1</span>, <span class="fl">1.3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_alpha_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.65</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">15</span>, <span class="dv">25</span>)) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_blog</span>() <span class="sc">+</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"K (matrix dimension)"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"min ESS per 1,000 gradients (log)"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Efficiency: The Triangular Basis Wins at Every Size"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Higher is better. The QR basis pays a growing geometry tax; the forced family drops out entirely at K = 25."</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-efficiency-scaling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-efficiency-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="corr-zeros-bakeoff_files/figure-html/fig-efficiency-scaling-1.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-efficiency-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,000 gradient evaluations, log scale) by dimension and concentration.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Outright failures: initialization could not find a feasible point after 100 attempts per chain.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">model</th>
+<th style="text-align: left;">K = 25</th>
+<th style="text-align: left;">K = 15</th>
+<th style="text-align: left;">K = 7</th>
+<th style="text-align: left;">K = 9</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">carpenter</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cvine</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ldl2</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ldl3</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pinkney</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">schur</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">4 of 4 etas</td>
+<td style="text-align: left;">4 of 4 etas</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Three things jump out.</p>
+<p><strong>The divergence tax explodes exactly where you would want to use this prior.</strong> At <span class="math inline">\(\eta = 1\)</span>, the uniform LKJ, the forced-zero family runs 13–17% divergent at <span class="math inline">\(K = 5\)</span>, and by <span class="math inline">\(K = 7\)</span>–<span class="math inline">\(9\)</span> it is at <strong>85–94%</strong>: five of every six transitions divergent. That is not a tuning problem; that is the uniform prior putting real mass right where the forced values overshoot the stick. (A fun artifact visible in the <span class="math inline">\(\eta = 1\)</span> panel: four of the gold lines coincide exactly. With the seed fixed, <code>carpenter</code>, <code>pinkney</code>, <code>ldl2</code>, and <code>ldl3</code> are <em>literally the same density in raw coordinates</em> — the correlation-scale bounds never bind, by Cauchy–Schwarz — so their chains agree bit-for-bit until floating-point chaos separates them. The distinct-looking K = 7 table entries in Section 5 are that chaos, not different geometry.)</p>
+<p><strong>Initialization failure is the same boundary, expressed terminally.</strong> <code>schur</code> cannot find a feasible starting point in 100 attempts per chain for this sweep’s patterns from <span class="math inline">\(K = 7\)</span> up (it ran fine on all five Section 5 patterns at the same size; feasible initialization is pattern-dependent luck). <code>cvine</code> joins it at <span class="math inline">\(K = 15\)</span>. At <span class="math inline">\(K = 25\)</span>, with 143 forced cells, <em>none of the six forced models</em> can start at any <span class="math inline">\(\eta\)</span>. This is the scaling fact that matters: the feasible set the forced construction must hit by chance gets exponentially thin as the pattern grows, and <code>adapt_delta</code> cannot rescue a model that never takes its first draw. The subspace models are immune by construction, since every point of their parameter space is feasible.</p>
+<p><strong>Anchoring the basis is not a nicety.</strong> The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at <span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 1\)</span> it needed 852 seconds against <code>tri</code>’s 6.8, and at <span class="math inline">\(K = 15\)</span>, <span class="math inline">\(\eta = 2\)</span> it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: <code>ldl3</code> at <span class="math inline">\(K = 9\)</span>, <span class="math inline">\(\eta = 2\)</span> came back with a min ESS of 19.) Interestingly, <code>qr2</code>’s <em>raw</em> min ESS at <span class="math inline">\(K = 25\)</span> is higher than <code>tri</code>’s — about 3,900 vs 1,200 of 8,000 draws — but it burns 6–100<span class="math inline">\(\times\)</span> the gradient evaluations to get it. Per gradient, and per second, <code>tri</code> wins every configuration in the sweep: zero divergences in all twenty, flat wall clock, and the best efficiency in the field.</p>
 </section>
-<section id="attribution" class="level2">
-<h2 class="anchored" data-anchor-id="attribution">Attribution</h2>
-<p>The exact-constraint subspace idea — zeros as orthogonality constraints, sampling on a lower-dimensional hemisphere and lifting through the orthogonal complement, with the <span class="math inline">\(\det R\)</span> Jacobian factor — is due to <a href="https://sethaxen.com/">Seth Axen</a>, from <a href="https://github.com/TuringLang/Turing.jl/discussions/2067">TuringLang/Turing.jl discussion #2067</a>. The <code>tri</code> model is that idea with a different (canonical, triangular) choice of complement basis and the determinant factored analytically.</p>
-<p>The forced-zero construction and its <span class="math inline">\(-\log L_{jj}\)</span> conditioning correction I learned from Bob Carpenter. The bounded/constrained Cholesky machinery used by several of the Family-1 variants is described in my <a href="https://arxiv.org/abs/2405.07286">short note on flexible Cholesky parameterizations</a>.</p>
+<section id="when-to-use-which" class="level2">
+<h2 class="anchored" data-anchor-id="when-to-use-which">7. When to Use Which</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Scenario</th>
+<th style="text-align: left;">Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Any new model with structural zeros</td>
+<td style="text-align: left;"><code>tri</code>: exact constraints, no divergence tax, no efficiency tax</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Small <span class="math inline">\(K\)</span>, sparse zeros, existing forced-zero code, deadlines</td>
+<td style="text-align: left;">Family 1 is fine with <code>adapt_delta</code> raised and divergences monitored</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(K \gtrsim 15\)</span> with dense zero patterns</td>
+<td style="text-align: left;">Family 1 may not even initialize; <code>tri</code> is the only option here that is both feasible and efficient</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Huge <span class="math inline">\(K\)</span></td>
+<td style="text-align: left;"><code>tri</code>, but profile the per-row <code>cholesky_decompose</code>; the <span class="math inline">\(d \times d\)</span> factorizations are small but not free</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Zeros plus <em>bounds</em> on the free correlations</td>
+<td style="text-align: left;">Family 1 machinery composes naturally with bounded transforms <span class="citation" data-cites="pinkney2024 pinkneytalk">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024a</a>, <a href="#ref-pinkneytalk" role="doc-biblioref">2024b</a>)</span>; porting bounds into the subspace view is open</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">8. Discussion</h2>
+<p>The key insight is geometric: <strong>a constraint you enforce is a boundary; a constraint you parameterize away is not there at all</strong>. The forced-zero family enforces, and pays on a sliding scale: a persistent divergence rate at small <span class="math inline">\(K\)</span>, collapsing ESS at moderate <span class="math inline">\(K\)</span>, and outright initialization failure once the pattern is dense enough that random starting points can never satisfy every forced cell at once. Axen’s subspace construction <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span> parameterizes away, and the only thing it was missing was a basis that respects the triangular structure of the problem. Once the complement basis is anchored to the matrix entries, the geometry cost vanishes and the exact method is simultaneously the safest, the most efficient per gradient, and the fastest on the wall clock.</p>
+<p>The measurement lesson is worth repeating too. Identical densities implemented with different arithmetic produced divergence counts spanning a 30% range across five patterns. Single-fit divergence comparisons between parameterizations are mostly noise unless the gap is qualitative, like several hundred versus exactly zero.</p>
+<p>Two threads are left open. Bounded correlations plus zeros in the subspace view would need the feasible region of a row intersected with a box, which no longer factors as a sphere. And the per-row Cholesky factorizations, while small, deserve profiling at <span class="math inline">\(K\)</span> in the hundreds. Both feel tractable.</p>
+</section>
+<section id="acknowledgments" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
+<p>The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the <span class="math inline">\(\det R\)</span> Jacobian factor, is due to Seth Axen <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>. The <code>tri</code> model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as <code>carpenter</code>, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of <span class="citation" data-cites="joe2006">Joe (<a href="#ref-joe2006" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="lewandowski2009">Lewandowski et al. (<a href="#ref-lewandowski2009" role="doc-biblioref">2009</a>)</span>.</p>
+</section>
+<section id="appendix-stan-code-for-tri" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-stan-code-for-tri">Appendix: Stan Code for <code>tri</code></h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>unitvec-tri-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="unitvec-tri-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                                              <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Exact-constraint subspace geometry but with a canonical</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// triangular basis instead of Householder QR: basis vector k is a unit</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// at free column k with the row's forced columns filled in by</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// back-substitution through the zero constraints, then orthonormalized</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// by the Cholesky factor of its small Gram matrix. The basis is</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// anchored to matrix entries and varies smoothly with earlier rows.</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> n_z <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> (zero_idx <span class="op">+</span> n_z <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;&amp;</span> zeros[zero_idx <span class="op">+</span> n_z, <span class="dv">1</span>] <span class="op">==</span> i) {</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        n_z <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>      <span class="co">// subsphere coordinates via tanh sticks (cosh-form jacobian)</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d] z;</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x <span class="op">=</span> raw[raw_idx];</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> cosh_x <span class="op">=</span> <span class="fu">cosh</span>(x);</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        z[k] <span class="op">=</span> r <span class="op">*</span> <span class="fu">tanh</span>(x);</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">-</span> k <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(cosh_x);</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        r <span class="op">/=</span> cosh_x;</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> z<span class="op">'</span>;</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        <span class="dt">array</span>[n_z] <span class="dt">int</span> zc;</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>          zc[m] <span class="op">=</span> zeros[zero_idx <span class="op">+</span> m <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>];</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the joint-delta term -0.5 * log det(Gram of zero-partner rows)</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">// factors: splitting the partner matrix A by forced/free coords,</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">// A_Z is triangular with the partners' diagonals, and by Sylvester</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">// det(A'A) = prod(L[j,j])^2 * det(T'T)</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[zc[m], zc[m]]);</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>          <span class="dt">array</span>[d] <span class="dt">int</span> free_cols;</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> fc <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> zp <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (c <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (zp <span class="op">&lt;=</span> n_z <span class="op">&amp;&amp;</span> zc[zp] <span class="op">==</span> c) {</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>                zp <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>              } <span class="cf">else</span> {</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>                fc <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>                free_cols[fc] <span class="op">=</span> c;</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>          <span class="co">// triangular basis: unit at each free column, forced columns</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>          <span class="co">// filled by back-substitution so every column is orthogonal to</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the zero-partner rows</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, d] T <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, i <span class="op">-</span> <span class="dv">1</span>, d);</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> <span class="fu">col</span> <span class="op">=</span> free_cols[k];</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>            T[<span class="fu">col</span>, k] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>              <span class="dt">int</span> j <span class="op">=</span> zc[m];</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (j <span class="op">&gt;</span> <span class="fu">col</span>) {</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>                T[j, k] <span class="op">=</span> <span class="op">-</span><span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], T[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>), k])</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>                          <span class="op">/</span> L[j, j];</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>          <span class="co">// T's free-column rows are the identity, so T'T = I + W'W with</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>          <span class="co">// W the forced-column rows only</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[n_z, d] W;</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>            W[m, ] <span class="op">=</span> T[zc[m], ];</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>          <span class="co">// orthonormalize: v = T * S'^{-1} * z has ||v|| = ||z||;</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>          <span class="co">// diagonal(S) doubles as the det(T'T) half of the delta term</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[d, d] S <span class="op">=</span> <span class="fu">cholesky_decompose</span>(<span class="fu">add_diag</span>(<span class="fu">crossprod</span>(W), <span class="fl">1.0</span>));</span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">diagonal</span>(S)));</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] t <span class="op">=</span> <span class="fu">mdivide_right_tri_low</span>(z<span class="op">'</span>, S)<span class="op">'</span>;</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (T <span class="op">*</span> t)<span class="op">'</span>;</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(K, raw, zeros);</span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 
 
+
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-axen2023" class="csl-entry" role="listitem">
+Axen, Seth. 2023. <em>Working with Positive Definite Matrices with Structural Zeros</em>. TuringLang/Turing.jl GitHub discussion #2067. <a href="https://github.com/TuringLang/Turing.jl/discussions/2067">https://github.com/TuringLang/Turing.jl/discussions/2067</a>.
+</div>
+<div id="ref-carpenter2017" class="csl-entry" role="listitem">
+Carpenter, Bob, Andrew Gelman, Matthew D. Hoffman, et al. 2017. <span>“Stan: A Probabilistic Programming Language.”</span> <em>Journal of Statistical Software</em> 76 (1): 1–32. <a href="https://doi.org/10.18637/jss.v076.i01">https://doi.org/10.18637/jss.v076.i01</a>.
+</div>
+<div id="ref-joe2006" class="csl-entry" role="listitem">
+Joe, Harry. 2006. <span>“Generating Random Correlation Matrices Based on Partial Correlations.”</span> <em>Journal of Multivariate Analysis</em> 97 (10): 2177–89. <a href="https://doi.org/10.1016/j.jmva.2005.05.010">https://doi.org/10.1016/j.jmva.2005.05.010</a>.
+</div>
+<div id="ref-lewandowski2009" class="csl-entry" role="listitem">
+Lewandowski, Daniel, Dorota Kurowicka, and Harry Joe. 2009. <span>“Generating Random Correlation Matrices Based on Vines and Extended Onion Method.”</span> <em>Journal of Multivariate Analysis</em> 100 (9): 1989–2001. <a href="https://doi.org/10.1016/j.jmva.2009.04.008">https://doi.org/10.1016/j.jmva.2009.04.008</a>.
+</div>
+<div id="ref-pinkney2024" class="csl-entry" role="listitem">
+Pinkney, Sean. 2024a. <em>A Short Note on a Flexible Cholesky Parameterization of Correlation Matrices</em>. <a href="https://arxiv.org/abs/2405.07286">https://arxiv.org/abs/2405.07286</a>.
+</div>
+<div id="ref-pinkneytalk" class="csl-entry" role="listitem">
+Pinkney, Sean. 2024b. <em>Structured Correlation Matrices</em>. StanCon 2024. <a href="https://discourse.mc-stan.org/t/new-users-guide-intro-sem-and-user-defined-constrained-parameters-chapters/41430/4">https://discourse.mc-stan.org/t/new-users-guide-intro-sem-and-user-defined-constrained-parameters-chapters/41430/4</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
