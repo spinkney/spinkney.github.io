@@ -304,8 +304,80 @@ Two threads are left open. Bounded correlations plus zeros in the subspace view 
 
 The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the $\det R$ Jacobian factor, is due to Seth Axen [@axen2023], whose radial prior [@axen2022] the donut variant relies on. The `tri` model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as `carpenter`, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of @joe2006 and @lewandowski2009.
 
-## Appendix: Stan Code for `tri`
+## Appendix: Stan Code for All Twelve Parameterizations
+
+::: {.panel-tabset}
+
+### tri
 
 ``` {.stan filename="unitvec-tri-corr-zeros.stan"}
 {{< include unitvec-tri-corr-zeros.stan >}}
 ```
+
+### donut
+
+``` {.stan filename="unitvec-donut-corr-zeros.stan"}
+{{< include unitvec-donut-corr-zeros.stan >}}
+```
+
+### carpenter
+
+``` {.stan filename="carpenter-corr-zeros.stan"}
+{{< include carpenter-corr-zeros.stan >}}
+```
+
+### pinkney
+
+``` {.stan filename="pinkney-corr-zeros2.stan"}
+{{< include pinkney-corr-zeros2.stan >}}
+```
+
+### ldl
+
+``` {.stan filename="pinkney-corr-zeros-ldl.stan"}
+{{< include pinkney-corr-zeros-ldl.stan >}}
+```
+
+### ldl2
+
+``` {.stan filename="pinkney-corr-zeros-ldl2.stan"}
+{{< include pinkney-corr-zeros-ldl2.stan >}}
+```
+
+### ldl3
+
+``` {.stan filename="pinkney-corr-zeros-ldl3.stan"}
+{{< include pinkney-corr-zeros-ldl3.stan >}}
+```
+
+### cvine
+
+``` {.stan filename="cvine-corr-zeros.stan"}
+{{< include cvine-corr-zeros.stan >}}
+```
+
+### rowscale
+
+``` {.stan filename="pinkney-corr-zeros-rowscale.stan"}
+{{< include pinkney-corr-zeros-rowscale.stan >}}
+```
+
+### schur
+
+``` {.stan filename="pinkney-corr-zeros-schur.stan"}
+{{< include pinkney-corr-zeros-schur.stan >}}
+```
+
+### qr
+
+``` {.stan filename="qr-corr-zeros.stan"}
+{{< include qr-corr-zeros.stan >}}
+```
+
+### qr2
+
+``` {.stan filename="qr2-corr-zeros.stan"}
+{{< include qr2-corr-zeros.stan >}}
+```
+
+:::
