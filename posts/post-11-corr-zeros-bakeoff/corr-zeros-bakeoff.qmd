@@ -72,7 +72,18 @@ Two identities then make the whole thing almost embarrassingly cheap.
 
 Per constrained row, the entire construction is one $d \times d$ `cholesky_decompose` and some small matrix-vector products. No QR anywhere. I call this model `tri`; the full Stan code is in the appendix.
 
-I also tried a "donut" variant, one extra parameter per row, normalizing a free vector instead of using a compact chart. It kept the exact-constraint geometry but the $|u_{\text{last}}|$ fold puts a power-law barrier at the equator, and it diverged worse than anything else in the field. Not every overparameterization trick transfers.
+I also tried a "donut" variant, one extra parameter per row: normalize a free vector $y$, take $u = y / \lVert y \rVert$, and let $-\tfrac{1}{2} y'y$ keep the radius away from trouble. Or so I thought. With that implicit chi-distributed radius it diverged worse than anything else in the field — 2,531 across the five $K = 7$ patterns in the tables below, which report this $m = 0$ baseline.
+
+The fix, fittingly, also comes from Seth Axen, in the *A Better Unit Vector* Discourse thread [@axen2022]: put an explicit prior on the radius that repels it from the origin singularity of the normalization map. I used his Gaussian-centered form, replacing $-\tfrac{1}{2}\lVert y \rVert^2$ with $-\tfrac{1}{2}(\lVert y \rVert - m)^2$. The radial factor is independent of the direction, so the $\Omega$ posterior is untouched (verified against `carpenter`: max free-cell mean difference 0.0046). The effect on sampling is not subtle. Across the five $K = 7$, $\eta = 4$ patterns:
+
+| radial prior | total divergences | median min ESS | median ESS / 1k gradients |
+|:---|--:|--:|--:|
+| $m = 0$ (implicit chi) | 2,549 | 4,778 | 19 |
+| $m = 2$ | 349 | 8,106 | 80 |
+| $m = 4$ | 8 | 10,778 | 192 |
+| $m = 6$ | **0** | 9,045 | 162 |
+
+So the origin singularity, not the $|u_{\text{last}}|$ hemisphere fold, was nearly the whole problem: pushing the radial shell out to $m = 6$ joins the zero-divergence club outright, and $m = 4$ trades eight divergences in 40,000 transitions for the best raw ESS I measured at this size. I still prefer `tri` as the default — no tuning knob, $K - 1$ fewer parameters, and zero divergences without negotiation — but the donut's rescue is a clean confirmation of Axen's radial-prior argument, and it means the subspace family now has *two* working members.
 
 ## 5. The Bake-Off at K = 7
 
@@ -275,7 +286,7 @@ Two threads are left open. Bounded correlations plus zeros in the subspace view 
 
 ## Acknowledgments
 
-The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the $\det R$ Jacobian factor, is due to Seth Axen [@axen2023]. The `tri` model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as `carpenter`, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of @joe2006 and @lewandowski2009.
+The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the $\det R$ Jacobian factor, is due to Seth Axen [@axen2023], who also supplied the radial-prior fix that rescued the donut variant [@axen2022]. The `tri` model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as `carpenter`, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of @joe2006 and @lewandowski2009.
 
 ## Appendix: Stan Code for `tri`
 
