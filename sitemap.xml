@@ -1,51 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://spinkney.github.io/posts/post-3-better-unit-vector/a-better-unit-vector.html</loc>
-    <lastmod>2026-03-31T10:55:18.282Z</lastmod>
-  </url>
-  <url>
-    <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html</loc>
-    <lastmod>2026-03-31T10:55:18.269Z</lastmod>
-  </url>
-  <url>
-    <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html</loc>
-    <lastmod>2026-03-31T10:55:18.280Z</lastmod>
-  </url>
-  <url>
-    <loc>https://spinkney.github.io/posts/post-4-poincare-lca/poincare-lca.html</loc>
-    <lastmod>2026-03-31T10:55:18.309Z</lastmod>
-  </url>
-  <url>
     <loc>https://spinkney.github.io/index.html</loc>
-    <lastmod>2026-03-31T10:55:17.671Z</lastmod>
-  </url>
-  <url>
-    <loc>https://spinkney.github.io/quantile-reg-series.html</loc>
-    <lastmod>2026-03-31T10:55:18.328Z</lastmod>
-  </url>
-  <url>
-    <loc>https://spinkney.github.io/about.html</loc>
-    <lastmod>2026-03-31T10:55:17.653Z</lastmod>
-  </url>
-  <url>
-    <loc>https://spinkney.github.io/css/highlight/DIGESTS.html</loc>
-    <lastmod>2026-03-31T10:55:17.654Z</lastmod>
+    <lastmod>2026-07-15T14:12:20.675Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/COMMENTING.html</loc>
-    <lastmod>2026-03-31T10:55:17.630Z</lastmod>
+    <lastmod>2026-07-15T14:12:20.618Z</lastmod>
   </url>
   <url>
-    <loc>https://spinkney.github.io/posts/post-1-vasciek/vasciek_post.html</loc>
-    <lastmod>2026-03-31T10:55:17.676Z</lastmod>
+    <loc>https://spinkney.github.io/posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.html</loc>
+    <lastmod>2026-07-15T14:12:20.735Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html</loc>
-    <lastmod>2026-03-31T10:55:18.281Z</lastmod>
+    <lastmod>2026-07-15T14:12:21.325Z</lastmod>
   </url>
   <url>
     <loc>https://spinkney.github.io/posts/post-5-compound-symmetric-block-toeplitz/compound-symmetric.html</loc>
-    <lastmod>2026-03-31T10:55:18.319Z</lastmod>
+    <lastmod>2026-07-15T14:12:21.366Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/posts/post-1-vasciek/vasciek_post.html</loc>
+    <lastmod>2026-07-15T14:12:20.680Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/quantile-reg-series.html</loc>
+    <lastmod>2026-07-15T14:12:21.377Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/css/highlight/DIGESTS.html</loc>
+    <lastmod>2026-07-15T14:12:20.645Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/posts/post-3-better-unit-vector/a-better-unit-vector.html</loc>
+    <lastmod>2026-07-15T14:12:21.326Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html</loc>
+    <lastmod>2026-07-15T14:12:21.312Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html</loc>
+    <lastmod>2026-07-15T14:12:21.324Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/posts/post-4-poincare-lca/poincare-lca.html</loc>
+    <lastmod>2026-07-15T14:12:21.355Z</lastmod>
+  </url>
+  <url>
+    <loc>https://spinkney.github.io/about.html</loc>
+    <lastmod>2026-07-15T14:12:20.645Z</lastmod>
   </url>
 </urlset>

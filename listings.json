@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.html",
       "/posts/post-5-compound-symmetric-block-toeplitz/compound-symmetric.html",
       "/posts/post-4-poincare-lca/poincare-lca.html",
       "/posts/post-3-better-unit-vector/a-better-unit-vector.html",

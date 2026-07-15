@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sean Pinkney">
+<meta name="dcterms.date" content="2026-07-15">
+
+<title>Structural Zeros in Correlation Matrices: A Twelve-Parameterization Bake-Off – Pinkney’s Sufficient Stats</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-85314cde386895b85e915c39ab98eb64.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Pinkney’s Sufficient Stats</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/spinkney"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/sean-pinkney123/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Structural Zeros in Correlation Matrices: A Twelve-Parameterization Bake-Off</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">stan</div>
+                <div class="quarto-category">parameterizations</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Sean Pinkney </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 15, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
+<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero — a graphical structure, a confirmatory factor model, a physical constraint. You cannot just sample a correlation matrix from an LKJ prior and zero out cells: the result is generally not positive definite. The zeros have to be built into the parameterization itself.</p>
+<p>This post races twelve Stan parameterizations of “LKJ prior + hard zeros” against each other. All twelve target the same posterior (verified against each other within Monte Carlo error), so the comparison is purely about sampling geometry: divergences, effective sample size, and cost per gradient evaluation.</p>
+<p>The punchline: the two families of solutions make opposite trade-offs, and a hybrid — an exact-constraint subspace construction with a canonical triangular basis — gets the best of both: <strong>zero divergences across every run and the best ESS per gradient in the field</strong>.</p>
+</section>
+<section id="family-1-forced-zeros" class="level2">
+<h2 class="anchored" data-anchor-id="family-1-forced-zeros">Family 1: forced zeros</h2>
+<p>The construction I first saw from Bob Carpenter walks the Cholesky factor row by row. Writing <span class="math inline">\(\Omega = L L'\)</span> with unit-norm rows of <span class="math inline">\(L\)</span>, the correlation in cell <span class="math inline">\((i,j)\)</span> is</p>
+<p><span class="math display">\[
+\Omega_{ij} = b_1 + L_{ij} L_{jj}, \qquad
+b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
+\]</span></p>
+<p>so a structural zero pins <span class="math inline">\(L_{ij} = -b_1 / L_{jj}\)</span> — no parameter needed. Conditioning the LKJ distribution on <span class="math inline">\(\Omega_{ij} = 0\)</span> (a delta function in <span class="math inline">\(\Omega\)</span> coordinates) contributes a density correction <span class="math inline">\(-\log L_{jj}\)</span> per zero.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b <span class="op">=</span> <span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  L[i, j] <span class="op">=</span> <span class="op">-</span>b <span class="op">/</span> L[j, j];   <span class="co">// implies Omega[i, j] == 0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[j, j]);</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The forced-zero trick composes with essentially any Cholesky-style parameterization of the free cells. I tested eight members of this family:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>label</th>
+<th>free-cell parameterization</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>carpenter</code></td>
+<td>direct Cholesky entries, bounded by the remaining stick</td>
+</tr>
+<tr class="even">
+<td><code>pinkney</code></td>
+<td>correlation-scale value divided by <span class="math inline">\(L_{jj}\)</span>, multiplicative stick</td>
+</tr>
+<tr class="odd">
+<td><code>ldl</code> / <code>ldl2</code> / <code>ldl3</code></td>
+<td><span class="math inline">\(LDL'\)</span> factorization; stick tracked by <code>log_diff_exp</code>, <code>log1m</code>-ratio, or natural scale</td>
+</tr>
+<tr class="even">
+<td><code>cvine</code></td>
+<td>C-vine partial correlations with the LKJ Beta factorization</td>
+</tr>
+<tr class="odd">
+<td><code>rowscale</code></td>
+<td>direct Cholesky entries, row-scaling stick</td>
+</tr>
+<tr class="even">
+<td><code>schur</code></td>
+<td>canonical partial correlations, <span class="math inline">\(L_{ij} = r \tanh(x)\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>They all share one flaw. The forced value <span class="math inline">\(-b_1/L_{jj}\)</span> can exceed the row’s remaining stick, <span class="math inline">\(\sqrt{1 - \sum_{k&lt;j} L_{ik}^2}\)</span>. When it does, a downstream <code>sqrt</code> of a negative number produces <code>NaN</code>, the proposal is rejected, and near that boundary the sampler diverges. Every member of the family runs at roughly a <strong>1% divergence rate</strong> on the test patterns below — a bias risk you have to manage with <code>adapt_delta</code> forever.</p>
+<p>The three LDL variants deserve a footnote: they define <em>identical</em> densities and differ only in floating-point arithmetic, yet their divergence totals span 356–466. That spread is a direct measurement of the noise floor for single-fit divergence counts, and it is wider than most gaps between genuinely different parameterizations. Beware of divergence league tables built from single runs.</p>
+</section>
+<section id="family-2-exact-constraint-subspaces" class="level2">
+<h2 class="anchored" data-anchor-id="family-2-exact-constraint-subspaces">Family 2: exact-constraint subspaces</h2>
+<p>The second idea eliminates the boundary entirely. I learned it from <strong>Seth Axen</strong>, in a <a href="https://github.com/TuringLang/Turing.jl/discussions/2067">Turing.jl discussion on positive definite matrices with structural zeros</a>:</p>
+<blockquote class="blockquote">
+<p>For each column j, each column i for i &lt; j that is orthogonal to column j decreases the dimensionality of the hemisphere by 1. So we simply construct a point on a lower dimensional hemisphere and use the QR decomposition of the orthogonal columns to lift it to a higher dimensional hemisphere.</p>
+</blockquote>
+<p>Row <span class="math inline">\(i\)</span> of a correlation Cholesky factor is a unit vector with positive last coordinate. Because row <span class="math inline">\(j\)</span> is zero beyond column <span class="math inline">\(j\)</span>, the constraint <span class="math inline">\(\Omega_{ij}=0\)</span> says row <span class="math inline">\(i\)</span> is <strong>orthogonal to row <span class="math inline">\(j\)</span> as a whole vector</strong>. So a row with <span class="math inline">\(n_z\)</span> zeros lives on a unit hemisphere inside the orthogonal complement of its zero-partner rows — a sphere of dimension <span class="math inline">\(d = i - 1 - n_z\)</span>. Sample there and the constraint holds <em>by construction</em>: no proposal can ever be infeasible, so the divergence mechanism of Family 1 does not exist. The joint delta over a row’s zeros contributes <span class="math inline">\(-\tfrac{1}{2}\log\det(A'A)\)</span>, where <span class="math inline">\(A\)</span> collects the zero-partner rows — Axen’s “divide by the determinant of the R factor.”</p>
+<p>My first two implementations (<code>qr</code>, <code>qr2</code>) followed the recipe literally: Householder QR of <span class="math inline">\(A\)</span>, complement basis from the full <span class="math inline">\(Q\)</span>, hemisphere chart via a gnomonic map or tanh sticks. They achieved exactly zero divergences — and about <strong>40% of the ESS</strong> of the forced-zero family. The chart didn’t matter; the basis did. Householder’s complement columns are an arbitrary orthonormal frame that <em>spins</em> as the earlier rows move, so the raw coordinates keep changing meaning underneath the sampler.</p>
+</section>
+<section id="the-fix-a-canonical-triangular-basis-tri" class="level2">
+<h2 class="anchored" data-anchor-id="the-fix-a-canonical-triangular-basis-tri">The fix: a canonical triangular basis (<code>tri</code>)</h2>
+<p>Replace the QR basis with one anchored to the matrix entries. For each free column <span class="math inline">\(k\)</span> of row <span class="math inline">\(i\)</span>, take <span class="math inline">\(e_k\)</span> and fill in the row’s forced columns by back-substitution through the zero constraints — Carpenter’s fill applied to <em>basis vectors</em> instead of the sampled row. Collect these as the columns of <span class="math inline">\(T\)</span>. Splitting coordinates into forced (<span class="math inline">\(Z\)</span>) and free (<span class="math inline">\(F\)</span>) sets, <span class="math inline">\(T_F = I\)</span> and <span class="math inline">\(T_Z = -(A_Z')^{-1} A_F'\)</span>, and orthonormalizing costs one small Cholesky: with <span class="math inline">\(S = \operatorname{chol}(T'T)\)</span>, the map <span class="math inline">\(v = T S'^{-T} z\)</span> satisfies <span class="math inline">\(\lVert v \rVert = \lVert z \rVert\)</span>, so the sphere-measure bookkeeping is unchanged.</p>
+<p>Two pleasant identities finish the job. First, because the zero-partner rows have triangular support, <span class="math inline">\(A_Z\)</span> is triangular with the partners’ diagonals on its diagonal, and Sylvester’s determinant identity gives</p>
+<p><span class="math display">\[
+\det(A'A) \;=\; \Big(\prod_{j \in Z} L_{jj}\Big)^{2} \, \det(T'T),
+\]</span></p>
+<p>so the delta term splits into Carpenter’s <span class="math inline">\(-\sum_j \log L_{jj}\)</span> — which now falls out <em>analytically</em>, no linear algebra required — plus <span class="math inline">\(-\sum_k \log S_{kk}\)</span>, which rides along free with the orthonormalization Cholesky. Second, since <span class="math inline">\(T_F = I\)</span>, the Gram is <span class="math inline">\(T'T = I + W'W\)</span> with <span class="math inline">\(W\)</span> just the <span class="math inline">\(n_z\)</span> forced-coordinate rows, so the crossprod works on length-<span class="math inline">\(n_z\)</span> vectors. Per constrained row, the entire construction costs one <span class="math inline">\(d \times d\)</span> Cholesky and some small matrix-vector products. No QR anywhere.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>unitvec-tri-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="unitvec-tri-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                                              <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> n_z <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> (zero_idx <span class="op">+</span> n_z <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;&amp;</span> zeros[zero_idx <span class="op">+</span> n_z, <span class="dv">1</span>] <span class="op">==</span> i) {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        n_z <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      <span class="co">// subsphere coordinates via tanh sticks (cosh-form jacobian)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d] z;</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x <span class="op">=</span> raw[raw_idx];</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> cosh_x <span class="op">=</span> <span class="fu">cosh</span>(x);</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        z[k] <span class="op">=</span> r <span class="op">*</span> <span class="fu">tanh</span>(x);</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">-</span> k <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(cosh_x);</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        r <span class="op">/=</span> cosh_x;</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> z<span class="op">'</span>;</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">array</span>[n_z] <span class="dt">int</span> zc;</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>          zc[m] <span class="op">=</span> zeros[zero_idx <span class="op">+</span> m <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>];</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the joint-delta term -0.5 * log det(Gram of zero-partner rows)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">// factors: det(A'A) = prod(L[j,j])^2 * det(T'T) by Sylvester</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[zc[m], zc[m]]);</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>          <span class="dt">array</span>[d] <span class="dt">int</span> free_cols;</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> fc <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> zp <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (c <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (zp <span class="op">&lt;=</span> n_z <span class="op">&amp;&amp;</span> zc[zp] <span class="op">==</span> c) {</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>                zp <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>              } <span class="cf">else</span> {</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>                fc <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>                free_cols[fc] <span class="op">=</span> c;</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>          <span class="co">// triangular basis: unit at each free column, forced columns</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>          <span class="co">// filled by back-substitution so every column is orthogonal to</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the zero-partner rows</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, d] T <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, i <span class="op">-</span> <span class="dv">1</span>, d);</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> <span class="fu">col</span> <span class="op">=</span> free_cols[k];</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>            T[<span class="fu">col</span>, k] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>              <span class="dt">int</span> j <span class="op">=</span> zc[m];</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (j <span class="op">&gt;</span> <span class="fu">col</span>) {</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>                T[j, k] <span class="op">=</span> <span class="op">-</span><span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], T[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>), k])</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>                          <span class="op">/</span> L[j, j];</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>          <span class="co">// T's free-column rows are the identity, so T'T = I + W'W with</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>          <span class="co">// W the forced-column rows only</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[n_z, d] W;</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>            W[m, ] <span class="op">=</span> T[zc[m], ];</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[d, d] S <span class="op">=</span> <span class="fu">cholesky_decompose</span>(<span class="fu">add_diag</span>(<span class="fu">crossprod</span>(W), <span class="fl">1.0</span>));</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">diagonal</span>(S)));</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] t <span class="op">=</span> <span class="fu">mdivide_right_tri_low</span>(z<span class="op">'</span>, S)<span class="op">'</span>;</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (T <span class="op">*</span> t)<span class="op">'</span>;</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;  <span class="co">// lower triangular, row major order</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(K, raw, zeros);</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>I also tried a “donut” variant — one extra parameter per row, normalizing a free vector instead of using a compact chart. It kept the exact-constraint geometry but the <span class="math inline">\(|u_{\text{last}}|\)</span> fold put a power-law barrier at the equator and it diverged worse than anything else in the field (2,531 total). Not every overparameterization trick transfers.</p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>Setup: <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span>, prior-only, five random zero patterns (about half of the 21 lower-triangular cells zeroed, seeds 1–5), 4 chains <span class="math inline">\(\times\)</span> 2000 draws after 1000 warmup, default <code>adapt_delta = 0.8</code>, CmdStan 2.39. Correctness was checked on a separate pattern: all twelve posteriors match the <code>carpenter</code> baseline within Monte Carlo error (max free-cell mean difference <span class="math inline">\(\le 0.008\)</span> at bulk ESS <span class="math inline">\(\ge\)</span> 3,700), and the constrained cells are numerically exact zeros (<span class="math inline">\(\sim 10^{-19}\)</span>).</p>
+<p><strong>Divergences</strong> out of 8,000 post-warmup transitions:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>pattern</th>
+<th>carpenter</th>
+<th>pinkney</th>
+<th>ldl</th>
+<th>ldl2</th>
+<th>cvine</th>
+<th>rowscale</th>
+<th>ldl3</th>
+<th>schur</th>
+<th>qr</th>
+<th>qr2</th>
+<th>tri</th>
+<th>donut</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>seed 1</td>
+<td>34</td>
+<td>53</td>
+<td>53</td>
+<td>26</td>
+<td>41</td>
+<td>44</td>
+<td>40</td>
+<td>40</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+<td>522</td>
+</tr>
+<tr class="even">
+<td>seed 2</td>
+<td>61</td>
+<td>65</td>
+<td>74</td>
+<td>107</td>
+<td>64</td>
+<td>78</td>
+<td>104</td>
+<td>60</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+<td>551</td>
+</tr>
+<tr class="odd">
+<td>seed 3</td>
+<td>77</td>
+<td>44</td>
+<td>67</td>
+<td>57</td>
+<td>69</td>
+<td>44</td>
+<td>68</td>
+<td>59</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>seed 4</td>
+<td>137</td>
+<td>157</td>
+<td>130</td>
+<td>112</td>
+<td>186</td>
+<td>155</td>
+<td>152</td>
+<td>123</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+<td>418</td>
+</tr>
+<tr class="odd">
+<td>seed 5</td>
+<td>110</td>
+<td>94</td>
+<td>114</td>
+<td>54</td>
+<td>141</td>
+<td>114</td>
+<td>102</td>
+<td>29</td>
+<td>0</td>
+<td>0</td>
+<td><strong>0</strong></td>
+<td>540</td>
+</tr>
+<tr class="even">
+<td><strong>total</strong></td>
+<td>419</td>
+<td>413</td>
+<td>438</td>
+<td>356</td>
+<td>501</td>
+<td>435</td>
+<td>466</td>
+<td>311</td>
+<td><strong>0</strong></td>
+<td><strong>0</strong></td>
+<td><strong>0</strong></td>
+<td>2531</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Min bulk ESS</strong> over the free cells of <span class="math inline">\(\Omega\)</span> (8,000 draws):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>pattern</th>
+<th>carpenter</th>
+<th>pinkney</th>
+<th>ldl</th>
+<th>ldl2</th>
+<th>cvine</th>
+<th>rowscale</th>
+<th>ldl3</th>
+<th>schur</th>
+<th>qr</th>
+<th>qr2</th>
+<th>tri</th>
+<th>donut</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>seed 1</td>
+<td>11639</td>
+<td>10566</td>
+<td>9979</td>
+<td>10618</td>
+<td>10219</td>
+<td>11319</td>
+<td>9840</td>
+<td>11036</td>
+<td>3995</td>
+<td>3362</td>
+<td><strong>11430</strong></td>
+<td>4321</td>
+</tr>
+<tr class="even">
+<td>seed 2</td>
+<td>10817</td>
+<td>9866</td>
+<td>10826</td>
+<td>9772</td>
+<td>10188</td>
+<td>10153</td>
+<td>10361</td>
+<td>10040</td>
+<td>4049</td>
+<td>3728</td>
+<td><strong>11427</strong></td>
+<td>5049</td>
+</tr>
+<tr class="odd">
+<td>seed 3</td>
+<td>9344</td>
+<td>11014</td>
+<td>10244</td>
+<td>10314</td>
+<td>10946</td>
+<td>9420</td>
+<td>10625</td>
+<td>10787</td>
+<td>4334</td>
+<td>4304</td>
+<td>9574</td>
+<td>3795</td>
+</tr>
+<tr class="even">
+<td>seed 4</td>
+<td>8395</td>
+<td>9159</td>
+<td>8326</td>
+<td>9257</td>
+<td>8771</td>
+<td>9463</td>
+<td>8266</td>
+<td>9458</td>
+<td>3701</td>
+<td>3815</td>
+<td><strong>9582</strong></td>
+<td>5121</td>
+</tr>
+<tr class="odd">
+<td>seed 5</td>
+<td>10381</td>
+<td>10010</td>
+<td>9268</td>
+<td>8760</td>
+<td>10301</td>
+<td>9218</td>
+<td>9896</td>
+<td>4770</td>
+<td>4267</td>
+<td>4153</td>
+<td><strong>11284</strong></td>
+<td>4454</td>
+</tr>
+<tr class="even">
+<td><strong>median</strong></td>
+<td>10381</td>
+<td>10010</td>
+<td>9979</td>
+<td>9772</td>
+<td>10219</td>
+<td>9463</td>
+<td>9896</td>
+<td>10040</td>
+<td>4049</td>
+<td>3815</td>
+<td><strong>11284</strong></td>
+<td>4454</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Efficiency</strong> (medians over the five patterns):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>carpenter</th>
+<th>pinkney</th>
+<th>ldl</th>
+<th>ldl2</th>
+<th>cvine</th>
+<th>rowscale</th>
+<th>ldl3</th>
+<th>schur</th>
+<th>qr</th>
+<th>qr2</th>
+<th>tri</th>
+<th>donut</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>min ESS / 1000 gradients</td>
+<td>188.5</td>
+<td>179.6</td>
+<td>185.9</td>
+<td>182.2</td>
+<td>188.9</td>
+<td>176.3</td>
+<td>182.1</td>
+<td>182.0</td>
+<td>75.0</td>
+<td>72.5</td>
+<td><strong>207.3</strong></td>
+<td>18.7</td>
+</tr>
+<tr class="even">
+<td>total wall clock, 5 fits (s)</td>
+<td>4.53</td>
+<td>4.10</td>
+<td>4.40</td>
+<td>4.51</td>
+<td>5.14</td>
+<td>4.21</td>
+<td>4.51</td>
+<td>4.15</td>
+<td>2.07</td>
+<td>2.06</td>
+<td><strong>1.95</strong></td>
+<td>9.72</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>tri</code> column is the whole story: zero divergences on every pattern, the highest median ESS in the table, the best ESS per gradient evaluation, and the lowest wall-clock time. The subspace family’s short trajectories (no boundary to fight) plus a well-anchored basis means it wins on <em>every</em> axis at once — the usual robustness-versus-speed trade simply dissolves.</p>
+</section>
+<section id="caveats" class="level2">
+<h2 class="anchored" data-anchor-id="caveats">Caveats</h2>
+<ul>
+<li>Everything above is <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span>, prior-only, dense zero patterns. Larger <span class="math inline">\(K\)</span>, data likelihoods, and sparse patterns may reorder the forced-zero family — though the structural argument for <code>tri</code> (no infeasible region exists) is dimension-independent.</li>
+<li>Divergence counts from single fits are noisy; the identical-density LDL trio spans 356–466 on the same patterns. The forced-vs-subspace gap (hundreds vs.&nbsp;exactly zero) is far outside that noise; the within-family rankings are not.</li>
+<li>The <code>tri</code> construction needs the zero list sorted in row-major order and one <span class="math inline">\(d \times d\)</span> <code>cholesky_decompose</code> per constrained row per gradient — negligible at this size, worth profiling at <span class="math inline">\(K \gtrsim 50\)</span>.</li>
+</ul>
+</section>
+<section id="attribution" class="level2">
+<h2 class="anchored" data-anchor-id="attribution">Attribution</h2>
+<p>The exact-constraint subspace idea — zeros as orthogonality constraints, sampling on a lower-dimensional hemisphere and lifting through the orthogonal complement, with the <span class="math inline">\(\det R\)</span> Jacobian factor — is due to <a href="https://sethaxen.com/">Seth Axen</a>, from <a href="https://github.com/TuringLang/Turing.jl/discussions/2067">TuringLang/Turing.jl discussion #2067</a>. The <code>tri</code> model is that idea with a different (canonical, triangular) choice of complement basis and the determinant factored analytically.</p>
+<p>The forced-zero construction and its <span class="math inline">\(-\log L_{jj}\)</span> conditioning correction I learned from Bob Carpenter. The bounded/constrained Cholesky machinery used by several of the Family-1 variants is described in my <a href="https://arxiv.org/abs/2405.07286">short note on flexible Cholesky parameterizations</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/spinkney\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="light">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "spinkney/spinkney.github.io";
+    script.dataset.repoId = "MDEwOlJlcG9zaXRvcnkxMTQ1MjkzOTM=";
+    script.dataset.category = "General";
+    script.dataset.categoryId = "DIC_kwDOBtOUcc4C0_rn";
+    script.dataset.mapping = "pathname";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+</div> <!-- /content -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.quarto-category').forEach(function(cat) {
+    const categoryName = cat.textContent.trim();
+    const encodedCategory = encodeURIComponent(btoa(categoryName));
+    cat.style.cursor = 'pointer';
+    cat.addEventListener('click', function() {
+      // Get site root from current URL
+      const siteRoot = window.location.origin + '/';
+      window.location.href = siteRoot + '#category=' + encodedCategory;
+    });
+  });
+});
+</script>
+<style>
+.quarto-category:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+</style>
+
+
+
+
+</body></html>
