@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-85314cde386895b85e915c39ab98eb64.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -864,52 +864,56 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <p>Three things jump out.</p>
 <p><strong>The divergence tax explodes exactly where you would want to use this prior.</strong> At <span class="math inline">\(\eta = 1\)</span>, the uniform LKJ, the forced-zero family runs 13–17% divergent at <span class="math inline">\(K = 5\)</span>, and by <span class="math inline">\(K = 7\)</span>–<span class="math inline">\(9\)</span> it is at <strong>85–94%</strong>: five of every six transitions divergent. That is not a tuning problem; that is the uniform prior putting real mass right where the forced values overshoot the stick. (A fun artifact visible in the <span class="math inline">\(\eta = 1\)</span> panel: four of the gold lines coincide exactly. With the seed fixed, <code>carpenter</code>, <code>pinkney</code>, <code>ldl2</code>, and <code>ldl3</code> are <em>literally the same density in raw coordinates</em> — the correlation-scale bounds never bind, by Cauchy–Schwarz — so their chains agree bit-for-bit until floating-point chaos separates them. The distinct-looking K = 7 table entries in Section 5 are that chaos, not different geometry.)</p>
 <p><strong>Initialization failure is the same boundary, expressed terminally.</strong> <code>schur</code> cannot find a feasible starting point in 100 attempts per chain for this sweep’s patterns from <span class="math inline">\(K = 7\)</span> up (it ran fine on all five Section 5 patterns at the same size; feasible initialization is pattern-dependent luck). <code>cvine</code> joins it at <span class="math inline">\(K = 15\)</span>. At <span class="math inline">\(K = 25\)</span>, with 143 forced cells, <em>none of the six forced models</em> can start at any <span class="math inline">\(\eta\)</span>. This is the scaling fact that matters: the feasible set the forced construction must hit by chance gets exponentially thin as the pattern grows, and <code>adapt_delta</code> cannot rescue a model that never takes its first draw. The subspace models are immune by construction, since every point of their parameter space is feasible.</p>
-<p>Since <code>tri</code> is the recommendation, here is its full scaling record on its own. Divergences are zero in every cell of this table, so what is left to watch is efficiency: min bulk ESS holds close to the 8,000-draw ceiling through <span class="math inline">\(K = 15\)</span> and comes down to a still-comfortable ~1,200 at <span class="math inline">\(K = 25\)</span>, where the min is taken over 157 free correlations. ESS per gradient decays gently with <span class="math inline">\(K\)</span>, is nearly flat in <span class="math inline">\(\eta\)</span>, and the wall clock stays in seconds throughout.</p>
+<p>The two exact-constraint members deserve a closer look side by side. <code>tri</code>’s divergence count is zero in every cell of this table; the donut matches it from <span class="math inline">\(\eta = 2\)</span> up but gives back a small count at <span class="math inline">\(\eta = 1\)</span> (bracketed below). On efficiency the pattern is dimension-dependent: <code>tri</code> holds its min bulk ESS close to the 8,000-draw ceiling through <span class="math inline">\(K = 15\)</span>, while the donut rides lower — but at <span class="math inline">\(K = 25\)</span>, where the min runs over 157 free correlations, the donut’s extra radial parameters stop costing and start paying, and its raw min ESS comes out 4–5<span class="math inline">\(\times\)</span> <code>tri</code>’s at comparable cost per gradient. Wall clock stays in seconds for both.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tri_tab <span class="ot">&lt;-</span> sweep <span class="sc">|&gt;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(model <span class="sc">==</span> <span class="st">"tri"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cell =</span> <span class="fu">sprintf</span>(<span class="st">"%s (%s)"</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sub_tab <span class="ot">&lt;-</span> sweep <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(model <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"tri"</span>, <span class="st">"donut"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cell =</span> <span class="fu">sprintf</span>(<span class="st">"%s (%s)%s"</span>,</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">format</span>(<span class="fu">round</span>(min_ess), <span class="at">big.mark =</span> <span class="st">","</span>),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">round</span>(ess_per_1k_grad))) <span class="sc">|&gt;</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(K, N_zero, eta, cell, seconds)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>tri_wide <span class="ot">&lt;-</span> tri_tab <span class="sc">|&gt;</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(K, N_zero, eta, cell) <span class="sc">|&gt;</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> eta, <span class="at">values_from =</span> cell,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">names_prefix =</span> <span class="st">"eta = "</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    tri_tab <span class="sc">|&gt;</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">group_by</span>(K) <span class="sc">|&gt;</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarize</span>(<span class="st">`</span><span class="at">wall clock (s)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.1f-%.1f"</span>,</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                                           <span class="fu">min</span>(seconds), <span class="fu">max</span>(seconds)),</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">.groups =</span> <span class="st">"drop"</span>),</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"K"</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">zero / free cells</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(N_zero, <span class="st">" / "</span>, <span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="sc">-</span> N_zero),</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">.after =</span> K) <span class="sc">|&gt;</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>N_zero)</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  tri_wide, <span class="at">align =</span> <span class="fu">c</span>(<span class="st">"r"</span>, <span class="st">"c"</span>, <span class="fu">rep</span>(<span class="st">"c"</span>, <span class="dv">4</span>), <span class="st">"c"</span>),</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"tri across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses). Divergences are 0 in every configuration; wall clock is the range across eta for 4 parallel chains."</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">round</span>(ess_per_1k_grad),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">ifelse</span>(divergences <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">paste0</span>(<span class="st">" ["</span>, divergences, <span class="st">" div]"</span>), <span class="st">""</span>)))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>sub_wide <span class="ot">&lt;-</span> sub_tab <span class="sc">|&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(model, K, N_zero, eta, cell) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> eta, <span class="at">values_from =</span> cell,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">names_prefix =</span> <span class="st">"eta = "</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    sub_tab <span class="sc">|&gt;</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">group_by</span>(model, K) <span class="sc">|&gt;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarize</span>(<span class="st">`</span><span class="at">wall clock (s)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.1f-%.1f"</span>,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                                           <span class="fu">min</span>(seconds), <span class="fu">max</span>(seconds)),</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">.groups =</span> <span class="st">"drop"</span>),</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"model"</span>, <span class="st">"K"</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">zero / free cells</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(N_zero, <span class="st">" / "</span>, <span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="sc">-</span> N_zero),</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">.after =</span> K) <span class="sc">|&gt;</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>N_zero) <span class="sc">|&gt;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(K, <span class="fu">desc</span>(model))</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  sub_wide, <span class="at">align =</span> <span class="fu">c</span>(<span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"c"</span>, <span class="fu">rep</span>(<span class="st">"c"</span>, <span class="dv">4</span>), <span class="st">"c"</span>),</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"tri and the donut (m_radius = 6) across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses; divergent transitions in brackets where nonzero -- tri has none anywhere). Wall clock is the range across eta for 4 parallel chains."</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption>tri across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses). Divergences are 0 in every configuration; wall clock is the range across eta for 4 parallel chains.</caption>
+<caption>tri and the donut (m_radius = 6) across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses; divergent transitions in brackets where nonzero – tri has none anywhere). Wall clock is the range across eta for 4 parallel chains.</caption>
 <colgroup>
-<col style="width: 3%">
-<col style="width: 20%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 15%">
+<col style="width: 5%">
+<col style="width: 2%">
+<col style="width: 16%">
+<col style="width: 18%">
 <col style="width: 17%">
+<col style="width: 11%">
+<col style="width: 12%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
+<th style="text-align: left;">model</th>
 <th style="text-align: right;">K</th>
 <th style="text-align: center;">zero / free cells</th>
 <th style="text-align: center;">eta = 1</th>
@@ -921,6 +925,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </thead>
 <tbody>
 <tr class="odd">
+<td style="text-align: left;">tri</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: center;">6 / 4</td>
 <td style="text-align: center;">7,350 (161)</td>
@@ -930,6 +935,17 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: center;">0.2-0.2</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">donut</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: center;">6 / 4</td>
+<td style="text-align: center;">2,364 (20) [23 div]</td>
+<td style="text-align: center;">3,865 (66)</td>
+<td style="text-align: center;">6,715 (120)</td>
+<td style="text-align: center;">8,832 (172)</td>
+<td style="text-align: center;">0.3-0.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tri</td>
 <td style="text-align: right;">7</td>
 <td style="text-align: center;">7 / 14</td>
 <td style="text-align: center;">7,403 (133)</td>
@@ -938,7 +954,18 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: center;">10,400 (187)</td>
 <td style="text-align: center;">0.4-0.4</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;">donut</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: center;">7 / 14</td>
+<td style="text-align: center;">2,031 (19) [42 div]</td>
+<td style="text-align: center;">5,796 (70)</td>
+<td style="text-align: center;">7,128 (117)</td>
+<td style="text-align: center;">8,430 (151)</td>
+<td style="text-align: center;">0.5-0.8</td>
+</tr>
 <tr class="odd">
+<td style="text-align: left;">tri</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: center;">13 / 23</td>
 <td style="text-align: center;">5,451 (97)</td>
@@ -948,6 +975,17 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: center;">0.6-0.6</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">donut</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: center;">13 / 23</td>
+<td style="text-align: center;">5,315 (36) [54 div]</td>
+<td style="text-align: center;">5,969 (74) [1 div]</td>
+<td style="text-align: center;">6,977 (123)</td>
+<td style="text-align: center;">6,834 (120)</td>
+<td style="text-align: center;">0.7-1.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tri</td>
 <td style="text-align: right;">15</td>
 <td style="text-align: center;">64 / 41</td>
 <td style="text-align: center;">7,400 (132)</td>
@@ -956,7 +994,18 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: center;">8,390 (150)</td>
 <td style="text-align: center;">1.2-1.4</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;">donut</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: center;">64 / 41</td>
+<td style="text-align: center;">5,046 (41) [99 div]</td>
+<td style="text-align: center;">7,532 (79)</td>
+<td style="text-align: center;">6,515 (82)</td>
+<td style="text-align: center;">7,523 (122)</td>
+<td style="text-align: center;">1.8-3.1</td>
+</tr>
 <tr class="odd">
+<td style="text-align: left;">tri</td>
 <td style="text-align: right;">25</td>
 <td style="text-align: center;">143 / 157</td>
 <td style="text-align: center;">1,156 (39)</td>
@@ -964,6 +1013,16 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: center;">1,499 (50)</td>
 <td style="text-align: center;">1,151 (44)</td>
 <td style="text-align: center;">6.3-7.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">donut</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: center;">143 / 157</td>
+<td style="text-align: center;">4,667 (29) [98 div]</td>
+<td style="text-align: center;">5,547 (46) [2 div]</td>
+<td style="text-align: center;">5,524 (46)</td>
+<td style="text-align: center;">5,907 (50)</td>
+<td style="text-align: center;">9.3-14.4</td>
 </tr>
 </tbody>
 </table>
