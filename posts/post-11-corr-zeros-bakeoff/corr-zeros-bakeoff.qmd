@@ -11,11 +11,11 @@ format:
 
 ## 1. The Problem with Zeros in Correlation Matrices
 
-Sometimes you know, before seeing any data, that certain correlations are exactly zero. A graphical model tells you two variables are conditionally unrelated, a confirmatory factor structure forbids a cross-loading, a physical system rules out a coupling. The prior you want is "LKJ [@lewandowski2009], restricted to the matrices that respect my zeros."
+Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are conditionally unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.
 
-You cannot get there by sampling from the LKJ and zeroing out cells, as the result is generally not positive definite. The zeros have to be built into the parameterization itself, and how you build them in turns out to matter a great deal for the sampler. In this post I race twelve Stan [@carpenter2017] parameterizations of the same target posterior against each other. Since all twelve provably target the same distribution (and I verify this numerically), the comparison isolates exactly one thing: **sampling geometry**. Divergences, effective sample size, and cost per gradient evaluation.
+You cannot get there by sampling from the LKJ and zeroing out cells, as the result is generally not positive definite. The zeros have to be built into the parameterization itself, and how you build them in turns out to matter a great deal for the sampler. In this post I test twelve Stan [@carpenter2017] parameterizations of the same target posterior against each other. Since all twelve provably target the same distribution (and I verify this numerically), the comparison isolates exactly one thing: **sampling geometry**. Divergences, effective sample size, and cost per gradient evaluation.
 
-The punchline: the two families of solutions make opposite trade-offs, and a hybrid, an exact-constraint construction with a canonical triangular basis, refuses to trade at all. **Zero divergences in every run, the best ESS per gradient in the field, and the fastest wall clock.**
+The two families of solutions make opposite trade-offs, and a hybrid, an exact-constraint construction with a canonical triangular basis, is best of all. **Zero divergences in every run, the best ESS per gradient in the field, and the fastest wall clock.**
 
 ## 2. Family 1: Forced Zeros
 
@@ -24,7 +24,7 @@ Family 1 is the constrained-Cholesky approach I introduced in @pinkney2024 and p
 b_1 = \sum_{k<j} L_{ik} L_{jk},
 $$ which is affine in $L_{ij}$, so a known value — here zero — pins $L_{ij} = -b_1 / L_{jj}$ and consumes no parameter, while a bound on $\Omega_{ij}$ becomes a bound on $L_{ij}$. Conditioning the LKJ distribution on $\Omega_{ij} = 0$, a delta function in $\Omega$ coordinates, contributes a density correction of $-\log L_{jj}$ per zero. The `carpenter` variant below is Bob Carpenter's compact formulation of the zeros-only case, from a [recent Stan Discourse exchange](https://discourse.mc-stan.org/t/new-users-guide-intro-sem-and-user-defined-constrained-parameters-chapters/41430) about exactly this problem:
 
-``` {.stan}
+``` stan
 if (is_zero(i, j, zeros, zero_idx)) {
   real b = dot_product(L[j, 1:(j - 1)], L[i, 1:(j - 1)]);
   L[i, j] = -b / L[j, j];   // implies Omega[i, j] == 0
@@ -36,7 +36,7 @@ if (is_zero(i, j, zeros, zero_idx)) {
 The forced-zero trick composes with essentially any Cholesky-style parameterization of the free cells, which is how one idea becomes eight models:
 
 | label | free-cell parameterization |
-|:---|:---|
+|:-----------------------------------|:-----------------------------------|
 | `carpenter` | direct Cholesky entries, bounded by the remaining stick |
 | `pinkney` | correlation-scale value divided by $L_{jj}$, multiplicative stick [@pinkney2024; @pinkneytalk] |
 | `ldl` / `ldl2` / `ldl3` | $LDL'$ factorization [@pinkney2024]; stick tracked via `log_diff_exp`, a `log1m` ratio, or the natural scale |
@@ -75,7 +75,7 @@ Per constrained row, the entire construction is one $d \times d$ `cholesky_decom
 The subspace family has a second member: a "donut" variant, one extra parameter per row. Normalize a free vector, $u = y / \lVert y \rVert$, and the row's subsphere coordinates come along with beautifully isotropic geometry — except that the normalization map has a singularity at the origin, and the implicit chi-distributed radius that $-\tfrac{1}{2} y'y$ places on $\lVert y \rVert$ lets the sampler wander right into it. The cure is also Seth Axen's, from the *A Better Unit Vector* Discourse thread [@axen2022]: put an explicit prior on the radius that repels the norm from the origin. I use his Gaussian-centered form, replacing $-\tfrac{1}{2}\lVert y \rVert^2$ with $-\tfrac{1}{2}(\lVert y \rVert - m)^2$. The radial factor is independent of the direction, so the $\Omega$ posterior is untouched (verified against `carpenter`: max free-cell mean difference 0.0046); the only thing that changes is the geometry the sampler sees. Across the five $K = 7$, $\eta = 4$ patterns:
 
 | radial prior | total divergences | median min ESS | median ESS / 1k gradients |
-|:---|--:|--:|--:|
+|:--------------------|----------------:|----------------:|----------------:|
 | $m = 0$ (implicit chi) | 2,549 | 4,778 | 19 |
 | $m = 2$ | 349 | 8,106 | 80 |
 | $m = 4$ | 8 | 10,778 | 192 |
@@ -90,7 +90,7 @@ Setup: $K = 7$, $\eta = 4$, prior-only, five random zero patterns with roughly h
 **Divergences** out of 8,000 post-warmup transitions:
 
 | pattern | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
 | seed 1 | 34 | 53 | 53 | 26 | 41 | 44 | 40 | 40 | 0 | 0 | **0** | 0 |
 | seed 2 | 61 | 65 | 74 | 107 | 64 | 78 | 104 | 60 | 0 | 0 | **0** | 0 |
 | seed 3 | 77 | 44 | 67 | 57 | 69 | 44 | 68 | 59 | 0 | 0 | **0** | 0 |
@@ -101,7 +101,7 @@ Setup: $K = 7$, $\eta = 4$, prior-only, five random zero patterns with roughly h
 **Min bulk ESS** over the free cells of $\Omega$ (8,000 draws):
 
 | pattern | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
 | seed 1 | 11639 | 10566 | 9979 | 10618 | 10219 | 11319 | 9840 | 11036 | 3995 | 3362 | **11430** | 10676 |
 | seed 2 | 10817 | 9866 | 10826 | 9772 | 10188 | 10153 | 10361 | 10040 | 4049 | 3728 | **11427** | 9045 |
 | seed 3 | 9344 | 11014 | 10244 | 10314 | 10946 | 9420 | 10625 | 10787 | 4334 | 4304 | 9574 | 9429 |
@@ -111,8 +111,8 @@ Setup: $K = 7$, $\eta = 4$, prior-only, five random zero patterns with roughly h
 
 **Efficiency** (medians over the five patterns):
 
-|  | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+|   | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
+|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
 | min ESS / 1000 gradients | 188.5 | 179.6 | 185.9 | 182.2 | 188.9 | 176.3 | 182.1 | 182.0 | 75.0 | 72.5 | **207.3** | 161.8 |
 | total wall clock, 5 fits (s) | 4.53 | 4.10 | 4.40 | 4.51 | 5.14 | 4.21 | 4.51 | 4.15 | 2.07 | 2.06 | **1.95** | 2.39 |
 
@@ -285,7 +285,7 @@ knitr::kable(
 ## 7. When to Use Which
 
 | Scenario | Recommendation |
-|:---|:---|
+|:-----------------------------------|:-----------------------------------|
 | Any new model with structural zeros | `tri`: exact constraints, no divergence tax, no efficiency tax |
 | Small $K$, sparse zeros, existing forced-zero code, deadlines | Family 1 is fine with `adapt_delta` raised and divergences monitored |
 | $K \gtrsim 15$ with dense zero patterns | Family 1 may not even initialize; `tri` is the only option here that is both feasible and efficient |
@@ -306,8 +306,7 @@ The exact-constraint subspace idea, zeros as orthogonality constraints with the 
 
 ## Appendix: Stan Code for All Twelve Parameterizations
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### tri
 
 ``` {.stan filename="unitvec-tri-corr-zeros.stan"}
@@ -379,5 +378,4 @@ The exact-constraint subspace idea, zeros as orthogonality constraints with the 
 ``` {.stan filename="qr2-corr-zeros.stan"}
 {{< include qr2-corr-zeros.stan >}}
 ```
-
 :::
