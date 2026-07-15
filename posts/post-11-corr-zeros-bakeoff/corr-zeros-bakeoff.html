@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-85314cde386895b85e915c39ab98eb64.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -1091,8 +1091,12 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
 <p>The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the <span class="math inline">\(\det R\)</span> Jacobian factor, is due to Seth Axen <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>, whose radial prior <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span> the donut variant relies on. The <code>tri</code> model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as <code>carpenter</code>, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of <span class="citation" data-cites="joe2006">Joe (<a href="#ref-joe2006" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="lewandowski2009">Lewandowski et al. (<a href="#ref-lewandowski2009" role="doc-biblioref">2009</a>)</span>.</p>
 </section>
-<section id="appendix-stan-code-for-tri" class="level2">
-<h2 class="anchored" data-anchor-id="appendix-stan-code-for-tri">Appendix: Stan Code for <code>tri</code></h2>
+<section id="appendix-stan-code-for-all-twelve-parameterizations" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-stan-code-for-all-twelve-parameterizations">Appendix: Stan Code for All Twelve Parameterizations</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">tri</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">donut</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">carpenter</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false" href="">pinkney</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false" href="">ldl</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-6" role="tab" aria-controls="tabset-1-6" aria-selected="false" href="">ldl2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-7" role="tab" aria-controls="tabset-1-7" aria-selected="false" href="">ldl3</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-8" role="tab" aria-controls="tabset-1-8" aria-selected="false" href="">cvine</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-9" role="tab" aria-controls="tabset-1-9" aria-selected="false" href="">rowscale</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-10-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-10" role="tab" aria-controls="tabset-1-10" aria-selected="false" href="">schur</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-11-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-11" role="tab" aria-controls="tabset-1-11" aria-selected="false" href="">qr</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-12-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-12" role="tab" aria-controls="tabset-1-12" aria-selected="false" href="">qr2</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>unitvec-tri-corr-zeros.stan</strong></pre>
@@ -1217,6 +1221,903 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
 <span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
 <span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>unitvec-donut-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="unitvec-donut-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_donut_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                                                <span class="dt">array</span>[,] <span class="dt">int</span> zeros,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                                                <span class="dt">real</span> m_radius) {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Exact-constraint subspace geometry with the triangular basis, but the</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// subsphere is parameterized by normalizing a free vector ("donut"):</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// one extra parameter per row, u = y / ||y||, with -0.5 * y'y keeping</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the radius Gaussian and independent of the direction. The diagonal</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// is |u_last| (the two mirror hemispheres fold onto the same L), and</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the measure conversion dz = |u_last| dsigma contributes log|u_last|</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// on top of the LKJ weight supplied by the model block.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> n_z <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> (zero_idx <span class="op">+</span> n_z <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;&amp;</span> zeros[zero_idx <span class="op">+</span> n_z, <span class="dv">1</span>] <span class="op">==</span> i) {</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        n_z <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d <span class="op">+</span> <span class="dv">1</span>] y <span class="op">=</span> raw[raw_idx<span class="op">:</span>(raw_idx <span class="op">+</span> d)];</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> s <span class="op">=</span> <span class="fu">norm2</span>(y);</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d <span class="op">+</span> <span class="dv">1</span>] u <span class="op">=</span> y <span class="op">/</span> s;</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>      <span class="co">// radial prior centered at m_radius repels the norm from the</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>      <span class="co">// origin singularity of the normalization (Axen, "A better unit</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>      <span class="co">// vector", Stan Discourse post 30); m_radius = 0 recovers the</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>      <span class="co">// implicit chi-distributed radius. The direction marginal, and</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>      <span class="co">// hence the Omega posterior, is unchanged.</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>      <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> <span class="fu">square</span>(s <span class="op">-</span> m_radius) <span class="op">+</span> <span class="fu">log</span>(<span class="fu">abs</span>(u[d <span class="op">+</span> <span class="dv">1</span>]));</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>      L[i, i] <span class="op">=</span> <span class="fu">abs</span>(u[d <span class="op">+</span> <span class="dv">1</span>]);</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>      raw_idx <span class="op">+=</span> d <span class="op">+</span> <span class="dv">1</span>;</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> u[<span class="dv">1</span><span class="op">:</span>d]<span class="op">'</span>;</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>        <span class="dt">array</span>[n_z] <span class="dt">int</span> zc;</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>          zc[m] <span class="op">=</span> zeros[zero_idx <span class="op">+</span> m <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>];</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">// -0.5 * log det(Gram of zero-partner rows) from the joint delta</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, n_z] A;</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>          A[, m] <span class="op">=</span> L[zc[m], <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)]<span class="op">'</span>;</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">diagonal</span>(<span class="fu">cholesky_decompose</span>(<span class="fu">crossprod</span>(A)))));</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>          <span class="dt">array</span>[d] <span class="dt">int</span> free_cols;</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> fc <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> zp <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (c <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (zp <span class="op">&lt;=</span> n_z <span class="op">&amp;&amp;</span> zc[zp] <span class="op">==</span> c) {</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>                zp <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>              } <span class="cf">else</span> {</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>                fc <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>                free_cols[fc] <span class="op">=</span> c;</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>          <span class="co">// triangular basis: unit at each free column, forced columns</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>          <span class="co">// filled by back-substitution so every column is orthogonal to</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the zero-partner rows</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, d] T <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, i <span class="op">-</span> <span class="dv">1</span>, d);</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> <span class="fu">col</span> <span class="op">=</span> free_cols[k];</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>            T[<span class="fu">col</span>, k] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>              <span class="dt">int</span> j <span class="op">=</span> zc[m];</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (j <span class="op">&gt;</span> <span class="fu">col</span>) {</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>                T[j, k] <span class="op">=</span> <span class="op">-</span><span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], T[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>), k])</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>                          <span class="op">/</span> L[j, j];</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>          <span class="co">// orthonormalize: v = T * S'^{-1} * u[1:d] has ||v|| = ||u[1:d]||</span></span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[d, d] S <span class="op">=</span> <span class="fu">cholesky_decompose</span>(<span class="fu">crossprod</span>(T));</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] t <span class="op">=</span> <span class="fu">mdivide_right_tri_low</span>(u[<span class="dv">1</span><span class="op">:</span>d]<span class="op">'</span>, S)<span class="op">'</span>;</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (T <span class="op">*</span> t)<span class="op">'</span>;</span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> m_radius;                     <span class="co">// radial prior center; 0 = chi radius</span></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>  <span class="co">// one extra parameter per row: dim d + 1 per row sums to</span></span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>  <span class="co">// choose(K, 2) - N_zero + (K - 1)</span></span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero <span class="op">+</span> K <span class="op">-</span> <span class="dv">1</span>] raw;</span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_donut_jacobian</span>(K, raw, zeros,</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>                                                                m_radius);</span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>carpenter-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="carpenter-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_zeros_jacobian</span>(<span class="dt">int</span> D,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                                      <span class="dt">vector</span> raw,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                                      <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[D, D] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, D, D);</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>D) {</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> stick <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> b <span class="op">=</span> <span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>          L[i, j] <span class="op">=</span> <span class="op">-</span>b <span class="op">/</span> L[j, j];  <span class="co">// implies Omega[i, j] == 0</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> sqrt_stick <span class="op">=</span> <span class="fu">sqrt</span>(stick);</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>          L[i, j] <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], <span class="op">-</span>sqrt_stick, sqrt_stick);  <span class="co">// inside stick</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="dv">0</span>;</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    stick <span class="op">-=</span> L[i, j]<span class="op">^</span><span class="dv">2</span>;</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>      L[i, i] <span class="op">=</span> <span class="fu">sqrt</span>(stick);</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> lkj_cholesky_corr_zeros_lpdf(<span class="dt">matrix</span> L,</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>                                    <span class="dt">real</span> nu,</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>                                    <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> lp <span class="op">=</span> lkj_corr_cholesky_lpdf(L | nu);  <span class="co">// over-adjusts</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N_zero <span class="op">=</span> <span class="fu">size</span>(zeros);</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>N_zero) {                      </span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> col_idx <span class="op">=</span> zeros[n, <span class="dv">2</span>];</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>      lp <span class="op">-=</span> <span class="fu">log</span>(L[col_idx, col_idx]);          <span class="co">// correct over-adjustment</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lp;</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> D;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(D, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(D, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;           <span class="co">// raw parameters</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[D, D] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_zeros_jacobian</span>(D, raw, zeros);</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span>lkj_cholesky_corr_zeros(eta, zeros);</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[D, D] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinkney-corr-zeros2.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="pinkney-corr-zeros2.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_outer_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                                                <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>      <span class="co">// remaining radius of row i: sqrt(1 - sum of squares so far)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> l_ij_old <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> l_ij_old_x_l_jj <span class="op">=</span> l_ij_old <span class="op">*</span> L[j, j];</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> b1 <span class="op">=</span> <span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// how to derive the bounds</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// we know that the correlation value C is bound by</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// b1 - Ljj * Lij_old &lt;= C &lt;= b1 + Ljj * Lij_old</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Now we want our bounds to be enforced too so</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// max(lb, b1 - Ljj * Lij_old) &lt;= C &lt;= min(ub, b1 + Ljj * Lij_old)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// We have Lij_new = (C - b1) / Ljj</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x;</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="op">-</span>b1;  <span class="co">// Omega[i, j] = b1 + Lij * Ljj = 0</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> low <span class="op">=</span> <span class="fu">max</span>({<span class="op">-</span>l_ij_old_x_l_jj, <span class="op">-</span><span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> up <span class="op">=</span> <span class="fu">min</span>({l_ij_old_x_l_jj, <span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], low, up);</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>        L[i, j] <span class="op">=</span> x <span class="op">/</span> L[j, j];</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">// free entries: change of variables x -&gt; L[i, j]</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">// zero entries: Carpenter's correction for the LKJ over-adjustment</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[j, j]);</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        l_ij_old <span class="op">*=</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="op">-</span> (L[i, j] <span class="op">/</span> l_ij_old)<span class="op">^</span><span class="dv">2</span>);</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>      L[i, i] <span class="op">=</span> l_ij_old;</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_outer_jacobian</span>(K, raw, zeros);</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-5-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinkney-corr-zeros-ldl.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-filename="pinkney-corr-zeros-ldl.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_ldl_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                                              <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Omega = L * diag(D) * L' with unit lower-triangular L;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the Cholesky factor is diag_post_multiply(L, sqrt(D))</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">diag_matrix</span>(<span class="fu">rep_vector</span>(<span class="dv">1</span>, K));</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[K] D;</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[K] log_D;</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    D[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    log_D[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>      <span class="co">// log remaining radius^2 of row i: log(1 - sum_{k&lt;j} L[i,k]^2 * D[k])</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> log_r <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> b1 <span class="op">=</span> <span class="fu">dot_product</span>(D[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]<span class="op">'</span> <span class="op">.*</span> L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)],</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>                              L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Omega[i, j] = b1 + L[i, j] * D[j] and the correlation C satisfies</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// |C - b1| &lt;= sqrt(D[j] * r), intersected with (-1, 1)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x;</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="op">-</span>b1;  <span class="co">// Omega[i, j] = b1 + Lij * Dj = 0</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> b2 <span class="op">=</span> <span class="fu">exp</span>(<span class="fl">0.5</span> <span class="op">*</span> (log_r <span class="op">+</span> log_D[j]));</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> low <span class="op">=</span> <span class="fu">max</span>({<span class="op">-</span>b2, <span class="op">-</span><span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> up <span class="op">=</span> <span class="fu">min</span>({b2, <span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], low, up);</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        L[i, j] <span class="op">=</span> x <span class="op">/</span> D[j];</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// free entries: change of variables x -&gt; L_chol[i, j] = x / sqrt(D[j])</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">// zero entries: Carpenter's correction -log(L_chol[j, j])</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> log_D[j];</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        log_r <span class="op">=</span> <span class="fu">log_diff_exp</span>(log_r, log_D[j] <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> <span class="fu">log</span>(<span class="fu">abs</span>(L[i, j])));</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>      log_D[i] <span class="op">=</span> log_r;</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>      D[i] <span class="op">=</span> <span class="fu">exp</span>(log_r);</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">diag_post_multiply</span>(L, <span class="fu">sqrt</span>(D));</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_ldl_jacobian</span>(K, raw, zeros);</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-6-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinkney-corr-zeros-ldl2.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-filename="pinkney-corr-zeros-ldl2.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_ldl2_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                                               <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Omega = L * diag(D) * L' with unit lower-triangular L;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the Cholesky factor is diag_post_multiply(L, sqrt(D)).</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Same as ldl version except the remaining radius is updated with</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// log1m of the ratio instead of log_diff_exp.</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">diag_matrix</span>(<span class="fu">rep_vector</span>(<span class="dv">1</span>, K));</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[K] D;</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[K] log_D;</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    D[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    log_D[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>      <span class="co">// log remaining radius^2 of row i: log(1 - sum_{k&lt;j} L[i,k]^2 * D[k])</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> log_r <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> b1 <span class="op">=</span> <span class="fu">dot_product</span>(D[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]<span class="op">'</span> <span class="op">.*</span> L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)],</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                              L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Omega[i, j] = b1 + L[i, j] * D[j] and the correlation C satisfies</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// |C - b1| &lt;= sqrt(D[j] * r), intersected with (-1, 1)</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x;</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="op">-</span>b1;  <span class="co">// Omega[i, j] = b1 + Lij * Dj = 0</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> b2 <span class="op">=</span> <span class="fu">exp</span>(<span class="fl">0.5</span> <span class="op">*</span> (log_r <span class="op">+</span> log_D[j]));</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> low <span class="op">=</span> <span class="fu">max</span>({<span class="op">-</span>b2, <span class="op">-</span><span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> up <span class="op">=</span> <span class="fu">min</span>({b2, <span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], low, up);</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>        L[i, j] <span class="op">=</span> x <span class="op">/</span> D[j];</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">// free entries: change of variables x -&gt; L_chol[i, j] = x / sqrt(D[j])</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">// zero entries: Carpenter's correction -log(L_chol[j, j])</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> log_D[j];</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>        log_r <span class="op">+=</span> <span class="fu">log1m</span>(D[j] <span class="op">*</span> L[i, j]<span class="op">^</span><span class="dv">2</span> <span class="op">/</span> <span class="fu">exp</span>(log_r));</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>      log_D[i] <span class="op">=</span> log_r;</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>      D[i] <span class="op">=</span> <span class="fu">exp</span>(log_r);</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">diag_post_multiply</span>(L, <span class="fu">sqrt</span>(D));</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_ldl2_jacobian</span>(K, raw, zeros);</span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-7" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-7-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinkney-corr-zeros-ldl3.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-filename="pinkney-corr-zeros-ldl3.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_ldl3_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                                               <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Omega = L * diag(D) * L' with unit lower-triangular L;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the Cholesky factor is diag_post_multiply(L, sqrt(D)).</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Same as the ldl versions except the remaining radius is tracked on</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the natural scale: r -= D[j] * L[i, j]^2.</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">diag_matrix</span>(<span class="fu">rep_vector</span>(<span class="dv">1</span>, K));</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[K] D;</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    D[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      <span class="co">// remaining radius^2 of row i: 1 - sum_{k&lt;j} L[i,k]^2 * D[k]</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> b1 <span class="op">=</span> <span class="fu">dot_product</span>(D[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]<span class="op">'</span> <span class="op">.*</span> L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)],</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                              L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Omega[i, j] = b1 + L[i, j] * D[j] and the correlation C satisfies</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// |C - b1| &lt;= sqrt(D[j] * r), intersected with (-1, 1)</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x;</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="op">-</span>b1;  <span class="co">// Omega[i, j] = b1 + Lij * Dj = 0</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> b2 <span class="op">=</span> <span class="fu">sqrt</span>(r <span class="op">*</span> D[j]);</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> low <span class="op">=</span> <span class="fu">max</span>({<span class="op">-</span>b2, <span class="op">-</span><span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> up <span class="op">=</span> <span class="fu">min</span>({b2, <span class="dv">1</span> <span class="op">-</span> b1});</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>          x <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], low, up);</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        L[i, j] <span class="op">=</span> x <span class="op">/</span> D[j];</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// free entries: change of variables x -&gt; L_chol[i, j] = x / sqrt(D[j])</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">// zero entries: Carpenter's correction -log(L_chol[j, j])</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> <span class="fu">log</span>(D[j]);</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>        r <span class="op">-=</span> D[j] <span class="op">*</span> L[i, j]<span class="op">^</span><span class="dv">2</span>;</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>      D[i] <span class="op">=</span> r;</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">diag_post_multiply</span>(L, <span class="fu">sqrt</span>(D));</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_ldl3_jacobian</span>(K, raw, zeros);</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-8" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-8-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>cvine-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-filename="cvine-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// traversal here is tree-by-tree (column major), so scan instead of the</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// merge-join used by the row-major models</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero_scan(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="fu">size</span>(zeros)) {</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (zeros[n, <span class="dv">1</span>] <span class="op">==</span> row_idx <span class="op">&amp;&amp;</span> zeros[n, <span class="dv">2</span>] <span class="op">==</span> col_idx) {</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span>;</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span>;</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">corr_constrain_cvine_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                                       <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">real</span> eta) {</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] C <span class="op">=</span> <span class="fu">identity_matrix</span>(K);</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] P <span class="op">=</span> <span class="fu">identity_matrix</span>(K);</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// LKJ in C-vine form: partial corr in tree i ~ Beta(a - i/2 adjustments);</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// constant base a with the -0.5 * i * log1m(p^2) correction below</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> a <span class="op">=</span> eta <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> (K <span class="op">-</span> <span class="dv">1</span>);</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// tree 1: marginal correlations with variable 1</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (is_zero_scan(k, <span class="dv">1</span>, zeros)) {</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        P[<span class="dv">1</span>, k] <span class="op">=</span> <span class="dv">0</span>;  <span class="co">// prior terms at p = 0 are constants</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        P[<span class="dv">1</span>, k] <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], <span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>);</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> beta_lpdf(<span class="fl">0.5</span> <span class="op">*</span> (P[<span class="dv">1</span>, k] <span class="op">+</span> <span class="dv">1</span>) | a, a)</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>                    <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu">log1m</span>(P[<span class="dv">1</span>, k]<span class="op">^</span><span class="dv">2</span>);</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>      C[<span class="dv">1</span>, k] <span class="op">=</span> P[<span class="dv">1</span>, k];</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>      C[k, <span class="dv">1</span>] <span class="op">=</span> P[<span class="dv">1</span>, k];</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>(K <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> (i <span class="op">+</span> <span class="dv">1</span>)<span class="op">:</span>K) {</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        <span class="dt">vector</span>[i <span class="op">-</span> <span class="dv">1</span>] b1;</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>        <span class="dt">vector</span>[i <span class="op">-</span> <span class="dv">1</span>] b2;</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> m <span class="op">=</span> i;</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>          m <span class="op">-=</span> <span class="dv">1</span>;</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>          b1[k] <span class="op">=</span> P[m, i] <span class="op">*</span> P[m, j];</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>          b2[k] <span class="op">=</span> <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="op">-</span> P[m, i]<span class="op">^</span><span class="dv">2</span>) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> P[m, j]<span class="op">^</span><span class="dv">2</span>));</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>        <span class="co">// unwinding the partial correlation recursion is affine:</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">// C[i, j] = A + B * P[i, j]</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> A <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> B <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>          A <span class="op">=</span> b1[k] <span class="op">+</span> A <span class="op">*</span> b2[k];</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>          B <span class="op">*=</span> b2[k];</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> p_ij;</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero_scan(j, i, zeros)) {</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>          p_ij <span class="op">=</span> <span class="op">-</span>A <span class="op">/</span> B;         <span class="co">// C[i, j] = 0</span></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(B);   <span class="co">// delta in Omega coords -&gt; partial coords</span></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>          p_ij <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], <span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>);</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>        <span class="co">// LKJ prior on the tree-i partial (evaluated at p* for zeros)</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> beta_lpdf(<span class="fl">0.5</span> <span class="op">*</span> (p_ij <span class="op">+</span> <span class="dv">1</span>) | a, a)</span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>                    <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> i <span class="op">*</span> <span class="fu">log1m</span>(p_ij<span class="op">^</span><span class="dv">2</span>);</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>        P[i, j] <span class="op">=</span> p_ij;</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>        C[i, j] <span class="op">=</span> A <span class="op">+</span> B <span class="op">*</span> p_ij;</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>        C[j, i] <span class="op">=</span> C[i, j];</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> C;</span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ</span></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular index pairs</span></span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>  <span class="co">// prior is included via the beta terms in the constraint, so the</span></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>  <span class="co">// model block stays empty</span></span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> <span class="bu">corr_constrain_cvine_jacobian</span>(K, raw, zeros, eta);</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-9" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-9-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinkney-corr-zeros-rowscale.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" data-filename="pinkney-corr-zeros-rowscale.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_rowscale_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                                                   <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Samples L[i, j] directly (bounds pre-divided by L[j, j]) and keeps the</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// remaining radius in the untouched tail of the row: each entry of</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// L[i, j:i] holds the current radius until column j is sampled, then the</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// tail is scaled down. L[i, i] ends up as the diagonal automatically.</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>      L[i, <span class="dv">1</span><span class="op">:</span>i] <span class="op">=</span> <span class="fu">rep_row_vector</span>(<span class="dv">1</span>, i);</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> l_ij_old <span class="op">=</span> L[i, j];  <span class="co">// remaining radius of row i</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> b1 <span class="op">=</span> <span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>          L[i, j] <span class="op">=</span> <span class="op">-</span>b1 <span class="op">/</span> L[j, j];  <span class="co">// Omega[i, j] = b1 + Lij * Ljj = 0</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[j, j]);  <span class="co">// Carpenter's correction</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>          <span class="co">// |L[i, j]| &lt;= radius and Omega[i, j] = b1 + Lij * Ljj in (-1, 1);</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>          <span class="co">// sampling L directly, the 1 / L[j, j] factor is inside the</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>          <span class="co">// bound width, so no separate jacobian term</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> low <span class="op">=</span> <span class="fu">max</span>({<span class="op">-</span>l_ij_old, (<span class="op">-</span><span class="dv">1</span> <span class="op">-</span> b1) <span class="op">/</span> L[j, j]});</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> up <span class="op">=</span> <span class="fu">min</span>({l_ij_old, (<span class="dv">1</span> <span class="op">-</span> b1) <span class="op">/</span> L[j, j]});</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>          L[i, j] <span class="op">=</span> <span class="bu">lower_upper_bound_jacobian</span>(raw[raw_idx], low, up);</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        L[i, (j <span class="op">+</span> <span class="dv">1</span>)<span class="op">:</span>i] <span class="op">*=</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="op">-</span> (L[i, j] <span class="op">/</span> l_ij_old)<span class="op">^</span><span class="dv">2</span>);</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_rowscale_jacobian</span>(K, raw, zeros);</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-10" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-10-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinkney-corr-zeros-schur.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-filename="pinkney-corr-zeros-schur.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> is_zero(<span class="dt">int</span> row_idx, <span class="dt">int</span> col_idx, <span class="dt">array</span>[,] <span class="dt">int</span> zeros, <span class="dt">int</span> zero_idx) {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> zero_idx <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">1</span>] <span class="op">==</span> row_idx</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;&amp;</span> zeros[zero_idx, <span class="dv">2</span>] <span class="op">==</span> col_idx;</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_schur_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                                                <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Canonical partial correlation construction: each free entry is the</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// remaining radius times tanh(raw), so |L[i, j]| &lt; radius automatically</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// and no correlation bounds are needed. The untouched tail of each row</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// holds the current radius (row-scaling trick).</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      L[i, <span class="dv">1</span><span class="op">:</span>i] <span class="op">=</span> <span class="fu">rep_row_vector</span>(<span class="dv">1</span>, i);</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> r <span class="op">=</span> L[i, j];  <span class="co">// remaining radius of row i</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (is_zero(i, j, zeros, zero_idx)) {</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> b1 <span class="op">=</span> <span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], L[i, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)]);</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>          L[i, j] <span class="op">=</span> <span class="op">-</span>b1 <span class="op">/</span> L[j, j];  <span class="co">// Omega[i, j] = b1 + Lij * Ljj = 0</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[j, j]);  <span class="co">// Carpenter's correction</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>          zero_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>          L[i, (j <span class="op">+</span> <span class="dv">1</span>)<span class="op">:</span>i] <span class="op">*=</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="op">-</span> (L[i, j] <span class="op">/</span> r)<span class="op">^</span><span class="dv">2</span>);</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> x <span class="op">=</span> raw[raw_idx];</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> cosh_x <span class="op">=</span> <span class="fu">cosh</span>(x);</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>          <span class="co">// tanh jacobian and x -&gt; L[i, j] = r * tanh(x);</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the radius update sqrt(1 - tanh^2) is 1 / cosh</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="dv">2</span> <span class="op">*</span> <span class="fu">log</span>(cosh_x) <span class="op">+</span> <span class="fu">log</span>(r);</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>          L[i, j] <span class="op">=</span> r <span class="op">*</span> <span class="fu">tanh</span>(x);</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>          L[i, (j <span class="op">+</span> <span class="dv">1</span>)<span class="op">:</span>i] <span class="op">/=</span> cosh_x;</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_schur_jacobian</span>(K, raw, zeros);</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-11" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-11-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>qr-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-filename="qr-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_unitvec_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                                                  <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Row i of a Cholesky correlation factor is a unit vector in R^i with</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// positive last coordinate. Omega[i, j] = 0 means row i is orthogonal</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// to row j, so row i lives on the unit sphere in the orthogonal</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// complement of its zero-partner rows: the constraint is satisfied</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// exactly by construction and no proposal can ever be infeasible.</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">//</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Chart per row: unit vector u = (C * y, 1)' / s with s = sqrt(1 + y'y),</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// C an orthonormal basis of the feasible subspace. Jacobian onto the</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// subsphere is -(d + 2) * log(s); the joint delta over the row's zeros</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// contributes -0.5 * log det(Gram) = -sum(log|diag(R)|) from the QR.</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> n_z <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> (zero_idx <span class="op">+</span> n_z <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;&amp;</span> zeros[zero_idx <span class="op">+</span> n_z, <span class="dv">1</span>] <span class="op">==</span> i) {</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        n_z <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">vector</span>[d] y <span class="op">=</span> raw[raw_idx<span class="op">:</span>(raw_idx <span class="op">+</span> d <span class="op">-</span> <span class="dv">1</span>)];</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> s <span class="op">=</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="op">+</span> <span class="fu">dot_self</span>(y));</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>        L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> y<span class="op">'</span> <span class="op">/</span> s;</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> s;</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(s);</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> d;</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// columns are the zero-partner rows restricted to 1:(i - 1)</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, n_z] A;</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>          A[, n] <span class="op">=</span> L[zeros[zero_idx <span class="op">+</span> n <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>], <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)]<span class="op">'</span>;</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// full qr: the complement basis lives in Q's last d columns and</span></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">// diagonal(R) supplies the Gram term from one decomposition</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, i <span class="op">-</span> <span class="dv">1</span>] Q;</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, n_z] R;</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>        (Q, R) <span class="op">=</span> <span class="fu">qr</span>(A);</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">abs</span>(<span class="fu">diagonal</span>(R))));</span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] y <span class="op">=</span> raw[raw_idx<span class="op">:</span>(raw_idx <span class="op">+</span> d <span class="op">-</span> <span class="dv">1</span>)];</span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>          <span class="dt">real</span> s <span class="op">=</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="op">+</span> <span class="fu">dot_self</span>(y));</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (Q[, (n_z <span class="op">+</span> <span class="dv">1</span>)<span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">*</span> y)<span class="op">'</span> <span class="op">/</span> s;</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>          L[i, i] <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> s;</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(s);</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>          raw_idx <span class="op">+=</span> d;</span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>          L[i, i] <span class="op">=</span> <span class="dv">1</span>;  <span class="co">// row fully constrained: e_i</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_unitvec_jacobian</span>(K, raw, zeros);</span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div id="tabset-1-12" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-12-tab">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>qr2-corr-zeros.stan</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-filename="qr2-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_unitvec2_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                                                   <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Same exact-constraint geometry as the unitvec version: row i lives on</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the unit sphere in the orthogonal complement of its zero-partner rows,</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// so every raw value maps to a valid constrained matrix. The chart on</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the subsphere is the canonical-partial-correlation (tanh) stick</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// construction instead of the gnomonic map, to lighten the tails.</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[K, K] L <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, K, K);</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> raw_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> zero_idx <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    L[<span class="dv">1</span>, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span>K) {</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> n_z <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> (zero_idx <span class="op">+</span> n_z <span class="op">&lt;=</span> <span class="fu">size</span>(zeros)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;&amp;</span> zeros[zero_idx <span class="op">+</span> n_z, <span class="dv">1</span>] <span class="op">==</span> i) {</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        n_z <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>      <span class="co">// subspace coordinates via tanh sticks: w_k = tanh(x_k) * radius,</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>      <span class="co">// radius update sqrt(1 - tanh^2) = 1 / cosh, so the whole chart</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>      <span class="co">// jacobian collapses to accumulated powers of log(cosh)</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d] w;</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x <span class="op">=</span> raw[raw_idx];</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> cosh_x <span class="op">=</span> <span class="fu">cosh</span>(x);</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>        w[k] <span class="op">=</span> r <span class="op">*</span> <span class="fu">tanh</span>(x);</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">-</span> k <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(cosh_x);</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>        r <span class="op">/=</span> cosh_x;</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> w<span class="op">'</span>;</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">// columns are the zero-partner rows restricted to 1:(i - 1);</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">// -0.5 * log det(Gram) from the joint delta over this row's zeros</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, n_z] A;</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>          A[, n] <span class="op">=</span> L[zeros[zero_idx <span class="op">+</span> n <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>], <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)]<span class="op">'</span>;</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">// full qr: the complement basis lives in Q's last d columns and</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">// diagonal(R) supplies the Gram term from one decomposition</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, i <span class="op">-</span> <span class="dv">1</span>] Q;</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>        <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, n_z] R;</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>        (Q, R) <span class="op">=</span> <span class="fu">qr</span>(A);</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">abs</span>(<span class="fu">diagonal</span>(R))));</span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (Q[, (n_z <span class="op">+</span> <span class="dv">1</span>)<span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">*</span> w)<span class="op">'</span>;</span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb17-74"><a href="#cb17-74" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_unitvec2_jacobian</span>(K, raw, zeros);</span>
+<span id="cb17-75"><a href="#cb17-75" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-76"><a href="#cb17-76" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb17-77"><a href="#cb17-77" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb17-78"><a href="#cb17-78" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-79"><a href="#cb17-79" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb17-80"><a href="#cb17-80" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb17-81"><a href="#cb17-81" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
 </div>
 
 
