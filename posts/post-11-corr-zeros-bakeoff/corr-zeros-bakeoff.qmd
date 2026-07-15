@@ -219,6 +219,40 @@ Three things jump out.
 
 **Initialization failure is the same boundary, expressed terminally.** `schur` cannot find a feasible starting point in 100 attempts per chain for this sweep's patterns from $K = 7$ up (it ran fine on all five Section 5 patterns at the same size; feasible initialization is pattern-dependent luck). `cvine` joins it at $K = 15$. At $K = 25$, with 143 forced cells, *none of the six forced models* can start at any $\eta$. This is the scaling fact that matters: the feasible set the forced construction must hit by chance gets exponentially thin as the pattern grows, and `adapt_delta` cannot rescue a model that never takes its first draw. The subspace models are immune by construction, since every point of their parameter space is feasible.
 
+Since `tri` is the recommendation, here is its full scaling record on its own. Divergences are zero in every cell of this table, so what is left to watch is efficiency: min bulk ESS holds close to the 8,000-draw ceiling through $K = 15$ and comes down to a still-comfortable \~1,200 at $K = 25$, where the min is taken over 157 free correlations. ESS per gradient decays gently with $K$, is nearly flat in $\eta$, and the wall clock stays in seconds throughout.
+
+```{r}
+#| label: tri-scaling-table
+
+tri_tab <- sweep |>
+  filter(model == "tri") |>
+  mutate(cell = sprintf("%s (%s)",
+                        format(round(min_ess), big.mark = ","),
+                        round(ess_per_1k_grad))) |>
+  select(K, N_zero, eta, cell, seconds)
+
+tri_wide <- tri_tab |>
+  select(K, N_zero, eta, cell) |>
+  pivot_wider(names_from = eta, values_from = cell,
+              names_prefix = "eta = ") |>
+  left_join(
+    tri_tab |>
+      group_by(K) |>
+      summarize(`wall clock (s)` = sprintf("%.1f-%.1f",
+                                           min(seconds), max(seconds)),
+                .groups = "drop"),
+    by = "K"
+  ) |>
+  mutate(`zero / free cells` = paste0(N_zero, " / ", choose(K, 2) - N_zero),
+         .after = K) |>
+  select(-N_zero)
+
+knitr::kable(
+  tri_wide, align = c("r", "c", rep("c", 4), "c"),
+  caption = "tri across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses). Divergences are 0 in every configuration; wall clock is the range across eta for 4 parallel chains."
+)
+```
+
 **Anchoring the basis is not a nicety.** The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at $K = 25$, $\eta = 1$ it needed 852 seconds against `tri`'s 6.8, and at $K = 15$, $\eta = 2$ it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: `ldl3` at $K = 9$, $\eta = 2$ came back with a min ESS of 19.) Interestingly, `qr2`'s *raw* min ESS at $K = 25$ is higher than `tri`'s — about 3,900 vs 1,200 of 8,000 draws — but it burns 6--100$\times$ the gradient evaluations to get it. Per gradient, and per second, `tri` wins every configuration in the sweep: zero divergences in all twenty, flat wall clock, and the best efficiency in the field.
 
 ## 7. When to Use Which
