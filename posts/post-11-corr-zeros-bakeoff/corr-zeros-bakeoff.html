@@ -328,8 +328,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <li><p><strong>The Gram is small.</strong> Since <span class="math inline">\(T_F = I\)</span>, we have <span class="math inline">\(T'T = I + W'W\)</span> where <span class="math inline">\(W\)</span> holds only the <span class="math inline">\(n_z\)</span> forced-coordinate rows, so the crossprod works on length-<span class="math inline">\(n_z\)</span> vectors rather than length-<span class="math inline">\((i-1)\)</span> ones.</p></li>
 </ol>
 <p>Per constrained row, the entire construction is one <span class="math inline">\(d \times d\)</span> <code>cholesky_decompose</code> and some small matrix-vector products. No QR anywhere. I call this model <code>tri</code>; the full Stan code is in the appendix.</p>
-<p>I also tried a “donut” variant, one extra parameter per row: normalize a free vector <span class="math inline">\(y\)</span>, take <span class="math inline">\(u = y / \lVert y \rVert\)</span>, and let <span class="math inline">\(-\tfrac{1}{2} y'y\)</span> keep the radius away from trouble. Or so I thought. With that implicit chi-distributed radius it diverged worse than anything else in the field — 2,531 across the five <span class="math inline">\(K = 7\)</span> patterns in the tables below, which report this <span class="math inline">\(m = 0\)</span> baseline.</p>
-<p>The fix, fittingly, also comes from Seth Axen, in the <em>A Better Unit Vector</em> Discourse thread <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span>: put an explicit prior on the radius that repels it from the origin singularity of the normalization map. I used his Gaussian-centered form, replacing <span class="math inline">\(-\tfrac{1}{2}\lVert y \rVert^2\)</span> with <span class="math inline">\(-\tfrac{1}{2}(\lVert y \rVert - m)^2\)</span>. The radial factor is independent of the direction, so the <span class="math inline">\(\Omega\)</span> posterior is untouched (verified against <code>carpenter</code>: max free-cell mean difference 0.0046). The effect on sampling is not subtle. Across the five <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span> patterns:</p>
+<p>The subspace family has a second member: a “donut” variant, one extra parameter per row. Normalize a free vector, <span class="math inline">\(u = y / \lVert y \rVert\)</span>, and the row’s subsphere coordinates come along with beautifully isotropic geometry — except that the normalization map has a singularity at the origin, and the implicit chi-distributed radius that <span class="math inline">\(-\tfrac{1}{2} y'y\)</span> places on <span class="math inline">\(\lVert y \rVert\)</span> lets the sampler wander right into it. The cure is also Seth Axen’s, from the <em>A Better Unit Vector</em> Discourse thread <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span>: put an explicit prior on the radius that repels the norm from the origin. I use his Gaussian-centered form, replacing <span class="math inline">\(-\tfrac{1}{2}\lVert y \rVert^2\)</span> with <span class="math inline">\(-\tfrac{1}{2}(\lVert y \rVert - m)^2\)</span>. The radial factor is independent of the direction, so the <span class="math inline">\(\Omega\)</span> posterior is untouched (verified against <code>carpenter</code>: max free-cell mean difference 0.0046); the only thing that changes is the geometry the sampler sees. Across the five <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span> patterns:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 30%">
@@ -372,7 +371,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </tr>
 </tbody>
 </table>
-<p>So the origin singularity, not the <span class="math inline">\(|u_{\text{last}}|\)</span> hemisphere fold, was nearly the whole problem: pushing the radial shell out to <span class="math inline">\(m = 6\)</span> joins the zero-divergence club outright, and <span class="math inline">\(m = 4\)</span> trades eight divergences in 40,000 transitions for the best raw ESS I measured at this size. I still prefer <code>tri</code> as the default — no tuning knob, <span class="math inline">\(K - 1\)</span> fewer parameters, and zero divergences without negotiation — but the donut’s rescue is a clean confirmation of Axen’s radial-prior argument, and it means the subspace family now has <em>two</em> working members.</p>
+<p>The radial prior is worth two orders of magnitude in divergences and a factor of eight in gradient efficiency. Everything below runs the donut at <span class="math inline">\(m = 6\)</span>. I still prefer <code>tri</code> as the default — no tuning knob and <span class="math inline">\(K - 1\)</span> fewer parameters — but the subspace family has two clean members.</p>
 </section>
 <section id="the-bake-off-at-k-7" class="level2">
 <h2 class="anchored" data-anchor-id="the-bake-off-at-k-7">5. The Bake-Off at K = 7</h2>
@@ -425,7 +424,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;"><strong>0</strong></td>
-<td style="text-align: right;">522</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">seed 2</td>
@@ -440,7 +439,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;"><strong>0</strong></td>
-<td style="text-align: right;">551</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">seed 3</td>
@@ -455,7 +454,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;"><strong>0</strong></td>
-<td style="text-align: right;">500</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">seed 4</td>
@@ -470,7 +469,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;"><strong>0</strong></td>
-<td style="text-align: right;">418</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">seed 5</td>
@@ -485,7 +484,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;"><strong>0</strong></td>
-<td style="text-align: right;">540</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>total</strong></td>
@@ -500,7 +499,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;"><strong>0</strong></td>
 <td style="text-align: right;"><strong>0</strong></td>
 <td style="text-align: right;"><strong>0</strong></td>
-<td style="text-align: right;">2531</td>
+<td style="text-align: right;"><strong>0</strong></td>
 </tr>
 </tbody>
 </table>
@@ -552,7 +551,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">3995</td>
 <td style="text-align: right;">3362</td>
 <td style="text-align: right;"><strong>11430</strong></td>
-<td style="text-align: right;">4321</td>
+<td style="text-align: right;">10676</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">seed 2</td>
@@ -567,7 +566,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">4049</td>
 <td style="text-align: right;">3728</td>
 <td style="text-align: right;"><strong>11427</strong></td>
-<td style="text-align: right;">5049</td>
+<td style="text-align: right;">9045</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">seed 3</td>
@@ -582,7 +581,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">4334</td>
 <td style="text-align: right;">4304</td>
 <td style="text-align: right;">9574</td>
-<td style="text-align: right;">3795</td>
+<td style="text-align: right;">9429</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">seed 4</td>
@@ -597,7 +596,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">3701</td>
 <td style="text-align: right;">3815</td>
 <td style="text-align: right;"><strong>9582</strong></td>
-<td style="text-align: right;">5121</td>
+<td style="text-align: right;">8161</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">seed 5</td>
@@ -612,7 +611,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">4267</td>
 <td style="text-align: right;">4153</td>
 <td style="text-align: right;"><strong>11284</strong></td>
-<td style="text-align: right;">4454</td>
+<td style="text-align: right;">8619</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>median</strong></td>
@@ -627,7 +626,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">4049</td>
 <td style="text-align: right;">3815</td>
 <td style="text-align: right;"><strong>11284</strong></td>
-<td style="text-align: right;">4454</td>
+<td style="text-align: right;">9045</td>
 </tr>
 </tbody>
 </table>
@@ -679,7 +678,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">75.0</td>
 <td style="text-align: right;">72.5</td>
 <td style="text-align: right;"><strong>207.3</strong></td>
-<td style="text-align: right;">18.7</td>
+<td style="text-align: right;">161.8</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">total wall clock, 5 fits (s)</td>
@@ -694,7 +693,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">2.07</td>
 <td style="text-align: right;">2.06</td>
 <td style="text-align: right;"><strong>1.95</strong></td>
-<td style="text-align: right;">9.72</td>
+<td style="text-align: right;">2.39</td>
 </tr>
 </tbody>
 </table>
@@ -702,7 +701,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </section>
 <section id="does-it-hold-up-scaling-k-and-eta" class="level2">
 <h2 class="anchored" data-anchor-id="does-it-hold-up-scaling-k-and-eta">6. Does It Hold Up? Scaling K and <span class="math inline">\(\eta\)</span></h2>
-<p>A single <span class="math inline">\((K, \eta)\)</span> corner is not a benchmark, so I reran a representative subset over <span class="math inline">\(K \in \{5, 7, 9, 15, 25\}\)</span> and <span class="math inline">\(\eta \in \{1, 2, 3, 4\}\)</span>: six forced-zero models, the literal QR implementation <code>qr2</code>, and <code>tri</code>. One Bernoulli(0.5) zero pattern per <span class="math inline">\(K\)</span> (realized: 6 of 10 cells at <span class="math inline">\(K=5\)</span> up to 143 of 300 at <span class="math inline">\(K=25\)</span>), shared across <span class="math inline">\(\eta\)</span>, same sampler settings as before. One fit per configuration, so the single-fit noise caveat from Section 2 applies to small gaps; the patterns below are not small.</p>
+<p>A single <span class="math inline">\((K, \eta)\)</span> corner is not a benchmark, so I reran a representative subset over <span class="math inline">\(K \in \{5, 7, 9, 15, 25\}\)</span> and <span class="math inline">\(\eta \in \{1, 2, 3, 4\}\)</span>: six forced-zero models, the literal QR implementation <code>qr2</code>, <code>tri</code>, and the donut at <span class="math inline">\(m = 6\)</span>. One Bernoulli(0.5) zero pattern per <span class="math inline">\(K\)</span> (realized: 6 of 10 cells at <span class="math inline">\(K=5\)</span> up to 143 of 300 at <span class="math inline">\(K=25\)</span>), shared across <span class="math inline">\(\eta\)</span>, same sampler settings as before. One fit per configuration, so the single-fit noise caveat from Section 2 applies to small gaps; the patterns below are not small.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -717,18 +716,20 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">case_when</span>(</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      model <span class="sc">==</span> <span class="st">"tri"</span> <span class="sc">~</span> <span class="st">"Subspace (triangular basis)"</span>,</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      model <span class="sc">==</span> <span class="st">"qr2"</span> <span class="sc">~</span> <span class="st">"Subspace (QR basis)"</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> <span class="st">"Forced zeros"</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">div_pct =</span> <span class="dv">100</span> <span class="sc">*</span> divergences <span class="sc">/</span> <span class="dv">8000</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">eta_lab =</span> <span class="fu">factor</span>(<span class="fu">paste0</span>(<span class="st">"eta == "</span>, eta),</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">levels =</span> <span class="fu">paste0</span>(<span class="st">"eta == "</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(eta))))</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>fam_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Forced zeros"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>gold,</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (QR basis)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>purple,</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (triangular basis)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>teal</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      model <span class="sc">==</span> <span class="st">"donut"</span> <span class="sc">~</span> <span class="st">"Subspace (donut)"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> <span class="st">"Forced zeros"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">div_pct =</span> <span class="dv">100</span> <span class="sc">*</span> divergences <span class="sc">/</span> <span class="dv">8000</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">eta_lab =</span> <span class="fu">factor</span>(<span class="fu">paste0</span>(<span class="st">"eta == "</span>, eta),</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                     <span class="at">levels =</span> <span class="fu">paste0</span>(<span class="st">"eta == "</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(eta))))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>fam_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Forced zeros"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>gold,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (QR basis)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>purple,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (donut)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>blue,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Subspace (triangular basis)"</span> <span class="ot">=</span> blog_colors<span class="sc">$</span>teal</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
@@ -740,8 +741,8 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.6</span>) <span class="sc">+</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>eta_lab, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">labeller =</span> label_parsed) <span class="sc">+</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> fam_colors, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linewidth_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.1</span>, <span class="fl">1.3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_alpha_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.65</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linewidth_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.1</span>, <span class="fl">1.1</span>, <span class="fl">1.3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_alpha_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.65</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">15</span>, <span class="dv">25</span>)) <span class="sc">+</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_blog</span>() <span class="sc">+</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
@@ -759,7 +760,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <img src="corr-zeros-bakeoff_files/figure-html/fig-divergence-scaling-1.png" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-divergence-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Divergence rate by matrix dimension and LKJ concentration. Each thin gold line is one forced-zero parameterization; lines that stop mid-panel are models that failed to initialize at the next K. The teal line (tri) is exactly zero in every panel. The purple spike is qr2’s catastrophic run at K = 15, eta = 2: one chain stuck at 100% divergence.
+Figure&nbsp;1: Divergence rate by matrix dimension and LKJ concentration. Each thin gold line is one forced-zero parameterization; lines that stop mid-panel are models that failed to initialize at the next K. The teal line (tri) is exactly zero in every panel. The purple spike is qr2’s catastrophic run at K = 15, eta = 2: one chain stuck at 100% divergence. The blue donut line keeps a residual sub-1.5% rate at eta = 1.
 </figcaption>
 </figure>
 </div>
@@ -774,8 +775,8 @@ Figure&nbsp;1: Divergence rate by matrix dimension and LKJ concentration. Each t
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.6</span>) <span class="sc">+</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>eta_lab, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">labeller =</span> label_parsed) <span class="sc">+</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> fam_colors, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linewidth_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.1</span>, <span class="fl">1.3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_alpha_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.65</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linewidth_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.1</span>, <span class="fl">1.1</span>, <span class="fl">1.3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_alpha_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">0.65</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">15</span>, <span class="dv">25</span>)) <span class="sc">+</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_blog</span>() <span class="sc">+</span></span>
@@ -968,7 +969,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </table>
 </div>
 </div>
-<p><strong>Anchoring the basis is not a nicety.</strong> The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at <span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 1\)</span> it needed 852 seconds against <code>tri</code>’s 6.8, and at <span class="math inline">\(K = 15\)</span>, <span class="math inline">\(\eta = 2\)</span> it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: <code>ldl3</code> at <span class="math inline">\(K = 9\)</span>, <span class="math inline">\(\eta = 2\)</span> came back with a min ESS of 19.) Interestingly, <code>qr2</code>’s <em>raw</em> min ESS at <span class="math inline">\(K = 25\)</span> is higher than <code>tri</code>’s — about 3,900 vs 1,200 of 8,000 draws — but it burns 6–100<span class="math inline">\(\times\)</span> the gradient evaluations to get it. Per gradient, and per second, <code>tri</code> wins every configuration in the sweep: zero divergences in all twenty, flat wall clock, and the best efficiency in the field.</p>
+<p><strong>Anchoring the basis is not a nicety.</strong> The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at <span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 1\)</span> it needed 852 seconds against <code>tri</code>’s 6.8, and at <span class="math inline">\(K = 15\)</span>, <span class="math inline">\(\eta = 2\)</span> it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: <code>ldl3</code> at <span class="math inline">\(K = 9\)</span>, <span class="math inline">\(\eta = 2\)</span> came back with a min ESS of 19.) Interestingly, <code>qr2</code>’s <em>raw</em> min ESS at <span class="math inline">\(K = 25\)</span> is higher than <code>tri</code>’s — about 3,900 vs 1,200 of 8,000 draws — but it burns 6–100<span class="math inline">\(\times\)</span> the gradient evaluations to get it. Per gradient, and per second, <code>tri</code> is the class of the field: the only model at exactly zero divergences in all twenty configurations (the donut keeps a residual sub-1.5% rate at <span class="math inline">\(\eta = 1\)</span>), flat wall clock, and the best ESS per gradient in every cell but one (<span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 4\)</span>, where the donut edges it).</p>
 </section>
 <section id="when-to-use-which" class="level2">
 <h2 class="anchored" data-anchor-id="when-to-use-which">7. When to Use Which</h2>
@@ -1015,7 +1016,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </section>
 <section id="acknowledgments" class="level2">
 <h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
-<p>The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the <span class="math inline">\(\det R\)</span> Jacobian factor, is due to Seth Axen <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>, who also supplied the radial-prior fix that rescued the donut variant <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span>. The <code>tri</code> model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as <code>carpenter</code>, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of <span class="citation" data-cites="joe2006">Joe (<a href="#ref-joe2006" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="lewandowski2009">Lewandowski et al. (<a href="#ref-lewandowski2009" role="doc-biblioref">2009</a>)</span>.</p>
+<p>The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the <span class="math inline">\(\det R\)</span> Jacobian factor, is due to Seth Axen <span class="citation" data-cites="axen2023">(<a href="#ref-axen2023" role="doc-biblioref">Axen 2023</a>)</span>, whose radial prior <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span> the donut variant relies on. The <code>tri</code> model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as <code>carpenter</code>, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of <span class="citation" data-cites="joe2006">Joe (<a href="#ref-joe2006" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="lewandowski2009">Lewandowski et al. (<a href="#ref-lewandowski2009" role="doc-biblioref">2009</a>)</span>.</p>
 </section>
 <section id="appendix-stan-code-for-tri" class="level2">
 <h2 class="anchored" data-anchor-id="appendix-stan-code-for-tri">Appendix: Stan Code for <code>tri</code></h2>
