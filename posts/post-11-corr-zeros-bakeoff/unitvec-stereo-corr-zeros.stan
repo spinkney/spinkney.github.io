@@ -1,5 +1,5 @@
 functions {
-  matrix cholesky_corr_constrain_tri_jacobian(int K, vector raw,
+  matrix cholesky_corr_constrain_stereo_jacobian(int K, vector raw,
                                               array[,] int zeros) {
     // Exact-constraint subspace geometry but with a canonical
     // triangular basis instead of Householder QR: basis vector k is a unit
@@ -20,16 +20,17 @@ functions {
       }
       int d = i - 1 - n_z;
 
-      // subsphere coordinates via tanh sticks (cosh-form jacobian)
+      // subsphere coordinates via the modified stereographic chart:
+      // z = sqrt(t + 2) / (t + 1) * y with t = y'y, diagonal 1 / (t + 1)
       vector[d] z;
       real r = 1;
-      for (k in 1:d) {
-        real x = raw[raw_idx];
-        real cosh_x = cosh(x);
-        z[k] = r * tanh(x);
-        jacobian += -(d - k + 2) * log(cosh_x);
-        r /= cosh_x;
-        raw_idx += 1;
+      if (d > 0) {
+        vector[d] y = raw[raw_idx:(raw_idx + d - 1)];
+        real t = dot_self(y);
+        z = (sqrt(t + 2) / (t + 1)) * y;
+        r = 1 / (t + 1);
+        jacobian += 0.5 * (d - 2) * log(t + 2) - (d + 1) * log1p(t);
+        raw_idx += d;
       }
 
       if (n_z == 0) {
@@ -110,7 +111,7 @@ parameters {
   vector[choose(K, 2) - N_zero] raw;
 }
 transformed parameters {
-  matrix[K, K] L_Omega = cholesky_corr_constrain_tri_jacobian(K, raw, zeros);
+  matrix[K, K] L_Omega = cholesky_corr_constrain_stereo_jacobian(K, raw, zeros);
 }
 model {
   L_Omega ~ lkj_corr_cholesky(eta);

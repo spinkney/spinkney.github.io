@@ -60,7 +60,7 @@ My first two implementations (`qr`, `qr2`) followed the recipe literally: Househ
 
 ## 4. A Canonical Triangular Basis
 
-The fix is to anchor the basis to the matrix entries. For each free column $k$ of row $i$, take $e_k$ and fill in the row's forced columns by back-substitution through the zero constraints. This is exactly the Family 1 forced-entry fill, applied to *basis vectors* instead of the sampled row. Collect these as the columns of $T$. Splitting coordinates into forced ($Z$) and free ($F$) sets gives $T_F = I$ and $T_Z = -(A_Z')^{-1} A_F'$, and orthonormalization costs one small Cholesky factor $S = \operatorname{chol}(T'T)$: the map $v = T (S')^{-1} z$ satisfies $\lVert v \rVert = \lVert z \rVert$, so the sphere-measure bookkeeping goes through untouched. The subsphere coordinates $z$ come from the hyper-tanh peel [@pinkney2026]: $z_k = r_k \tanh(x_k)$ with the radius updated as $r_{k+1} = r_k / \cosh(x_k)$, since $\sqrt{1 - \tanh^2} = 1/\cosh$, which collapses the whole chart Jacobian to accumulated powers of $\log \cosh(x_k)$ -- one transcendental pair per coordinate, no square roots.
+The fix is to anchor the basis to the matrix entries. For each free column $k$ of row $i$, take $e_k$ and fill in the row's forced columns by back-substitution through the zero constraints. This is exactly the Family 1 forced-entry fill, applied to *basis vectors* instead of the sampled row. Collect these as the columns of $T$. Splitting coordinates into forced ($Z$) and free ($F$) sets gives $T_F = I$ and $T_Z = -(A_Z')^{-1} A_F'$, and orthonormalization costs one small Cholesky factor $S = \operatorname{chol}(T'T)$: the map $v = T (S')^{-1} z$ satisfies $\lVert v \rVert = \lVert z \rVert$, so the sphere-measure bookkeeping goes through untouched. The subsphere coordinates $z$ come from a modified stereographic chart: with $t = y'y$, $z = \sqrt{t + 2}/(t + 1) \, y$ and the diagonal is $1/(t + 1)$, with chart Jacobian $\tfrac{1}{2}(d - 2)\log(t + 2) - (d + 1)\log(1 + t)$ -- one vectorized map per row, no per-coordinate loop.
 
 Two identities then make the whole thing almost embarrassingly cheap.
 
@@ -102,19 +102,19 @@ Setup: $K = 7$, $\eta = 4$, prior-only, five random zero patterns with roughly h
 
 | pattern | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
 |:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-| seed 1 | 11639 | 10566 | 9979 | 10618 | 10219 | 11319 | 9840 | 11036 | 3995 | 3362 | **11430** | 10676 |
-| seed 2 | 10817 | 9866 | 10826 | 9772 | 10188 | 10153 | 10361 | 10040 | 4049 | 3728 | **11427** | 9045 |
-| seed 3 | 9344 | 11014 | 10244 | 10314 | 10946 | 9420 | 10625 | 10787 | 4334 | 4304 | 9574 | 9429 |
-| seed 4 | 8395 | 9159 | 8326 | 9257 | 8771 | 9463 | 8266 | 9458 | 3701 | 3815 | **9582** | 8161 |
-| seed 5 | 10381 | 10010 | 9268 | 8760 | 10301 | 9218 | 9896 | 4770 | 4267 | 4153 | **11284** | 8619 |
-| **median** | 10381 | 10010 | 9979 | 9772 | 10219 | 9463 | 9896 | 10040 | 4049 | 3815 | **11284** | 9045 |
+| seed 1 | 11639 | 10566 | 9979 | 10618 | 10219 | 11319 | 9840 | 11036 | 3995 | 3362 | **11238** | 10676 |
+| seed 2 | 10817 | 9866 | 10826 | 9772 | 10188 | 10153 | 10361 | 10040 | 4049 | 3728 | **11923** | 9045 |
+| seed 3 | 9344 | 11014 | 10244 | 10314 | 10946 | 9420 | 10625 | 10787 | 4334 | 4304 | 10655 | 9429 |
+| seed 4 | 8395 | 9159 | 8326 | 9257 | 8771 | 9463 | 8266 | 9458 | 3701 | 3815 | **9400** | 8161 |
+| seed 5 | 10381 | 10010 | 9268 | 8760 | 10301 | 9218 | 9896 | 4770 | 4267 | 4153 | **11845** | 8619 |
+| **median** | 10381 | 10010 | 9979 | 9772 | 10219 | 9463 | 9896 | 10040 | 4049 | 3815 | **11238** | 9045 |
 
 **Efficiency** (medians over the five patterns):
 
 |   | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
 |:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-| min ESS / 1000 gradients | 188.5 | 179.6 | 185.9 | 182.2 | 188.9 | 176.3 | 182.1 | 182.0 | 75.0 | 72.5 | **207.3** | 161.8 |
-| total wall clock, 5 fits (s) | 4.53 | 4.10 | 4.40 | 4.51 | 5.14 | 4.21 | 4.51 | 4.15 | 2.07 | 2.06 | **1.95** | 2.39 |
+| min ESS / 1000 gradients | 188.5 | 179.6 | 185.9 | 182.2 | 188.9 | 176.3 | 182.1 | 182.0 | 75.0 | 72.5 | **212.3** | 161.8 |
+| total wall clock, 5 fits (s) | 4.53 | 4.10 | 4.40 | 4.51 | 5.14 | 4.21 | 4.51 | 4.15 | 2.07 | 2.06 | **1.86** | 2.39 |
 
 The `tri` column is the whole story: zero divergences on every pattern, the highest median ESS in the table, the best ESS per gradient, and the lowest wall clock. The subspace geometry means there is no boundary to fight, and the anchored basis means the sampler is not chasing a spinning frame. The usual robustness-versus-speed trade dissolves.
 
@@ -244,7 +244,7 @@ Three things jump out.
 
 **Initialization failure is the same boundary, expressed terminally.** `schur` cannot find a feasible starting point in 100 attempts per chain for this sweep's patterns from $K = 7$ up (it ran fine on all five Section 5 patterns at the same size; feasible initialization is pattern-dependent luck). `cvine` joins it at $K = 15$. At $K = 25$, with 143 forced cells, *none of the six forced models* can start at any $\eta$. This is the scaling fact that matters: the feasible set the forced construction must hit by chance gets exponentially thin as the pattern grows, and `adapt_delta` cannot rescue a model that never takes its first draw. The subspace models are immune by construction, since every point of their parameter space is feasible.
 
-The two exact-constraint members deserve a closer look side by side. `tri`'s divergence count is zero in every cell of this table; the donut matches it from $\eta = 2$ up but gives back a small count at $\eta = 1$ (bracketed below). On efficiency the pattern is dimension-dependent: `tri` holds its min bulk ESS close to the 8,000-draw ceiling through $K = 15$, while the donut rides lower — but at $K = 25$, where the min runs over 157 free correlations, the donut's extra radial parameters stop costing and start paying, and its raw min ESS comes out 4--5$\times$ `tri`'s at comparable cost per gradient. Wall clock stays in seconds for both.
+The two exact-constraint members deserve a closer look side by side. `tri`'s divergence count is zero in every cell of this table; the donut matches it from $\eta = 2$ up but gives back a small count at $\eta = 1$ (bracketed below). On efficiency the pattern is consistent: `tri` holds its min bulk ESS close to the 8,000-draw ceiling through $K = 15$, while the donut rides lower, and at $K = 25$, where the min runs over 157 free correlations, both settle in the 4,700--6,600 range at comparable cost per gradient, with `tri` slightly ahead. Wall clock stays in seconds for both.
 
 ```{r}
 #| label: subspace-scaling-table
@@ -280,7 +280,7 @@ knitr::kable(
 )
 ```
 
-**Anchoring the basis is not a nicety.** The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at $K = 25$, $\eta = 1$ it needed 852 seconds against `tri`'s 6.8, and at $K = 15$, $\eta = 2$ it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: `ldl3` at $K = 9$, $\eta = 2$ came back with a min ESS of 19.) Interestingly, `qr2`'s *raw* min ESS at $K = 25$ is higher than `tri`'s — about 3,900 vs 1,200 of 8,000 draws — but it burns 6--100$\times$ the gradient evaluations to get it. Per gradient, and per second, `tri` is the class of the field: the only model at exactly zero divergences in all twenty configurations (the donut keeps a residual sub-1.5% rate at $\eta = 1$), flat wall clock, and the best ESS per gradient in every cell but one ($K = 25$, $\eta = 4$, where the donut edges it).
+**Anchoring the basis is not a nicety.** The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at $K = 25$, $\eta = 1$ it needed 852 seconds against `tri`'s 8.9, and at $K = 15$, $\eta = 2$ it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: `ldl3` at $K = 9$, $\eta = 2$ came back with a min ESS of 19.) `qr2`'s *raw* min ESS at $K = 25$ lands around 3,500--4,100 against `tri`'s 5,100--6,600, and it burns far more gradient evaluations to get there. Per gradient, and per second, `tri` is the class of the field: the only model at exactly zero divergences in all twenty configurations (the donut keeps a residual sub-1.5% rate at $\eta = 1$), flat wall clock, and the best ESS per gradient in 17 of the 20 cells (`qr2` edges it in three of the $K = 5$ corners).
 
 ## 7. When to Use Which
 
@@ -309,8 +309,8 @@ The exact-constraint subspace idea, zeros as orthogonality constraints with the 
 ::: panel-tabset
 ### tri
 
-``` {.stan filename="unitvec-tri-corr-zeros.stan"}
-{{< include unitvec-tri-corr-zeros.stan >}}
+``` {.stan filename="unitvec-stereo-corr-zeros.stan"}
+{{< include unitvec-stereo-corr-zeros.stan >}}
 ```
 
 ### donut
