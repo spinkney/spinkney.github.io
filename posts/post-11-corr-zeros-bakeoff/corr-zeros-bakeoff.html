@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-85314cde386895b85e915c39ab98eb64.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -250,9 +250,9 @@ window.Quarto = {
 
 <section id="the-problem-with-zeros-in-correlation-matrices" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem-with-zeros-in-correlation-matrices">1. The Problem with Zeros in Correlation Matrices</h2>
-<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero. A graphical model tells you two variables are conditionally unrelated, a confirmatory factor structure forbids a cross-loading, a physical system rules out a coupling. The prior you want is “LKJ <span class="citation" data-cites="lewandowski2009">(<a href="#ref-lewandowski2009" role="doc-biblioref">Lewandowski et al. 2009</a>)</span>, restricted to the matrices that respect my zeros.”</p>
-<p>You cannot get there by sampling from the LKJ and zeroing out cells, as the result is generally not positive definite. The zeros have to be built into the parameterization itself, and how you build them in turns out to matter a great deal for the sampler. In this post I race twelve Stan <span class="citation" data-cites="carpenter2017">(<a href="#ref-carpenter2017" role="doc-biblioref">Carpenter et al. 2017</a>)</span> parameterizations of the same target posterior against each other. Since all twelve provably target the same distribution (and I verify this numerically), the comparison isolates exactly one thing: <strong>sampling geometry</strong>. Divergences, effective sample size, and cost per gradient evaluation.</p>
-<p>The punchline: the two families of solutions make opposite trade-offs, and a hybrid, an exact-constraint construction with a canonical triangular basis, refuses to trade at all. <strong>Zero divergences in every run, the best ESS per gradient in the field, and the fastest wall clock.</strong></p>
+<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are conditionally unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.</p>
+<p>You cannot get there by sampling from the LKJ and zeroing out cells, as the result is generally not positive definite. The zeros have to be built into the parameterization itself, and how you build them in turns out to matter a great deal for the sampler. In this post I test twelve Stan <span class="citation" data-cites="carpenter2017">(<a href="#ref-carpenter2017" role="doc-biblioref">Carpenter et al. 2017</a>)</span> parameterizations of the same target posterior against each other. Since all twelve provably target the same distribution (and I verify this numerically), the comparison isolates exactly one thing: <strong>sampling geometry</strong>. Divergences, effective sample size, and cost per gradient evaluation.</p>
+<p>The two families of solutions make opposite trade-offs, and a hybrid, an exact-constraint construction with a canonical triangular basis, is best of all. <strong>Zero divergences in every run, the best ESS per gradient in the field, and the fastest wall clock.</strong></p>
 </section>
 <section id="family-1-forced-zeros" class="level2">
 <h2 class="anchored" data-anchor-id="family-1-forced-zeros">2. Family 1: Forced Zeros</h2>
@@ -319,7 +319,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 </section>
 <section id="a-canonical-triangular-basis" class="level2">
 <h2 class="anchored" data-anchor-id="a-canonical-triangular-basis">4. A Canonical Triangular Basis</h2>
-<p>The fix is to anchor the basis to the matrix entries. For each free column <span class="math inline">\(k\)</span> of row <span class="math inline">\(i\)</span>, take <span class="math inline">\(e_k\)</span> and fill in the row’s forced columns by back-substitution through the zero constraints. This is exactly the Family 1 forced-entry fill, applied to <em>basis vectors</em> instead of the sampled row. Collect these as the columns of <span class="math inline">\(T\)</span>. Splitting coordinates into forced (<span class="math inline">\(Z\)</span>) and free (<span class="math inline">\(F\)</span>) sets gives <span class="math inline">\(T_F = I\)</span> and <span class="math inline">\(T_Z = -(A_Z')^{-1} A_F'\)</span>, and orthonormalization costs one small Cholesky factor <span class="math inline">\(S = \operatorname{chol}(T'T)\)</span>: the map <span class="math inline">\(v = T (S')^{-1} z\)</span> satisfies <span class="math inline">\(\lVert v \rVert = \lVert z \rVert\)</span>, so the sphere-measure bookkeeping goes through untouched. The subsphere coordinates <span class="math inline">\(z\)</span> come from the hyper-tanh peel <span class="citation" data-cites="pinkney2026">(<a href="#ref-pinkney2026" role="doc-biblioref">Pinkney 2026</a>)</span>: <span class="math inline">\(z_k = r_k \tanh(x_k)\)</span> with the radius updated as <span class="math inline">\(r_{k+1} = r_k / \cosh(x_k)\)</span>, since <span class="math inline">\(\sqrt{1 - \tanh^2} = 1/\cosh\)</span>, which collapses the whole chart Jacobian to accumulated powers of <span class="math inline">\(\log \cosh(x_k)\)</span> – one transcendental pair per coordinate, no square roots.</p>
+<p>The fix is to anchor the basis to the matrix entries. For each free column <span class="math inline">\(k\)</span> of row <span class="math inline">\(i\)</span>, take <span class="math inline">\(e_k\)</span> and fill in the row’s forced columns by back-substitution through the zero constraints. This is exactly the Family 1 forced-entry fill, applied to <em>basis vectors</em> instead of the sampled row. Collect these as the columns of <span class="math inline">\(T\)</span>. Splitting coordinates into forced (<span class="math inline">\(Z\)</span>) and free (<span class="math inline">\(F\)</span>) sets gives <span class="math inline">\(T_F = I\)</span> and <span class="math inline">\(T_Z = -(A_Z')^{-1} A_F'\)</span>, and orthonormalization costs one small Cholesky factor <span class="math inline">\(S = \operatorname{chol}(T'T)\)</span>: the map <span class="math inline">\(v = T (S')^{-1} z\)</span> satisfies <span class="math inline">\(\lVert v \rVert = \lVert z \rVert\)</span>, so the sphere-measure bookkeeping goes through untouched. The subsphere coordinates <span class="math inline">\(z\)</span> come from a modified stereographic chart: with <span class="math inline">\(t = y'y\)</span>, <span class="math inline">\(z = \sqrt{t + 2}/(t + 1) \, y\)</span> and the diagonal is <span class="math inline">\(1/(t + 1)\)</span>, with chart Jacobian <span class="math inline">\(\tfrac{1}{2}(d - 2)\log(t + 2) - (d + 1)\log(1 + t)\)</span> – one vectorized map per row, no per-coordinate loop.</p>
 <p>Two identities then make the whole thing almost embarrassingly cheap.</p>
 <ol type="1">
 <li><p><strong>The delta term factors.</strong> The zero-partner rows have triangular support, so <span class="math inline">\(A_Z\)</span> is triangular with the partners’ diagonals on its diagonal, and Sylvester’s determinant identity gives <span class="math display">\[
@@ -331,7 +331,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <p>The subspace family has a second member: a “donut” variant, one extra parameter per row. Normalize a free vector, <span class="math inline">\(u = y / \lVert y \rVert\)</span>, and the row’s subsphere coordinates come along with beautifully isotropic geometry — except that the normalization map has a singularity at the origin, and the implicit chi-distributed radius that <span class="math inline">\(-\tfrac{1}{2} y'y\)</span> places on <span class="math inline">\(\lVert y \rVert\)</span> lets the sampler wander right into it. The cure is also Seth Axen’s, from the <em>A Better Unit Vector</em> Discourse thread <span class="citation" data-cites="axen2022">(<a href="#ref-axen2022" role="doc-biblioref">Axen 2022</a>)</span>: put an explicit prior on the radius that repels the norm from the origin. I use his Gaussian-centered form, replacing <span class="math inline">\(-\tfrac{1}{2}\lVert y \rVert^2\)</span> with <span class="math inline">\(-\tfrac{1}{2}(\lVert y \rVert - m)^2\)</span>. The radial factor is independent of the direction, so the <span class="math inline">\(\Omega\)</span> posterior is untouched (verified against <code>carpenter</code>: max free-cell mean difference 0.0046); the only thing that changes is the geometry the sampler sees. Across the five <span class="math inline">\(K = 7\)</span>, <span class="math inline">\(\eta = 4\)</span> patterns:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 30%">
+<col style="width: 29%">
 <col style="width: 23%">
 <col style="width: 23%">
 <col style="width: 23%">
@@ -550,7 +550,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">11036</td>
 <td style="text-align: right;">3995</td>
 <td style="text-align: right;">3362</td>
-<td style="text-align: right;"><strong>11430</strong></td>
+<td style="text-align: right;"><strong>11238</strong></td>
 <td style="text-align: right;">10676</td>
 </tr>
 <tr class="even">
@@ -565,7 +565,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">10040</td>
 <td style="text-align: right;">4049</td>
 <td style="text-align: right;">3728</td>
-<td style="text-align: right;"><strong>11427</strong></td>
+<td style="text-align: right;"><strong>11923</strong></td>
 <td style="text-align: right;">9045</td>
 </tr>
 <tr class="odd">
@@ -580,7 +580,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">10787</td>
 <td style="text-align: right;">4334</td>
 <td style="text-align: right;">4304</td>
-<td style="text-align: right;">9574</td>
+<td style="text-align: right;">10655</td>
 <td style="text-align: right;">9429</td>
 </tr>
 <tr class="even">
@@ -595,7 +595,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">9458</td>
 <td style="text-align: right;">3701</td>
 <td style="text-align: right;">3815</td>
-<td style="text-align: right;"><strong>9582</strong></td>
+<td style="text-align: right;"><strong>9400</strong></td>
 <td style="text-align: right;">8161</td>
 </tr>
 <tr class="odd">
@@ -610,7 +610,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">4770</td>
 <td style="text-align: right;">4267</td>
 <td style="text-align: right;">4153</td>
-<td style="text-align: right;"><strong>11284</strong></td>
+<td style="text-align: right;"><strong>11845</strong></td>
 <td style="text-align: right;">8619</td>
 </tr>
 <tr class="even">
@@ -625,7 +625,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">10040</td>
 <td style="text-align: right;">4049</td>
 <td style="text-align: right;">3815</td>
-<td style="text-align: right;"><strong>11284</strong></td>
+<td style="text-align: right;"><strong>11238</strong></td>
 <td style="text-align: right;">9045</td>
 </tr>
 </tbody>
@@ -677,7 +677,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">182.0</td>
 <td style="text-align: right;">75.0</td>
 <td style="text-align: right;">72.5</td>
-<td style="text-align: right;"><strong>207.3</strong></td>
+<td style="text-align: right;"><strong>212.3</strong></td>
 <td style="text-align: right;">161.8</td>
 </tr>
 <tr class="even">
@@ -692,7 +692,7 @@ b_1 = \sum_{k&lt;j} L_{ik} L_{jk},
 <td style="text-align: right;">4.15</td>
 <td style="text-align: right;">2.07</td>
 <td style="text-align: right;">2.06</td>
-<td style="text-align: right;"><strong>1.95</strong></td>
+<td style="text-align: right;"><strong>1.86</strong></td>
 <td style="text-align: right;">2.39</td>
 </tr>
 </tbody>
@@ -878,7 +878,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <p>Three things jump out.</p>
 <p><strong>The divergence tax explodes exactly where you would want to use this prior.</strong> At <span class="math inline">\(\eta = 1\)</span>, the uniform LKJ, the forced-zero family runs 13–17% divergent at <span class="math inline">\(K = 5\)</span>, and by <span class="math inline">\(K = 7\)</span>–<span class="math inline">\(9\)</span> it is at <strong>85–94%</strong>: five of every six transitions divergent. That is not a tuning problem; that is the uniform prior putting real mass right where the forced values overshoot the stick. (A fun artifact visible in the <span class="math inline">\(\eta = 1\)</span> panel: four of the gold lines coincide exactly. With the seed fixed, <code>carpenter</code>, <code>pinkney</code>, <code>ldl2</code>, and <code>ldl3</code> are <em>literally the same density in raw coordinates</em> — the correlation-scale bounds never bind, by Cauchy–Schwarz — so their chains agree bit-for-bit until floating-point chaos separates them. The distinct-looking K = 7 table entries in Section 5 are that chaos, not different geometry.)</p>
 <p><strong>Initialization failure is the same boundary, expressed terminally.</strong> <code>schur</code> cannot find a feasible starting point in 100 attempts per chain for this sweep’s patterns from <span class="math inline">\(K = 7\)</span> up (it ran fine on all five Section 5 patterns at the same size; feasible initialization is pattern-dependent luck). <code>cvine</code> joins it at <span class="math inline">\(K = 15\)</span>. At <span class="math inline">\(K = 25\)</span>, with 143 forced cells, <em>none of the six forced models</em> can start at any <span class="math inline">\(\eta\)</span>. This is the scaling fact that matters: the feasible set the forced construction must hit by chance gets exponentially thin as the pattern grows, and <code>adapt_delta</code> cannot rescue a model that never takes its first draw. The subspace models are immune by construction, since every point of their parameter space is feasible.</p>
-<p>The two exact-constraint members deserve a closer look side by side. <code>tri</code>’s divergence count is zero in every cell of this table; the donut matches it from <span class="math inline">\(\eta = 2\)</span> up but gives back a small count at <span class="math inline">\(\eta = 1\)</span> (bracketed below). On efficiency the pattern is dimension-dependent: <code>tri</code> holds its min bulk ESS close to the 8,000-draw ceiling through <span class="math inline">\(K = 15\)</span>, while the donut rides lower — but at <span class="math inline">\(K = 25\)</span>, where the min runs over 157 free correlations, the donut’s extra radial parameters stop costing and start paying, and its raw min ESS comes out 4–5<span class="math inline">\(\times\)</span> <code>tri</code>’s at comparable cost per gradient. Wall clock stays in seconds for both.</p>
+<p>The two exact-constraint members deserve a closer look side by side. <code>tri</code>’s divergence count is zero in every cell of this table; the donut matches it from <span class="math inline">\(\eta = 2\)</span> up but gives back a small count at <span class="math inline">\(\eta = 1\)</span> (bracketed below). On efficiency the pattern is consistent: <code>tri</code> holds its min bulk ESS close to the 8,000-draw ceiling through <span class="math inline">\(K = 15\)</span>, while the donut rides lower, and at <span class="math inline">\(K = 25\)</span>, where the min runs over 157 free correlations, both settle in the 4,700–6,600 range at comparable cost per gradient, with <code>tri</code> slightly ahead. Wall clock stays in seconds for both.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -921,7 +921,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <col style="width: 16%">
 <col style="width: 18%">
 <col style="width: 17%">
-<col style="width: 11%">
+<col style="width: 12%">
 <col style="width: 12%">
 <col style="width: 14%">
 </colgroup>
@@ -942,11 +942,11 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: left;">tri</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: center;">6 / 4</td>
-<td style="text-align: center;">7,350 (161)</td>
-<td style="text-align: center;">8,961 (250)</td>
-<td style="text-align: center;">7,093 (177)</td>
-<td style="text-align: center;">8,414 (210)</td>
-<td style="text-align: center;">0.2-0.2</td>
+<td style="text-align: center;">6,839 (127)</td>
+<td style="text-align: center;">8,619 (183)</td>
+<td style="text-align: center;">8,129 (192)</td>
+<td style="text-align: center;">8,530 (204)</td>
+<td style="text-align: center;">0.1-0.3</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">donut</td>
@@ -962,11 +962,11 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: left;">tri</td>
 <td style="text-align: right;">7</td>
 <td style="text-align: center;">7 / 14</td>
-<td style="text-align: center;">7,403 (133)</td>
-<td style="text-align: center;">8,757 (157)</td>
-<td style="text-align: center;">9,574 (173)</td>
-<td style="text-align: center;">10,400 (187)</td>
-<td style="text-align: center;">0.4-0.4</td>
+<td style="text-align: center;">6,922 (87)</td>
+<td style="text-align: center;">7,572 (134)</td>
+<td style="text-align: center;">10,480 (188)</td>
+<td style="text-align: center;">10,832 (196)</td>
+<td style="text-align: center;">0.4-0.5</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">donut</td>
@@ -982,11 +982,11 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: left;">tri</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: center;">13 / 23</td>
-<td style="text-align: center;">5,451 (97)</td>
-<td style="text-align: center;">7,112 (127)</td>
-<td style="text-align: center;">7,369 (132)</td>
-<td style="text-align: center;">8,070 (144)</td>
-<td style="text-align: center;">0.6-0.6</td>
+<td style="text-align: center;">6,419 (87)</td>
+<td style="text-align: center;">6,707 (118)</td>
+<td style="text-align: center;">7,424 (132)</td>
+<td style="text-align: center;">8,221 (147)</td>
+<td style="text-align: center;">0.6-0.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">donut</td>
@@ -1002,11 +1002,11 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: left;">tri</td>
 <td style="text-align: right;">15</td>
 <td style="text-align: center;">64 / 41</td>
-<td style="text-align: center;">7,400 (132)</td>
-<td style="text-align: center;">7,537 (135)</td>
-<td style="text-align: center;">8,144 (145)</td>
-<td style="text-align: center;">8,390 (150)</td>
-<td style="text-align: center;">1.2-1.4</td>
+<td style="text-align: center;">7,298 (67)</td>
+<td style="text-align: center;">7,836 (134)</td>
+<td style="text-align: center;">7,761 (127)</td>
+<td style="text-align: center;">8,340 (149)</td>
+<td style="text-align: center;">1.3-2.0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">donut</td>
@@ -1022,11 +1022,11 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <td style="text-align: left;">tri</td>
 <td style="text-align: right;">25</td>
 <td style="text-align: center;">143 / 157</td>
-<td style="text-align: center;">1,156 (39)</td>
-<td style="text-align: center;">1,246 (42)</td>
-<td style="text-align: center;">1,499 (50)</td>
-<td style="text-align: center;">1,151 (44)</td>
-<td style="text-align: center;">6.3-7.0</td>
+<td style="text-align: center;">5,081 (42)</td>
+<td style="text-align: center;">5,837 (51)</td>
+<td style="text-align: center;">5,742 (50)</td>
+<td style="text-align: center;">6,553 (55)</td>
+<td style="text-align: center;">7.0-8.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">donut</td>
@@ -1042,7 +1042,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </table>
 </div>
 </div>
-<p><strong>Anchoring the basis is not a nicety.</strong> The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at <span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 1\)</span> it needed 852 seconds against <code>tri</code>’s 6.8, and at <span class="math inline">\(K = 15\)</span>, <span class="math inline">\(\eta = 2\)</span> it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: <code>ldl3</code> at <span class="math inline">\(K = 9\)</span>, <span class="math inline">\(\eta = 2\)</span> came back with a min ESS of 19.) Interestingly, <code>qr2</code>’s <em>raw</em> min ESS at <span class="math inline">\(K = 25\)</span> is higher than <code>tri</code>’s — about 3,900 vs 1,200 of 8,000 draws — but it burns 6–100<span class="math inline">\(\times\)</span> the gradient evaluations to get it. Per gradient, and per second, <code>tri</code> is the class of the field: the only model at exactly zero divergences in all twenty configurations (the donut keeps a residual sub-1.5% rate at <span class="math inline">\(\eta = 1\)</span>), flat wall clock, and the best ESS per gradient in every cell but one (<span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 4\)</span>, where the donut edges it).</p>
+<p><strong>Anchoring the basis is not a nicety.</strong> The literal QR implementation survives everywhere the forced family dies, but it pays for the spinning frame: at <span class="math inline">\(K = 25\)</span>, <span class="math inline">\(\eta = 1\)</span> it needed 852 seconds against <code>tri</code>’s 8.9, and at <span class="math inline">\(K = 15\)</span>, <span class="math inline">\(\eta = 2\)</span> it failed catastrophically, one chain pinned at 100% divergence and a min ESS of 7. (The forced family has its own catastrophic mode: <code>ldl3</code> at <span class="math inline">\(K = 9\)</span>, <span class="math inline">\(\eta = 2\)</span> came back with a min ESS of 19.) <code>qr2</code>’s <em>raw</em> min ESS at <span class="math inline">\(K = 25\)</span> lands around 3,500–4,100 against <code>tri</code>’s 5,100–6,600, and it burns far more gradient evaluations to get there. Per gradient, and per second, <code>tri</code> is the class of the field: the only model at exactly zero divergences in all twenty configurations (the donut keeps a residual sub-1.5% rate at <span class="math inline">\(\eta = 1\)</span>), flat wall clock, and the best ESS per gradient in 17 of the 20 cells (<code>qr2</code> edges it in three of the <span class="math inline">\(K = 5\)</span> corners).</p>
 </section>
 <section id="when-to-use-which" class="level2">
 <h2 class="anchored" data-anchor-id="when-to-use-which">7. When to Use Which</h2>
@@ -1099,10 +1099,10 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
-<pre><strong>unitvec-tri-corr-zeros.stan</strong></pre>
+<pre><strong>unitvec-stereo-corr-zeros.stan</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="unitvec-tri-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="unitvec-stereo-corr-zeros.stan"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> <span class="bu">cholesky_corr_constrain_stereo_jacobian</span>(<span class="dt">int</span> K, <span class="dt">vector</span> raw,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                                              <span class="dt">array</span>[,] <span class="dt">int</span> zeros) {</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Exact-constraint subspace geometry but with a canonical</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// triangular basis instead of Householder QR: basis vector k is a unit</span></span>
@@ -1123,104 +1123,105 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>      }</span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      <span class="dt">int</span> d <span class="op">=</span> i <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> n_z;</span>
 <span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      <span class="co">// subsphere coordinates via tanh sticks (cosh-form jacobian)</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d] z;</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> x <span class="op">=</span> raw[raw_idx];</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> cosh_x <span class="op">=</span> <span class="fu">cosh</span>(x);</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        z[k] <span class="op">=</span> r <span class="op">*</span> <span class="fu">tanh</span>(x);</span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span>(d <span class="op">-</span> k <span class="op">+</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(cosh_x);</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        r <span class="op">/=</span> cosh_x;</span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> z<span class="op">'</span>;</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        <span class="dt">array</span>[n_z] <span class="dt">int</span> zc;</span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>          zc[m] <span class="op">=</span> zeros[zero_idx <span class="op">+</span> m <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>];</span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the joint-delta term -0.5 * log det(Gram of zero-partner rows)</span></span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">// factors: splitting the partner matrix A by forced/free coords,</span></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">// A_Z is triangular with the partners' diagonals, and by Sylvester</span></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">// det(A'A) = prod(L[j,j])^2 * det(T'T)</span></span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[zc[m], zc[m]]);</span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>          <span class="dt">array</span>[d] <span class="dt">int</span> free_cols;</span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>          {</span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> fc <span class="op">=</span> <span class="dv">0</span>;</span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> zp <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (c <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (zp <span class="op">&lt;=</span> n_z <span class="op">&amp;&amp;</span> zc[zp] <span class="op">==</span> c) {</span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>                zp <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>              } <span class="cf">else</span> {</span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>                fc <span class="op">+=</span> <span class="dv">1</span>;</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>                free_cols[fc] <span class="op">=</span> c;</span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>              }</span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>          <span class="co">// triangular basis: unit at each free column, forced columns</span></span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>          <span class="co">// filled by back-substitution so every column is orthogonal to</span></span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the zero-partner rows</span></span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, d] T <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, i <span class="op">-</span> <span class="dv">1</span>, d);</span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> <span class="fu">col</span> <span class="op">=</span> free_cols[k];</span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>            T[<span class="fu">col</span>, k] <span class="op">=</span> <span class="dv">1</span>;</span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>              <span class="dt">int</span> j <span class="op">=</span> zc[m];</span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (j <span class="op">&gt;</span> <span class="fu">col</span>) {</span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>                T[j, k] <span class="op">=</span> <span class="op">-</span><span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], T[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>), k])</span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>                          <span class="op">/</span> L[j, j];</span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>              }</span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>          <span class="co">// T's free-column rows are the identity, so T'T = I + W'W with</span></span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>          <span class="co">// W the forced-column rows only</span></span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[n_z, d] W;</span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>            W[m, ] <span class="op">=</span> T[zc[m], ];</span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>          }</span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>          <span class="co">// orthonormalize: v = T * S'^{-1} * z has ||v|| = ||z||;</span></span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>          <span class="co">// diagonal(S) doubles as the det(T'T) half of the delta term</span></span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[d, d] S <span class="op">=</span> <span class="fu">cholesky_decompose</span>(<span class="fu">add_diag</span>(<span class="fu">crossprod</span>(W), <span class="fl">1.0</span>));</span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">diagonal</span>(S)));</span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] t <span class="op">=</span> <span class="fu">mdivide_right_tri_low</span>(z<span class="op">'</span>, S)<span class="op">'</span>;</span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (T <span class="op">*</span> t)<span class="op">'</span>;</span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_tri_jacobian</span>(K, raw, zeros);</span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      <span class="co">// subsphere coordinates via the modified stereographic chart:</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      <span class="co">// z = sqrt(t + 2) / (t + 1) * y with t = y'y, diagonal 1 / (t + 1)</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[d] z;</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> r <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">vector</span>[d] y <span class="op">=</span> raw[raw_idx<span class="op">:</span>(raw_idx <span class="op">+</span> d <span class="op">-</span> <span class="dv">1</span>)];</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">real</span> t <span class="op">=</span> <span class="fu">dot_self</span>(y);</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> (<span class="fu">sqrt</span>(t <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> (t <span class="op">+</span> <span class="dv">1</span>)) <span class="op">*</span> y;</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        r <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (t <span class="op">+</span> <span class="dv">1</span>);</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">jacobian</span> <span class="op">+=</span> <span class="fl">0.5</span> <span class="op">*</span> (d <span class="op">-</span> <span class="dv">2</span>) <span class="op">*</span> <span class="fu">log</span>(t <span class="op">+</span> <span class="dv">2</span>) <span class="op">-</span> (d <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> <span class="fu">log1p</span>(t);</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        raw_idx <span class="op">+=</span> d;</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (n_z <span class="op">==</span> <span class="dv">0</span>) {</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>d] <span class="op">=</span> z<span class="op">'</span>;</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        <span class="dt">array</span>[n_z] <span class="dt">int</span> zc;</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>          zc[m] <span class="op">=</span> zeros[zero_idx <span class="op">+</span> m <span class="op">-</span> <span class="dv">1</span>, <span class="dv">2</span>];</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the joint-delta term -0.5 * log det(Gram of zero-partner rows)</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">// factors: splitting the partner matrix A by forced/free coords,</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">// A_Z is triangular with the partners' diagonals, and by Sylvester</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        <span class="co">// det(A'A) = prod(L[j,j])^2 * det(T'T)</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">log</span>(L[zc[m], zc[m]]);</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (d <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>          <span class="dt">array</span>[d] <span class="dt">int</span> free_cols;</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> fc <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> zp <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (c <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (zp <span class="op">&lt;=</span> n_z <span class="op">&amp;&amp;</span> zc[zp] <span class="op">==</span> c) {</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>                zp <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>              } <span class="cf">else</span> {</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>                fc <span class="op">+=</span> <span class="dv">1</span>;</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>                free_cols[fc] <span class="op">=</span> c;</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>          <span class="co">// triangular basis: unit at each free column, forced columns</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>          <span class="co">// filled by back-substitution so every column is orthogonal to</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>          <span class="co">// the zero-partner rows</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[i <span class="op">-</span> <span class="dv">1</span>, d] T <span class="op">=</span> <span class="fu">rep_matrix</span>(<span class="dv">0</span>, i <span class="op">-</span> <span class="dv">1</span>, d);</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>d) {</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> <span class="fu">col</span> <span class="op">=</span> free_cols[k];</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>            T[<span class="fu">col</span>, k] <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>              <span class="dt">int</span> j <span class="op">=</span> zc[m];</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>              <span class="cf">if</span> (j <span class="op">&gt;</span> <span class="fu">col</span>) {</span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>                T[j, k] <span class="op">=</span> <span class="op">-</span><span class="fu">dot_product</span>(L[j, <span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>)], T[<span class="dv">1</span><span class="op">:</span>(j <span class="op">-</span> <span class="dv">1</span>), k])</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>                          <span class="op">/</span> L[j, j];</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>          <span class="co">// T's free-column rows are the identity, so T'T = I + W'W with</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>          <span class="co">// W the forced-column rows only</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[n_z, d] W;</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>          <span class="cf">for</span> (m <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_z) {</span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>            W[m, ] <span class="op">=</span> T[zc[m], ];</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>          <span class="co">// orthonormalize: v = T * S'^{-1} * z has ||v|| = ||z||;</span></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>          <span class="co">// diagonal(S) doubles as the det(T'T) half of the delta term</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>          <span class="dt">matrix</span>[d, d] S <span class="op">=</span> <span class="fu">cholesky_decompose</span>(<span class="fu">add_diag</span>(<span class="fu">crossprod</span>(W), <span class="fl">1.0</span>));</span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>          <span class="kw">jacobian</span> <span class="op">+=</span> <span class="op">-</span><span class="fu">sum</span>(<span class="fu">log</span>(<span class="fu">diagonal</span>(S)));</span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>          <span class="dt">vector</span>[d] t <span class="op">=</span> <span class="fu">mdivide_right_tri_low</span>(z<span class="op">'</span>, S)<span class="op">'</span>;</span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>          L[i, <span class="dv">1</span><span class="op">:</span>(i <span class="op">-</span> <span class="dv">1</span>)] <span class="op">=</span> (T <span class="op">*</span> t)<span class="op">'</span>;</span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>        L[i, i] <span class="op">=</span> r;</span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>        zero_idx <span class="op">+=</span> n_z;</span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> L;</span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">2</span><span class="op">&gt;</span> K;                             <span class="co">// dimension of correlation matrix</span></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span><span class="op">&gt;</span> eta;                          <span class="co">// concentration in LKJ Cholesky</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">&lt;</span><span class="kw">lower</span><span class="op">=</span><span class="dv">0</span>, <span class="kw">upper</span><span class="op">=</span><span class="fu">choose</span>(K, <span class="dv">2</span>)<span class="op">&gt;</span> N_zero;    <span class="co">// # structural zero correlations</span></span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N_zero, <span class="dv">2</span>] <span class="dt">int</span> zeros;                 <span class="co">// lower triangular, row major order</span></span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[<span class="fu">choose</span>(K, <span class="dv">2</span>) <span class="op">-</span> N_zero] raw;</span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] L_Omega <span class="op">=</span> <span class="bu">cholesky_corr_constrain_stereo_jacobian</span>(K, raw, zeros);</span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>  L_Omega <span class="op">~ </span><span class="fu">lkj_corr_cholesky</span>(eta);</span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[K, K] Omega <span class="op">=</span> multiply_lower_tri_self_transpose(L_Omega);</span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
