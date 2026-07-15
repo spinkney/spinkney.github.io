@@ -230,37 +230,39 @@ Three things jump out.
 
 **Initialization failure is the same boundary, expressed terminally.** `schur` cannot find a feasible starting point in 100 attempts per chain for this sweep's patterns from $K = 7$ up (it ran fine on all five Section 5 patterns at the same size; feasible initialization is pattern-dependent luck). `cvine` joins it at $K = 15$. At $K = 25$, with 143 forced cells, *none of the six forced models* can start at any $\eta$. This is the scaling fact that matters: the feasible set the forced construction must hit by chance gets exponentially thin as the pattern grows, and `adapt_delta` cannot rescue a model that never takes its first draw. The subspace models are immune by construction, since every point of their parameter space is feasible.
 
-Since `tri` is the recommendation, here is its full scaling record on its own. Divergences are zero in every cell of this table, so what is left to watch is efficiency: min bulk ESS holds close to the 8,000-draw ceiling through $K = 15$ and comes down to a still-comfortable \~1,200 at $K = 25$, where the min is taken over 157 free correlations. ESS per gradient decays gently with $K$, is nearly flat in $\eta$, and the wall clock stays in seconds throughout.
+The two exact-constraint members deserve a closer look side by side. `tri`'s divergence count is zero in every cell of this table; the donut matches it from $\eta = 2$ up but gives back a small count at $\eta = 1$ (bracketed below). On efficiency the pattern is dimension-dependent: `tri` holds its min bulk ESS close to the 8,000-draw ceiling through $K = 15$, while the donut rides lower — but at $K = 25$, where the min runs over 157 free correlations, the donut's extra radial parameters stop costing and start paying, and its raw min ESS comes out 4--5$\times$ `tri`'s at comparable cost per gradient. Wall clock stays in seconds for both.
 
 ```{r}
-#| label: tri-scaling-table
+#| label: subspace-scaling-table
 
-tri_tab <- sweep |>
-  filter(model == "tri") |>
-  mutate(cell = sprintf("%s (%s)",
+sub_tab <- sweep |>
+  filter(model %in% c("tri", "donut")) |>
+  mutate(cell = sprintf("%s (%s)%s",
                         format(round(min_ess), big.mark = ","),
-                        round(ess_per_1k_grad))) |>
-  select(K, N_zero, eta, cell, seconds)
+                        round(ess_per_1k_grad),
+                        ifelse(divergences > 0,
+                               paste0(" [", divergences, " div]"), "")))
 
-tri_wide <- tri_tab |>
-  select(K, N_zero, eta, cell) |>
+sub_wide <- sub_tab |>
+  select(model, K, N_zero, eta, cell) |>
   pivot_wider(names_from = eta, values_from = cell,
               names_prefix = "eta = ") |>
   left_join(
-    tri_tab |>
-      group_by(K) |>
+    sub_tab |>
+      group_by(model, K) |>
       summarize(`wall clock (s)` = sprintf("%.1f-%.1f",
                                            min(seconds), max(seconds)),
                 .groups = "drop"),
-    by = "K"
+    by = c("model", "K")
   ) |>
   mutate(`zero / free cells` = paste0(N_zero, " / ", choose(K, 2) - N_zero),
          .after = K) |>
-  select(-N_zero)
+  select(-N_zero) |>
+  arrange(K, desc(model))
 
 knitr::kable(
-  tri_wide, align = c("r", "c", rep("c", 4), "c"),
-  caption = "tri across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses). Divergences are 0 in every configuration; wall clock is the range across eta for 4 parallel chains."
+  sub_wide, align = c("l", "r", "c", rep("c", 4), "c"),
+  caption = "tri and the donut (m_radius = 6) across the full sweep: min bulk ESS of 8,000 draws (ESS per 1,000 gradients in parentheses; divergent transitions in brackets where nonzero -- tri has none anywhere). Wall clock is the range across eta for 4 parallel chains."
 )
 ```
 
