@@ -156,7 +156,7 @@ fam_colors <- c(
 
 ```{r}
 #| label: fig-divergence-scaling
-#| fig-cap: "Divergence rate by matrix dimension and LKJ concentration. Each thin gold line is one forced-zero parameterization; lines that stop mid-panel are models that failed to initialize at the next K. The teal line (tri) is exactly zero in every panel. The purple spike is qr2's catastrophic run at K = 15, eta = 2: one chain stuck at 100% divergence. The blue donut line keeps a residual sub-1.5% rate at eta = 1."
+#| fig-cap: "Divergence rate by matrix dimension and LKJ concentration. Each thin gold line is one forced-zero parameterization; lines that stop mid-panel are models that failed to initialize at the next K. The teal line (tri) is exactly zero in every panel. The purple spike is qr2's catastrophic run at K = 15, eta = 2: one chain stuck at 100% divergence. The dashed blue donut line keeps a residual sub-1.5% rate at eta = 1; elsewhere it sits on zero underneath the tri line."
 #| fig-height: 4.5
 #| fig-width: 12
 #| out-width: "100%"
@@ -164,12 +164,19 @@ fam_colors <- c(
 
 ggplot(sweep |> filter(!failed),
        aes(x = K, y = div_pct, group = model, color = family)) +
-  geom_line(aes(linewidth = family, alpha = family)) +
+  geom_line(aes(linewidth = family, alpha = family, linetype = family)) +
   geom_point(size = 1.6) +
   facet_wrap(~eta_lab, nrow = 1, labeller = label_parsed) +
   scale_color_manual(values = fam_colors, name = NULL) +
-  scale_linewidth_manual(values = c(0.6, 1.1, 1.1, 1.3), guide = "none") +
-  scale_alpha_manual(values = c(0.65, 1, 1, 1), guide = "none") +
+  scale_linewidth_manual(guide = "none", values = c(
+    "Forced zeros" = 0.6, "Subspace (QR basis)" = 1.1,
+    "Subspace (donut)" = 1.1, "Subspace (triangular basis)" = 1.3)) +
+  scale_alpha_manual(guide = "none", values = c(
+    "Forced zeros" = 0.65, "Subspace (QR basis)" = 1,
+    "Subspace (donut)" = 1, "Subspace (triangular basis)" = 1)) +
+  scale_linetype_manual(guide = "none", values = c(
+    "Forced zeros" = "solid", "Subspace (QR basis)" = "solid",
+    "Subspace (donut)" = "22", "Subspace (triangular basis)" = "solid")) +
   scale_x_continuous(breaks = c(5, 7, 9, 15, 25)) +
   theme_blog() +
   labs(
@@ -191,12 +198,19 @@ ggplot(sweep |> filter(!failed),
 
 ggplot(sweep |> filter(!failed),
        aes(x = K, y = ess_per_1k_grad, group = model, color = family)) +
-  geom_line(aes(linewidth = family, alpha = family)) +
+  geom_line(aes(linewidth = family, alpha = family, linetype = family)) +
   geom_point(size = 1.6) +
   facet_wrap(~eta_lab, nrow = 1, labeller = label_parsed) +
   scale_color_manual(values = fam_colors, name = NULL) +
-  scale_linewidth_manual(values = c(0.6, 1.1, 1.1, 1.3), guide = "none") +
-  scale_alpha_manual(values = c(0.65, 1, 1, 1), guide = "none") +
+  scale_linewidth_manual(guide = "none", values = c(
+    "Forced zeros" = 0.6, "Subspace (QR basis)" = 1.1,
+    "Subspace (donut)" = 1.1, "Subspace (triangular basis)" = 1.3)) +
+  scale_alpha_manual(guide = "none", values = c(
+    "Forced zeros" = 0.65, "Subspace (QR basis)" = 1,
+    "Subspace (donut)" = 1, "Subspace (triangular basis)" = 1)) +
+  scale_linetype_manual(guide = "none", values = c(
+    "Forced zeros" = "solid", "Subspace (QR basis)" = "solid",
+    "Subspace (donut)" = "22", "Subspace (triangular basis)" = "solid")) +
   scale_x_continuous(breaks = c(5, 7, 9, 15, 25)) +
   scale_y_log10() +
   theme_blog() +
