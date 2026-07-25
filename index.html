@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -41,10 +44,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2a71ad880a2ccf5ed4c8ee051ed84066.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-92adcf7e78f4178a405fef6eb193be36.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -117,7 +120,7 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -242,7 +245,7 @@ window.Quarto = {
     </div>
 </div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ2NvcnJlbGF0aW9uJTJDcGFyYW1ldGVyaXphdGlvbnM=" data-listing-date-sort="1784073600000" data-listing-file-modified-sort="1784312685079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19" data-listing-word-count-sort="3784">
+<div class="quarto-post image-right" data-index="0" data-categories="c3RhbiUyQ2NvcnJlbGF0aW9uJTJDcGFyYW1ldGVyaXphdGlvbnM=" data-listing-date-sort="1784073600000" data-listing-file-modified-sort="1785015444879" data-listing-date-modified-sort="1784937600000" data-listing-reading-time-sort="20" data-listing-word-count-sort="3807">
 <div class="thumbnail"><a href="./posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.html" class="no-external">
 
 <p class="card-img-top"><img loading='lazy' src="posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff_files/figure-html/fig-divergence-scaling-1.png"  class="thumbnail-image card-img"/></p>
@@ -265,7 +268,7 @@ window.Quarto = {
 
 </div>
 <div class="delink listing-description"><a href="./posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.html" class="no-external">
-Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are conditionally unrelated occurs…
+Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are <em>marginally</em><sup>1</sup> unrelated occurs…
 </a></div>
 </div>
 <div class="metadata">
@@ -279,7 +282,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ2NvcnJlbGF0aW9u" data-listing-date-sort="1774915200000" data-listing-file-modified-sort="1784312685657" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4649">
+<div class="quarto-post image-right" data-index="1" data-categories="c3RhbiUyQ2NvcnJlbGF0aW9u" data-listing-date-sort="1774915200000" data-listing-file-modified-sort="1785015445457" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4649">
 <div class="thumbnail"><a href="./posts/post-5-compound-symmetric-block-toeplitz/compound-symmetric.html" class="no-external">
 
 <p class="card-img-top"><img loading='lazy' src="posts/post-5-compound-symmetric-block-toeplitz/compound-symmetric_files/figure-html/fig-recovery-1.png"  class="thumbnail-image card-img"/></p>
@@ -314,7 +317,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ21vZGVs" data-listing-date-sort="1772236800000" data-listing-file-modified-sort="1784312685648" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="28" data-listing-word-count-sort="5581">
+<div class="quarto-post image-right" data-index="2" data-categories="c3RhbiUyQ21vZGVs" data-listing-date-sort="1772236800000" data-listing-file-modified-sort="1785015445448" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="28" data-listing-word-count-sort="5584">
 <div class="thumbnail"><a href="./posts/post-4-poincare-lca/poincare-lca.html" class="no-external">
 
 <p class="card-img-top"><img loading='lazy' src="posts/post-4-poincare-lca/poincare-lca_files/figure-html/fig-disk-output-1.png"  class="thumbnail-image card-img"/></p>
@@ -349,7 +352,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1784312685620" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1323">
+<div class="quarto-post image-right" data-index="3" data-categories="c3RhbiUyQ3BhcmFtZXRlcml6YXRpb25z" data-listing-date-sort="1768435200000" data-listing-file-modified-sort="1785015445419" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1323">
 <div class="thumbnail"><a href="./posts/post-3-better-unit-vector/a-better-unit-vector.html" class="no-external">
 
 <p class="card-img-top"><img loading='lazy' src="posts/post-3-better-unit-vector/a-better-unit-vector_files/figure-html/uniformity-plot-1.png"  class="thumbnail-image card-img"/></p>
@@ -384,7 +387,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666483200000" data-listing-file-modified-sort="1784312685620" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1340">
+<div class="quarto-post image-right" data-index="4" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666483200000" data-listing-file-modified-sort="1785015445419" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1340">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-III/quantile-reg-part-III.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -419,7 +422,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1784312685619" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2462">
+<div class="quarto-post image-right" data-index="5" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1666051200000" data-listing-file-modified-sort="1785015445418" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2462">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-II/quantile-reg-part-II.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
@@ -454,7 +457,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1784312685607" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1558">
+<div class="quarto-post image-right" data-index="6" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665792000000" data-listing-file-modified-sort="1785015445407" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1558">
 <div class="thumbnail"><a href="./posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg.html" class="no-external">
 
 <p class="card-img-top"><img loading='lazy' src="posts/post-2-quantile-reg-series/post-2-quantile-reg-part-I/quantile-reg_files/figure-html/unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
@@ -489,7 +492,7 @@ Sean Pinkney
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1784312685028" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1883">
+<div class="quarto-post image-right" data-index="7" data-categories="c3RhbiUyQ3F1YW50aWxl" data-listing-date-sort="1665705600000" data-listing-file-modified-sort="1785015444830" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1883">
 <div class="thumbnail"><a href="./posts/post-1-vasciek/vasciek_post.html" class="no-external">
 
 <p class="card-img-top"><img loading='lazy' src="posts/post-1-vasciek/vasciek_post_files/figure-html/unnamed-chunk-6-1.png"  class="thumbnail-image card-img"/></p>

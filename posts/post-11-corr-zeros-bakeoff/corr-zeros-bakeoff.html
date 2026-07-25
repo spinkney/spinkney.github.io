@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -95,10 +98,10 @@ div.csl-indent {
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-600305633953e3b8b22375c8b49a2002.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2a71ad880a2ccf5ed4c8ee051ed84066.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-dc42e2d0f6329108b3e543495a4ea474.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-92adcf7e78f4178a405fef6eb193be36.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -128,7 +131,7 @@ div.csl-indent {
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -233,6 +236,12 @@ window.Quarto = {
       </div>
     </div>
     
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">July 25, 2026</p>
+      </div>
+    </div>
       
     </div>
     
@@ -250,7 +259,7 @@ window.Quarto = {
 
 <section id="the-problem-with-zeros-in-correlation-matrices" class="level2">
 <h2 class="anchored" data-anchor-id="the-problem-with-zeros-in-correlation-matrices">1. The Problem with Zeros in Correlation Matrices</h2>
-<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are conditionally unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.</p>
+<p>Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are <em>marginally</em><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.</p>
 <p>Sampling from an LKJ prior and setting selected cells to zero does not work because the resulting matrix will generally not be positive definite. Instead, the zeros have to be part of the parameterization. In this post I compare twelve Stan <span class="citation" data-cites="carpenter2017">(<a href="#ref-carpenter2017" role="doc-biblioref">Carpenter et al. 2017</a>)</span> implementations that target the same distribution. I check that they agree numerically, then compare divergences, effective sample size, gradient evaluations, and run time.</p>
 <p>The implementations fall into two groups. The first solves for individual Cholesky entries so that the requested correlations are zero. The second samples each row in the subspace satisfying all of its zero constraints. I also introduce a triangular basis for the second approach. In these examples it removes the divergences seen in the entry-wise construction without the loss of efficiency I found with a QR basis.</p>
 </section>
@@ -334,10 +343,10 @@ z = \frac{\sqrt{t+2}}{t+1}y, \qquad L_{ii}=\frac{1}{t+1},
 <p>I also test an over-parameterized version, called <code>donut</code>, that uses one additional parameter per row. It normalizes a free vector, <span class="math inline">\(u=y/\lVert y\rVert\)</span>, before mapping it into the constrained subspace. The normalization is rotationally symmetric but singular at the origin. Following <span class="citation" data-cites="axen2022">Axen (<a href="#ref-axen2022" role="doc-biblioref">2022</a>)</span>, I replace the usual radial term <span class="math inline">\(-\tfrac12\lVert y\rVert^2\)</span> with <span class="math inline">\(-\tfrac12(\lVert y\rVert-m)^2\)</span> so that the typical radius is away from zero. Since this term only changes the radius, it does not change the induced distribution on <span class="math inline">\(\Omega\)</span>. The largest difference in a free-cell posterior mean relative to <code>carpenter</code> is 0.0046. Across the five <span class="math inline">\(K=7\)</span>, <span class="math inline">\(\eta=4\)</span> patterns:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 29%">
-<col style="width: 23%">
-<col style="width: 23%">
-<col style="width: 23%">
+<col style="width: 27%">
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 24%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1061,27 +1070,24 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">A new model with structural zeros</td>
-<td style="text-align: left;">Start with <code>tri</code></td>
+<td style="text-align: left;">Structural zeros only</td>
+<td style="text-align: left;">Use <code>tri</code></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Small <span class="math inline">\(K\)</span>, few zeros, and existing entry-wise code</td>
-<td style="text-align: left;">The existing approach may be adequate; monitor divergences and check sensitivity to <code>adapt_delta</code></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Moderate or large <span class="math inline">\(K\)</span> with many zeros</td>
-<td style="text-align: left;">Use <code>tri</code>; entry-wise initialization can become unreliable</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Very large <span class="math inline">\(K\)</span></td>
+<td style="text-align: left;">Structural zeros at very large <span class="math inline">\(K\)</span></td>
 <td style="text-align: left;">Use <code>tri</code>, but profile the per-row <span class="math inline">\(d\times d\)</span> Cholesky factorizations</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Zeros plus bounds on free correlations</td>
-<td style="text-align: left;">The entry-wise method already supports bounded transforms <span class="citation" data-cites="pinkney2024 pinkneytalk">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024a</a>, <a href="#ref-pinkneytalk" role="doc-biblioref">2024b</a>)</span>; I have not extended the subspace method to this case</td>
+<td style="text-align: left;">Zeros plus other known correlation values</td>
+<td style="text-align: left;">Use the entry-wise method <span class="citation" data-cites="pinkney2024 pinkneytalk">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024a</a>, <a href="#ref-pinkneytalk" role="doc-biblioref">2024b</a>)</span>; <code>tri</code> currently handles zeros only</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Zeros plus bounds on other correlations</td>
+<td style="text-align: left;">Use the entry-wise method, which already supports bounded transforms <span class="citation" data-cites="pinkney2024 pinkneytalk">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024a</a>, <a href="#ref-pinkneytalk" role="doc-biblioref">2024b</a>)</span></td>
 </tr>
 </tbody>
 </table>
+<p>For structural zeros alone, I do not see a reason to prefer one of the entry-wise parameterizations. In these benchmarks <code>tri</code> is more reliable and at least as efficient. The entry-wise method remains useful because it handles more general constraints: correlations fixed at nonzero values and bounds on otherwise free correlations.</p>
 </section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">8. Discussion</h2>
@@ -2127,6 +2133,7 @@ Figure&nbsp;2: Sampling efficiency (min bulk ESS over free correlations per 1,00
 
 </section>
 
+
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-axen2022" class="csl-entry" role="listitem">
 Axen, Seth. 2022. <em>A Better Unit Vector</em>. Stan Discourse thread, post 30. <a href="https://discourse.mc-stan.org/t/a-better-unit-vector/26989/30">https://discourse.mc-stan.org/t/a-better-unit-vector/26989/30</a>.
@@ -2155,7 +2162,12 @@ Pinkney, Sean. 2025. <em>Updated Cholesky Corr Parameterization Testing</em>. St
 <div id="ref-pinkney2026" class="csl-entry" role="listitem">
 Pinkney, Sean. 2026. <em>A Better-Er Unit Vector</em>. Stan Discourse thread. <a href="https://discourse.mc-stan.org/t/a-better-er-unit-vector/40830">https://discourse.mc-stan.org/t/a-better-er-unit-vector/40830</a>.
 </div>
-</div></section></div></main> <!-- /main -->
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p><a href="https://bsky.app/profile/ethothepie.bsky.social">@ethothepie.bsky.social</a> corrected the original here where I incorrectly implied the zeros in the correlation matrix are conditionally unrelated when this is marginal<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
