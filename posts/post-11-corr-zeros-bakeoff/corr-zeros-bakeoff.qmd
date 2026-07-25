@@ -2,6 +2,7 @@
 title: "Structural Zeros in Correlation Matrices: A Twelve-Parameterization Bake-Off"
 author: "Sean Pinkney"
 date: "2026-07-15"
+date-modified: "2026-07-25"
 categories: [stan, correlation, parameterizations]
 bibliography: references.bib
 format:
@@ -11,7 +12,7 @@ format:
 
 ## 1. The Problem with Zeros in Correlation Matrices
 
-Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are conditionally unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.
+Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are *marginally*^[[\@ethothepie.bsky.social](https://bsky.app/profile/ethothepie.bsky.social) corrected the original here where I incorrectly implied the zeros in the correlation matrix are conditionally unrelated when this is marginal] unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.
 
 Sampling from an LKJ prior and setting selected cells to zero does not work because the resulting matrix will generally not be positive definite. Instead, the zeros have to be part of the parameterization. In this post I compare twelve Stan [@carpenter2017] implementations that target the same distribution. I check that they agree numerically, then compare divergences, effective sample size, gradient evaluations, and run time.
 
@@ -62,11 +63,9 @@ My first two implementations, `qr` and `qr2`, construct this complement with a H
 
 I instead construct a basis tied to the free matrix entries. For each free column $k$ of row $i$, I start with the coordinate vector $e_k$ and solve for the constrained columns by back-substitution. This is the entry-wise construction from the previous section applied to a basis vector rather than to the sampled row. If $Z$ and $F$ denote the constrained and free columns, the resulting basis matrix $T$ satisfies $T_F=I$ and $T_Z=-(A_Z')^{-1}A_F'$.
 
-To orthonormalize this basis, let $S=\operatorname{chol}(T'T)$. Then $v=T(S')^{-1}z$ preserves the norm of $z$. I parameterize $z$ using the row transformation from @pinkney2025. With $t=y'y$,
-$$
+To orthonormalize this basis, let $S=\operatorname{chol}(T'T)$. Then $v=T(S')^{-1}z$ preserves the norm of $z$. I parameterize $z$ using the row transformation from @pinkney2025. With $t=y'y$, $$
 z = \frac{\sqrt{t+2}}{t+1}y, \qquad L_{ii}=\frac{1}{t+1},
-$$
-and the log Jacobian is $\tfrac12(d-2)\log(t+2)-(d+1)\log(1+t)$.
+$$ and the log Jacobian is $\tfrac12(d-2)\log(t+2)-(d+1)\log(1+t)$.
 
 Two identities reduce the amount of linear algebra required.
 
@@ -81,7 +80,7 @@ Each constrained row requires one $d\times d$ `cholesky_decompose` and several m
 I also test an over-parameterized version, called `donut`, that uses one additional parameter per row. It normalizes a free vector, $u=y/\lVert y\rVert$, before mapping it into the constrained subspace. The normalization is rotationally symmetric but singular at the origin. Following @axen2022, I replace the usual radial term $-\tfrac12\lVert y\rVert^2$ with $-\tfrac12(\lVert y\rVert-m)^2$ so that the typical radius is away from zero. Since this term only changes the radius, it does not change the induced distribution on $\Omega$. The largest difference in a free-cell posterior mean relative to `carpenter` is 0.0046. Across the five $K=7$, $\eta=4$ patterns:
 
 | radial prior | total divergences | median min ESS | median ESS / 1k gradients |
-|:--------------------|----------------:|----------------:|----------------:|
+|:-------------------|-----------------:|-----------------:|-----------------:|
 | $m = 0$ (implicit chi) | 2,549 | 4,778 | 19 |
 | $m = 2$ | 349 | 8,106 | 80 |
 | $m = 4$ | 8 | 10,778 | 192 |
