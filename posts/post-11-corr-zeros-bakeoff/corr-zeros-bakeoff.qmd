@@ -1,8 +1,8 @@
 ---
-title: "Structural Zeros in Correlation Matrices: A Twelve-Parameterization Bake-Off"
+title: "Structural Zeros in Correlation Matrices: A Thirteen-Parameterization Bake-Off"
 author: "Sean Pinkney"
 date: "2026-07-15"
-date-modified: "2026-07-25"
+date-modified: "2026-08-08"
 categories: [stan, correlation, parameterizations]
 bibliography: references.bib
 format:
@@ -14,13 +14,13 @@ format:
 
 Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are *marginally*^[[\@ethothepie.bsky.social](https://bsky.app/profile/ethothepie.bsky.social) corrected the original here where I incorrectly implied the zeros in the correlation matrix are conditionally unrelated when this is marginal] unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.
 
-Sampling from an LKJ prior and setting selected cells to zero does not work because the resulting matrix will generally not be positive definite. Instead, the zeros have to be part of the parameterization. In this post I compare twelve Stan [@carpenter2017] implementations that target the same distribution. I check that they agree numerically, then compare divergences, effective sample size, gradient evaluations, and run time.
+Sampling from an LKJ prior and setting selected cells to zero does not work because the resulting matrix will generally not be positive definite. Instead, the zeros have to be part of the parameterization. In this post I compare thirteen Stan [@carpenter2017] implementations that target the same distribution. I check that they agree numerically, then compare divergences, effective sample size, gradient evaluations, and run time.
 
-The implementations fall into two groups. The first solves for individual Cholesky entries so that the requested correlations are zero. The second samples each row in the subspace satisfying all of its zero constraints. I also introduce a triangular basis for the second approach. In these examples it removes the divergences seen in the entry-wise construction without the loss of efficiency I found with a QR basis.
+The implementations fall into two groups. The first imposes the zero equalities sequentially in Cholesky or C-vine coordinates. The second samples each row in the subspace satisfying all of its zero constraints. I also introduce a triangular basis for the second approach. In these examples it removes the divergences seen in the entry-wise construction without the loss of efficiency I found with a QR basis.
 
 ## 2. Family 1: Forced Zeros
 
-The first group uses the constrained-Cholesky approach I introduced in @pinkney2024 and presented at StanCon [@pinkneytalk]. The original method also allows a correlation to be fixed at a nonzero value or restricted to an interval. Writing $\Omega = L L'$ with unit-norm rows of $L$, the correlation in cell $(i,j)$ is $$
+Seven members of the first group use the constrained-Cholesky approach I introduced in @pinkney2024 and presented at StanCon [@pinkneytalk]. The original method also allows a correlation to be fixed at a nonzero value or restricted to an interval. Writing $\Omega = L L'$ with unit-norm rows of $L$, the correlation in cell $(i,j)$ is $$
 \Omega_{ij} = b_1 + L_{ij} L_{jj}, \qquad
 b_1 = \sum_{k<j} L_{ik} L_{jk},
 $$ This is affine in $L_{ij}$, so setting the correlation to zero gives $L_{ij}=-b_1/L_{jj}$ and uses no parameter. A bound on $\Omega_{ij}$ similarly becomes a bound on $L_{ij}$. Conditioning on $\Omega_{ij}=0$ contributes $-\log L_{jj}$ to the log density for each zero. The `carpenter` variant below is Bob Carpenter's compact formulation of this case from a [Stan Discourse discussion](https://discourse.mc-stan.org/t/new-users-guide-intro-sem-and-user-defined-constrained-parameters-chapters/41430):
@@ -34,7 +34,7 @@ if (is_zero(i, j, zeros, zero_idx)) {
 }
 ```
 
-The free entries can be parameterized in several ways. I compare the following eight variants:
+The free entries can be parameterized in several ways. I compare the following nine variants:
 
 | label | free-cell parameterization |
 |:-----------------------------------|:-----------------------------------|
@@ -42,10 +42,13 @@ The free entries can be parameterized in several ways. I compare the following e
 | `pinkney` | correlation-scale value divided by $L_{jj}$, multiplicative stick [@pinkney2024; @pinkneytalk] |
 | `ldl` / `ldl2` / `ldl3` | $LDL'$ factorization [@pinkney2024]; stick tracked via `log_diff_exp`, a `log1m` ratio, or the natural scale |
 | `cvine` | C-vine partial correlations with the LKJ Beta factorization [@joe2006; @lewandowski2009] |
+| `cvine_lookahead` | exact equality coordinates, all-future 3-by-3 look-ahead, and a reduced free-cell Jacobian |
 | `rowscale` | direct Cholesky entries, row-scaling stick |
 | `schur` | canonical partial correlations, $L_{ij} = r \tanh(x)$ |
 
-These variants share the same constraint. The value $-b_1/L_{jj}$ is computed without reference to the remaining row norm, $\sqrt{1 - \sum_{k<j} L_{ik}^2}$, and can exceed the available range. A later square root then receives a negative argument. In the $K=7$ benchmarks below, each variant has divergences in about 1% of post-warmup transitions.
+The seven Cholesky and $LDL'$ variants share the same constraint. The value $-b_1/L_{jj}$ is computed without reference to the remaining row norm, $\sqrt{1 - \sum_{k<j} L_{ik}^2}$, and can exceed the available range. A later square root then receives a negative argument. In the $K=7$ benchmarks below, these variants have divergences in about 1% of post-warmup transitions.
+
+The [`cvine_lookahead` model](https://gist.github.com/spinkney/7d994fb03079c9edb8a0e83a40d2faad) instead represents every zero as an exact ordinary-correlation equality, omits those coordinates from the parameter vector, and uses exact $3\times3$ elliptope projections to narrow each free partial-correlation interval before sampling it. Its Jacobian contains only the free ordinary-correlation coordinates, and the LKJ kernel is added through $(\eta-1)\log\det(\Omega)$. The look-ahead substantially reduces infeasible proposals, although it does not remove every nonlocal feasibility boundary for dense patterns.
 
 The three LDL variants are also useful for judging Monte Carlo variability. They define the same density and differ only in how some floating-point operations are arranged, but their total divergences over five patterns range from 356 to 466. Differences of that size should not be interpreted as evidence that one parameterization is better from a single set of fits.
 
@@ -90,42 +93,108 @@ Increasing $m$ removes the divergences and improves efficiency up to $m=4$; $m=6
 
 ## 5. The Bake-Off at K = 7
 
-Setup: $K = 7$, $\eta = 4$, prior-only, five random zero patterns with roughly half of the 21 lower-triangular cells zeroed, 4 chains $\times$ 2000 draws after 1000 warmup, default `adapt_delta = 0.8`. Correctness was checked on a held-out pattern first: all twelve posteriors match the `carpenter` baseline within Monte Carlo error, and the constrained cells come back as numerically exact zeros ($\sim 10^{-19}$).
+Setup: $K = 7$, $\eta = 4$, prior-only, five random zero patterns with roughly half of the 21 lower-triangular cells zeroed, 4 chains $\times$ 2000 draws after 1000 warmup, default `adapt_delta = 0.8`. Correctness was checked on a held-out pattern first: all thirteen posteriors match the `carpenter` baseline within Monte Carlo error, and the constrained cells come back as numerically exact zeros ($\sim 10^{-19}$).
 
 **Divergences** out of 8,000 post-warmup transitions:
 
-| pattern | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
-|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-| seed 1 | 34 | 53 | 53 | 26 | 41 | 44 | 40 | 40 | 0 | 0 | **0** | 0 |
-| seed 2 | 61 | 65 | 74 | 107 | 64 | 78 | 104 | 60 | 0 | 0 | **0** | 0 |
-| seed 3 | 77 | 44 | 67 | 57 | 69 | 44 | 68 | 59 | 0 | 0 | **0** | 0 |
-| seed 4 | 137 | 157 | 130 | 112 | 186 | 155 | 152 | 123 | 0 | 0 | **0** | 0 |
-| seed 5 | 110 | 94 | 114 | 54 | 141 | 114 | 102 | 29 | 0 | 0 | **0** | 0 |
-| **total** | 419 | 413 | 438 | 356 | 501 | 435 | 466 | 311 | **0** | **0** | **0** | **0** |
+| pattern | carpenter | pinkney | ldl | ldl2 | cvine | cvine_lookahead | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
+|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
+| seed 1 | 34 | 53 | 53 | 26 | 41 | 0 | 44 | 40 | 40 | 0 | 0 | **0** | 0 |
+| seed 2 | 61 | 65 | 74 | 107 | 64 | 0 | 78 | 104 | 60 | 0 | 0 | **0** | 0 |
+| seed 3 | 77 | 44 | 67 | 57 | 69 | 1 | 44 | 68 | 59 | 0 | 0 | **0** | 0 |
+| seed 4 | 137 | 157 | 130 | 112 | 186 | 0 | 155 | 152 | 123 | 0 | 0 | **0** | 0 |
+| seed 5 | 110 | 94 | 114 | 54 | 141 | 7 | 114 | 102 | 29 | 0 | 0 | **0** | 0 |
+| **total** | 419 | 413 | 438 | 356 | 501 | 8 | 435 | 466 | 311 | **0** | **0** | **0** | **0** |
 
 **Min bulk ESS** over the free cells of $\Omega$ (8,000 draws):
 
-| pattern | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
-|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-| seed 1 | 11639 | 10566 | 9979 | 10618 | 10219 | 11319 | 9840 | 11036 | 3995 | 3362 | **11238** | 10676 |
-| seed 2 | 10817 | 9866 | 10826 | 9772 | 10188 | 10153 | 10361 | 10040 | 4049 | 3728 | **11923** | 9045 |
-| seed 3 | 9344 | 11014 | 10244 | 10314 | 10946 | 9420 | 10625 | 10787 | 4334 | 4304 | 10655 | 9429 |
-| seed 4 | 8395 | 9159 | 8326 | 9257 | 8771 | 9463 | 8266 | 9458 | 3701 | 3815 | **9400** | 8161 |
-| seed 5 | 10381 | 10010 | 9268 | 8760 | 10301 | 9218 | 9896 | 4770 | 4267 | 4153 | **11845** | 8619 |
-| **median** | 10381 | 10010 | 9979 | 9772 | 10219 | 9463 | 9896 | 10040 | 4049 | 3815 | **11238** | 9045 |
+| pattern | carpenter | pinkney | ldl | ldl2 | cvine | cvine_lookahead | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
+|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
+| seed 1 | 11639 | 10566 | 9979 | 10618 | 10219 | 11572 | 11319 | 9840 | 11036 | 3995 | 3362 | **11238** | 10676 |
+| seed 2 | 10817 | 9866 | 10826 | 9772 | 10188 | 12308 | 10153 | 10361 | 10040 | 4049 | 3728 | **11923** | 9045 |
+| seed 3 | 9344 | 11014 | 10244 | 10314 | 10946 | 9535 | 9420 | 10625 | 10787 | 4334 | 4304 | 10655 | 9429 |
+| seed 4 | 8395 | 9159 | 8326 | 9257 | 8771 | 9224 | 9463 | 8266 | 9458 | 3701 | 3815 | **9400** | 8161 |
+| seed 5 | 10381 | 10010 | 9268 | 8760 | 10301 | 10454 | 9218 | 9896 | 4770 | 4267 | 4153 | **11845** | 8619 |
+| **median** | 10381 | 10010 | 9979 | 9772 | 10219 | 10454 | 9463 | 9896 | 10040 | 4049 | 3815 | **11238** | 9045 |
 
 **Efficiency** (medians over the five patterns):
 
-|   | carpenter | pinkney | ldl | ldl2 | cvine | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
-|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-| min ESS / 1000 gradients | 188.5 | 179.6 | 185.9 | 182.2 | 188.9 | 176.3 | 182.1 | 182.0 | 75.0 | 72.5 | **212.3** | 161.8 |
-| total wall clock, 5 fits (s) | 4.53 | 4.10 | 4.40 | 4.51 | 5.14 | 4.21 | 4.51 | 4.15 | 2.07 | 2.06 | **1.86** | 2.39 |
+|   | carpenter | pinkney | ldl | ldl2 | cvine | cvine_lookahead | rowscale | ldl3 | schur | qr | qr2 | tri | donut |
+|:-----|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
+| min ESS / 1000 gradients | 188.5 | 179.6 | 185.9 | 182.2 | 188.9 | 194.1 | 176.3 | 182.1 | 182.0 | 75.0 | 72.5 | **212.3** | 161.8 |
+| total wall clock, 5 fits (s) | 4.53 | 4.10 | 4.40 | 4.51 | 5.14 | 2.65 | 4.21 | 4.51 | 4.15 | 2.07 | 2.06 | **1.86** | 2.39 |
 
-The `tri` model has zero divergences for all five patterns. It also has the highest median minimum ESS, the highest median ESS per 1,000 gradients, and the shortest total run time. The QR models also remove divergences, but their changing complement basis produces substantially lower ESS. The triangular basis avoids that loss in this benchmark.
+The `cvine_lookahead` model records 8 divergences across the five patterns, compared with 501 for `cvine`, and completes the five fits in 2.65 rather than 5.14 seconds. The `tri` model still has zero divergences for all five patterns, the highest median minimum ESS, the highest median ESS per 1,000 gradients, and the shortest total run time. The QR models also remove divergences, but their changing complement basis produces substantially lower ESS. The triangular basis avoids that loss in this benchmark.
 
-## 6. Does It Hold Up? Scaling K and $\eta$
+## 6. What the Look-Ahead Changes: `cvine` vs `cvine_lookahead`
 
-I next repeat the comparison for $K\in\{5,7,9,15,25\}$ and $\eta\in\{1,2,3,4\}$. This sweep includes six entry-wise models, `qr2`, `tri`, and the donut model with $m=6$. For each $K$, I generate one Bernoulli(0.5) zero pattern and reuse it for all four values of $\eta$. The realized number of zeros ranges from 6 of 10 cells at $K=5$ to 143 of 300 at $K=25$. Sampler settings are unchanged. There is one fit per configuration, so small differences should be interpreted with the variability from Section 2 in mind.
+The original `cvine` samples the unconstrained C-vine partial correlations from their LKJ Beta factors. When an ordinary correlation is fixed to zero, it solves the affine partial-correlation recursion for the required value. Nothing restricts earlier free partials to ensure that the solution will remain in $(-1,1)$, so the transform can meet a feasibility boundary late in the recursion.
+
+`cvine_lookahead` carries intervals for the unsampled conditional correlations. Before selecting the current partial correlation $x$, it uses the exact $3\times3$ condition
+
+$$
+1 + 2xyr - x^2 - y^2 - r^2 \ge 0
+$$
+
+to project every later pair onto a feasible interval for $x$. After selecting $x$, it tightens the later intervals and continues. Fixed ordinary correlations are point intervals, so zeros take no raw parameter in either model. The new transform uses the reduced Jacobian from raw values to the free ordinary correlations and adds the LKJ kernel as $(\eta-1)\log\det(\Omega)$; it therefore targets the same conditional LKJ distribution as `cvine`.
+
+| $K=7$, $\eta=4$, five patterns | `cvine` | `cvine_lookahead` |
+|:---------------------------------|--------:|------------------:|
+| total divergences | 501 | **8** |
+| median minimum bulk ESS | 10,219 | **10,454** |
+| median ESS / 1,000 gradients | 188.9 | **194.1** |
+| total wall clock (s) | 5.14 | **2.65** |
+
+The scaling sweep tells the same story. The original initializes in 12 of 20 configurations and fails for every $K=15$ and $K=25$ fit. `cvine_lookahead` initializes in 16 of 20 and reaches $K=15$. On the 12 configurations where both initialize, divergences fall from 20,842 to 993, median minimum ESS rises from 6,447 to 7,876, and median ESS per 1,000 gradients rises from 84.3 to 152.4. It still fails under default random initialization at $K=25$: enforcing every local $3\times3$ condition is necessary, but for $K\ge4$ it is not sufficient for a globally feasible completion satisfying all remaining zero constraints.
+
+## 7. How Far Can $3\times3$ Look-Ahead Propagate?
+
+The gist implementation already has maximum *breadth*: at each C-vine pair $(i,j)$ it checks every future $k>j$, not only $k=j+1$. What it does not do is repeatedly propagate every narrowing through other triangles. A bound narrowed in one triangle can narrow another edge in a second triangle, which can then feed a third. To test that depth, I added an experimental transform that sweeps all currently active triples symmetrically for a fixed number of passes before each sequential coordinate. Each synchronous pass reads the previous pass's intervals, intersects all three projected edges, and never moves an equality or an already sampled coordinate.
+
+The bounds still depend only on earlier raw coordinates and unsampled boxes. The transformation remains triangular, so the Jacobian needs only the current interval width, logistic derivative, and the existing C-vine scale factor; there is no additional "projection Jacobian." Fixed pass counts also avoid a tolerance-dependent stopping rule inside HMC.
+
+The next table uses the same five $K=7$, $\eta=4$ patterns and sampler settings. Spans 1 through 5 limit both the pre-selection intersection and post-selection tightening to that many future indices. `all` reaches the maximum possible distance of 6 and is `cvine_lookahead`. The sweep rows retain all-future breadth and add synchronous all-triple propagation before every coordinate. For `rowscale`, pass 0 and pass 1 are the same executable with propagation disabled or enabled, which controls for floating-point changes between Stan programs.
+
+| experiment | total divergences | median min ESS | median ESS / 1k gradients | total time (s) |
+|:--------------------------|------------------:|---------------:|---------------------------:|---------------:|
+| C-vine, span 1 | 206 | 11,153 | 214.5 | 3.80 |
+| C-vine, span 2 | 43 | 10,562 | 205.7 | 3.06 |
+| C-vine, span 3 | 9 | 10,454 | 194.1 | 2.93 |
+| C-vine, span 4 | **8** | 10,454 | 194.1 | **2.84** |
+| C-vine, span 5 | **8** | 10,454 | 194.1 | 3.05 |
+| C-vine, all future $k$ | **8** | 10,454 | 194.1 | 2.99 |
+| C-vine, all + 1 sweep | **7** | **11,255** | **219.4** | 19.89 |
+| C-vine, all + 2 sweeps | **7** | **11,255** | **219.4** | 37.96 |
+| C-vine, all + 4 sweeps | **7** | **11,255** | **219.4** | 74.42 |
+| `rowscale`, 0 sweeps | 362 | 9,567 | 174.8 | **4.54** |
+| `rowscale`, 1 sweep | **207** | **10,334** | **188.6** | 9.11 |
+| `rowscale`, 2 sweeps | **207** | **10,334** | **188.6** | 16.67 |
+| `rowscale`, 4 sweeps | **207** | **10,334** | **188.6** | 31.39 |
+
+Breadth is the useful part for the C-vine: nearest-neighbor look-ahead leaves 206 divergences, two-step leaves 43, three-step leaves 9, and spans 4, 5, and all future indices agree at 8. One synchronous all-triple pass before each coordinate changes the C-vine path slightly and removes one more divergence, but costs nearly seven times as much; passes 2 and 4 produce exactly the same diagnostics and ESS as pass 1 while only multiplying run time. The naive repeated sweep is $O(pK^5)$ for $p$ passes, so it is an experiment rather than a recommended default.
+
+The projection also transfers to an entry-wise Cholesky transform, provided it is applied to ordinary correlations rather than to Cholesky entries. For `rowscale`, I maintain boxes for $\Omega_{ij}$, sweep all same-row pairs before each coordinate against the already known $\Omega_{jk}$, then map the contracted interval back through $\Omega_{ij}=b_1+L_{ij}L_{jj}$. One pass cuts divergences from 362 to 207 and improves median efficiency; additional passes saturate immediately. It helps, but unlike the subspace construction it does not remove the nonlocal constrained-completion boundary.
+
+I then ported the same one-pass ordinary-correlation sweep to six entry-wise transforms from the bake-off. At a common parity-check point, pass-zero mode reproduced each original log density and full raw-gradient vector to printed precision. The table compares pass zero with pass one in those same executables; this is a cleaner intervention than comparing separately compiled programs. The contraction happens on $\Omega$, after which each transform retains its existing Cholesky or $LDL'$ scale and equality Jacobians.
+
+| model | successful patterns, 0 $\to$ 1 pass | divergences, 0 $\to$ 1 pass | median ESS / 1k gradients, 0 $\to$ 1 pass |
+|:----------|:-------------------------------:|-----------------------------:|-------------------------------------------:|
+| `carpenter` | 5 $\to$ 5 | 398 $\to$ **195** | 199.3 $\to$ **202.6** |
+| `pinkney` | 5 $\to$ 5 | 395 $\to$ **322** | 192.3 $\to$ **199.1** |
+| `ldl2` | 5 $\to$ 5 | 389 $\to$ **275** | 187.7 $\to$ **190.3** |
+| `ldl3` | 5 $\to$ 5 | 370 $\to$ **230** | 182.1 $\to$ **190.9** |
+| `rowscale` | 5 $\to$ 5 | 362 $\to$ **207** | 174.8 $\to$ **188.6** |
+| `schur` | 4 $\to$ **5** | 224 $\to$ **193**[^schur-lookahead] | 191.9 $\to$ **202.2** |
+
+[^schur-lookahead]: The pass-zero `schur` fit failed during initialization for seed 5, while the one-pass transform initialized all four chains. Its divergence and efficiency comparison therefore uses the four patterns that succeeded under both settings.
+
+Across the 29 matched model-pattern pairs, one sweep reduces divergences from 2,138 to 1,422, raises median minimum ESS from 10,222 to 10,334, and raises median ESS per 1,000 gradients from 189.7 to 190.9. Wall time doubles from 25.9 to 52.1 seconds. The direction is favorable for every model in aggregate, but the gain is much smaller than for `cvine_lookahead`, and individual fits can move the other way because HMC trajectories are chaotic near the boundary. Local $3\times3$ pruning is therefore useful as a guardrail for the entry-wise family, not a replacement for a parameterization that is feasible by construction.
+
+On a held-out $K=5$ pattern, the six one-pass posteriors also agree with the `carpenter` baseline: the largest free-cell mean difference is 0.016, the largest difference is 2.85 combined Monte Carlo standard errors, and the constrained cells remain zero to about $10^{-19}$. The experimental Stan sources, benchmark scripts, and raw result CSVs are stored alongside this post.
+
+## 8. Does It Hold Up? Scaling K and $\eta$
+
+I next repeat the comparison for $K\in\{5,7,9,15,25\}$ and $\eta\in\{1,2,3,4\}$. This sweep includes five entry-wise models, both C-vine models, `qr2`, `tri`, and the donut model with $m=6$. For each $K$, I generate one Bernoulli(0.5) zero pattern and reuse it for all four values of $\eta$. The realized number of zeros ranges from 6 of 10 cells at $K=5$ to 143 of 300 at $K=25$. Sampler settings are unchanged. There is one fit per configuration, so small differences should be interpreted with the variability from Section 2 in mind.
 
 ```{r}
 #| label: setup
@@ -144,6 +213,7 @@ sweep <- read.csv("sweep-results.csv") |>
       model == "tri" ~ "Subspace (triangular basis)",
       model == "qr2" ~ "Subspace (QR basis)",
       model == "donut" ~ "Subspace (donut)",
+      model == "cvine_lookahead" ~ "C-vine (look-ahead)",
       .default = "Forced zeros"
     ),
     div_pct = 100 * divergences / 8000,
@@ -153,6 +223,7 @@ sweep <- read.csv("sweep-results.csv") |>
 
 fam_colors <- c(
   "Forced zeros" = blog_colors$gold,
+  "C-vine (look-ahead)" = blog_colors$red,
   "Subspace (QR basis)" = blog_colors$purple,
   "Subspace (donut)" = blog_colors$blue,
   "Subspace (triangular basis)" = blog_colors$teal
@@ -161,7 +232,7 @@ fam_colors <- c(
 
 ```{r}
 #| label: fig-divergence-scaling
-#| fig-cap: "Divergence rate by matrix dimension and LKJ concentration. Each thin gold line is one entry-wise parameterization; missing points indicate initialization failures. The tri model has zero divergences in every panel. For qr2 at K = 15 and eta = 2, one chain has 100% divergences. The donut model remains below 1.5% at eta = 1 and has zero divergences otherwise."
+#| fig-cap: "Divergence rate by matrix dimension and LKJ concentration. Thin gold lines are the original sequential transforms and the red line is cvine_lookahead; missing points indicate initialization failures. The tri model has zero divergences in every panel. For qr2 at K = 15 and eta = 2, one chain has 100% divergences. The donut model remains below 1.5% throughout."
 #| fig-height: 4.5
 #| fig-width: 12
 #| out-width: "100%"
@@ -174,13 +245,13 @@ ggplot(sweep |> filter(!failed),
   facet_wrap(~eta_lab, nrow = 1, labeller = label_parsed) +
   scale_color_manual(values = fam_colors, name = NULL) +
   scale_linewidth_manual(guide = "none", values = c(
-    "Forced zeros" = 0.6, "Subspace (QR basis)" = 1.1,
+    "Forced zeros" = 0.6, "C-vine (look-ahead)" = 0.9, "Subspace (QR basis)" = 1.1,
     "Subspace (donut)" = 1.1, "Subspace (triangular basis)" = 1.3)) +
   scale_alpha_manual(guide = "none", values = c(
-    "Forced zeros" = 0.65, "Subspace (QR basis)" = 1,
+    "Forced zeros" = 0.65, "C-vine (look-ahead)" = 1, "Subspace (QR basis)" = 1,
     "Subspace (donut)" = 1, "Subspace (triangular basis)" = 1)) +
   scale_linetype_manual(guide = "none", values = c(
-    "Forced zeros" = "solid", "Subspace (QR basis)" = "solid",
+    "Forced zeros" = "solid", "C-vine (look-ahead)" = "solid", "Subspace (QR basis)" = "solid",
     "Subspace (donut)" = "22", "Subspace (triangular basis)" = "solid")) +
   scale_x_continuous(breaks = c(5, 7, 9, 15, 25)) +
   theme_blog() +
@@ -208,13 +279,13 @@ ggplot(sweep |> filter(!failed),
   facet_wrap(~eta_lab, nrow = 1, labeller = label_parsed) +
   scale_color_manual(values = fam_colors, name = NULL) +
   scale_linewidth_manual(guide = "none", values = c(
-    "Forced zeros" = 0.6, "Subspace (QR basis)" = 1.1,
+    "Forced zeros" = 0.6, "C-vine (look-ahead)" = 0.9, "Subspace (QR basis)" = 1.1,
     "Subspace (donut)" = 1.1, "Subspace (triangular basis)" = 1.3)) +
   scale_alpha_manual(guide = "none", values = c(
-    "Forced zeros" = 0.65, "Subspace (QR basis)" = 1,
+    "Forced zeros" = 0.65, "C-vine (look-ahead)" = 1, "Subspace (QR basis)" = 1,
     "Subspace (donut)" = 1, "Subspace (triangular basis)" = 1)) +
   scale_linetype_manual(guide = "none", values = c(
-    "Forced zeros" = "solid", "Subspace (QR basis)" = "solid",
+    "Forced zeros" = "solid", "C-vine (look-ahead)" = "solid", "Subspace (QR basis)" = "solid",
     "Subspace (donut)" = "22", "Subspace (triangular basis)" = "solid")) +
   scale_x_continuous(breaks = c(5, 7, 9, 15, 25)) +
   scale_y_log10() +
@@ -243,11 +314,11 @@ sweep |>
   )
 ```
 
-At $\eta=1$, the entry-wise models have 13--17% divergences for $K=5$ and 85--94% for $K=7$ and $K=9$. The uniform LKJ prior places more mass near the part of the parameter space where a solved Cholesky entry can exceed the remaining row norm. Four curves coincide in the $\eta=1$ panel because `carpenter`, `pinkney`, `ldl2`, and `ldl3` have the same density in their raw coordinates until floating-point differences separate their trajectories.
+At $\eta=1$, the entry-wise models have 15--18% divergences for $K=5$ and 85--94% for $K=7$ and $K=9$. The uniform LKJ prior places more mass near the part of the parameter space where a solved Cholesky entry can exceed the remaining row norm. Four curves coincide in the $\eta=1$ panel because `carpenter`, `pinkney`, `ldl2`, and `ldl3` have the same density in their raw coordinates until floating-point differences separate their trajectories.
 
-Initialization also becomes difficult for the entry-wise models. For these particular patterns, `schur` fails to initialize from $K=7$ onward and `cvine` fails at $K=15$. At $K=25$, none of the six entry-wise models finds a feasible initial value in 100 attempts per chain. This depends on the zero pattern—`schur` initialized for every pattern in Section 5—but the problem becomes more likely as the number of constraints increases. Every initial value in the subspace models satisfies the zero constraints by construction.
+Initialization also becomes difficult for the sequential models. For these particular patterns, `schur` fails to initialize from $K=7$ onward and `cvine` fails from $K=15$ onward. The `cvine_lookahead` model initializes and samples through $K=15$, but still fails to find a feasible default initialization at $K=25$. The other entry-wise models also fail at $K=25$. This depends on the zero pattern—`schur` initialized for every pattern in Section 5—but the problem becomes more likely as the number of constraints increases. Every initial value in the subspace models satisfies the zero constraints by construction.
 
-The `tri` model has zero divergences in all 20 configurations. The donut model has a small number at $\eta=1$ and none for $\eta\ge2$. Through $K=15$, the minimum bulk ESS for `tri` remains near the number of posterior draws. At $K=25$, the minimum is taken over 157 free correlations and ranges from about 5,100 to 6,600 for `tri`. The donut model ranges from about 4,700 to 6,600. Both complete in seconds.
+The `tri` model has zero divergences in all 20 configurations. The donut model remains below 1.5% divergences throughout, with small counts for $\eta\le2$ and none for $\eta\ge3$. Through $K=15$, the minimum bulk ESS for `tri` remains near the number of posterior draws. At $K=25$, the minimum is taken over 157 free correlations and ranges from about 5,100 to 6,600 for `tri`. The donut model ranges from about 4,700 to 6,600. Both complete in seconds.
 
 ```{r}
 #| label: subspace-scaling-table
@@ -283,9 +354,9 @@ knitr::kable(
 )
 ```
 
-The QR basis remains feasible when the entry-wise models fail, but it becomes expensive as $K$ grows. At $K=25$, $\eta=1$, `qr2` takes 852 seconds compared with 8.9 seconds for `tri`. At $K=15$, $\eta=2$, one `qr2` chain has 100% divergences and the minimum ESS is 7. The `ldl3` model has a similar isolated failure at $K=9$, $\eta=2$, with a minimum ESS of 19. At $K=25$, the minimum ESS for `qr2` is about 3,500--4,100, compared with 5,100--6,600 for `tri`, and `qr2` requires many more gradient evaluations. `tri` has the highest ESS per gradient in 17 of the 20 configurations; `qr2` is higher in three of the $K=5$ configurations.
+The QR basis remains feasible when the entry-wise models fail, but it becomes expensive as $K$ grows. At $K=25$, $\eta=1$, `qr2` takes 852 seconds compared with 8.9 seconds for `tri`. At $K=15$, $\eta=2$, one `qr2` chain has 100% divergences and the minimum ESS is 7. The `ldl3` model has a similar isolated failure at $K=9$, $\eta=2$, with a minimum ESS of 19. At $K=25$, the minimum ESS for `qr2` is about 3,500--4,100, compared with 5,100--6,600 for `tri`, and `qr2` requires many more gradient evaluations. `tri` has the highest ESS per gradient in 14 of the 20 configurations, `cvine_lookahead` in four, and `qr2` in two.
 
-## 7. When to Use Which
+## 9. When to Use Which
 
 | Scenario | Recommendation |
 |:-----------------------------------|:-----------------------------------|
@@ -294,21 +365,21 @@ The QR basis remains feasible when the entry-wise models fail, but it becomes ex
 | Zeros plus other known correlation values | Use the entry-wise method [@pinkney2024; @pinkneytalk]; `tri` currently handles zeros only |
 | Zeros plus bounds on other correlations | Use the entry-wise method, which already supports bounded transforms [@pinkney2024; @pinkneytalk] |
 
-For structural zeros alone, I do not see a reason to prefer one of the entry-wise parameterizations. In these benchmarks `tri` is more reliable and at least as efficient. The entry-wise method remains useful because it handles more general constraints: correlations fixed at nonzero values and bounds on otherwise free correlations.
+For structural zeros alone, I do not see a reason to prefer one of the entry-wise parameterizations. In these benchmarks `tri` is more reliable and at least as efficient. The entry-wise method remains the established option here for more general constraints. The underlying look-ahead C-vine also accepts nonzero equalities and bounded free correlations, but this zeros-only adapter does not benchmark those cases.
 
-## 8. Discussion
+## 10. Discussion
 
-The entry-wise construction solves each zero constraint but leaves the boundary of the feasible row norm in the parameter space. This produces divergences for the smaller examples and initialization failures for the larger ones. The subspace construction removes that boundary because every parameter value maps to a row satisfying the constraints.
+The entry-wise construction solves each zero constraint but leaves the boundary of the feasible row norm in the parameter space. This produces divergences for the smaller examples and initialization failures for the larger ones. `cvine_lookahead` narrows sequential partial-correlation intervals using exact $3\times3$ feasibility projections and performs much better, but dense patterns can still leave a nonlocal constrained-completion boundary. The subspace construction removes that boundary because every parameter value maps to a row satisfying the constraints.
 
 The choice of basis is important. A complement obtained directly from QR is valid, but its coordinates change with the earlier rows and sampling becomes less efficient. The triangular basis fixes the free coordinates to matrix entries and only solves for the constrained coordinates. In these benchmarks, that gives zero divergences without sacrificing effective sample size or run time.
 
-There are two limitations I have not addressed here. Adding bounds on otherwise free correlations changes the row's feasible region from a sphere to the intersection of a sphere and a box. Also, the small Cholesky factorization performed for each constrained row should be profiled for matrices with dimensions in the hundreds.
+There are two limitations I have not addressed here. The general look-ahead C-vine also supports nonzero equalities and bounded free correlations, but this bake-off's interface specializes it to exact zeros and does not compare those targets. Also, the small Cholesky factorization performed for each constrained row should be profiled for matrices with dimensions in the hundreds.
 
 ## Acknowledgments
 
 The exact-constraint subspace idea, zeros as orthogonality constraints with the sample lifted from a lower-dimensional hemisphere through the orthogonal complement, including the $\det R$ Jacobian factor, is due to Seth Axen [@axen2023], whose radial prior [@axen2022] the donut variant relies on. The `tri` model is that idea with a canonical triangular choice of complement basis and the determinant factored analytically. Thanks to Bob Carpenter for the compact zeros-only formulation benchmarked here as `carpenter`, and for the Discourse conversation that prompted this bake-off. The C-vine construction rests on the vine and partial-correlation results of @joe2006 and @lewandowski2009.
 
-## Appendix: Stan Code for All Twelve Parameterizations
+## Appendix: Stan Code for All Thirteen Parameterizations
 
 ::: panel-tabset
 ### tri
@@ -357,6 +428,12 @@ The exact-constraint subspace idea, zeros as orthogonality constraints with the 
 
 ``` {.stan filename="cvine-corr-zeros.stan"}
 {{< include cvine-corr-zeros.stan >}}
+```
+
+### cvine_lookahead
+
+``` {.stan filename="cvine-lookahead-corr-zeros.stan"}
+{{< include cvine-lookahead-corr-zeros.stan >}}
 ```
 
 ### rowscale

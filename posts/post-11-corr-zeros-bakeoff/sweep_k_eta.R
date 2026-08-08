@@ -1,4 +1,5 @@
 ## Expanded benchmark over K and eta for the blog post.
+## Run from this directory.
 ## Writes sweep-results.csv into the blog post folder.
 
 library(cmdstanr)
@@ -11,9 +12,11 @@ sweep_models <- c(
   ldl2      = "pinkney-corr-zeros-ldl2.stan",
   ldl3      = "pinkney-corr-zeros-ldl3.stan",
   cvine     = "cvine-corr-zeros.stan",
+  cvine_lookahead = "cvine-lookahead-corr-zeros.stan",
   schur     = "pinkney-corr-zeros-schur.stan",
   qr2       = "qr2-corr-zeros.stan",
-  tri       = "unitvec-tri-corr-zeros.stan"
+  tri       = "unitvec-stereo-corr-zeros.stan",
+  donut     = "unitvec-donut-corr-zeros.stan"
 )
 mods <- lapply(sweep_models, cmdstan_model)
 
@@ -38,7 +41,8 @@ for (K in Ks) {
     for (m in names(mods)) {
       res <- tryCatch({
         fit <- mods[[m]]$sample(
-          data = list(D = K, K = K, eta = eta, N_zero = pat$n, zeros = pat$index),
+          data = list(D = K, K = K, eta = eta, N_zero = pat$n,
+                      zeros = pat$index, m_radius = 6),
           seed = 1, parallel_chains = 4,
           iter_warmup = 1000, iter_sampling = 2000,
           refresh = 0, show_messages = FALSE, show_exceptions = FALSE
