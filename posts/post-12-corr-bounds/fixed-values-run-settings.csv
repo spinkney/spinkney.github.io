@@ -1,0 +1,2 @@
+"K","eta","N_fixed","D_free","chains","parallel_chains","iter_warmup","iter_sampling","adapt_delta","max_treedepth","reference_proposals","cmdstan_version","run_time_utc"
+4,2,2,4,4,4,750,1500,0.9,12,500000,"2.39.0","2026-08-08 23:28:32 UTC"

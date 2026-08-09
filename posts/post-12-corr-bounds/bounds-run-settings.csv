@@ -1,0 +1,2 @@
+"K","eta","chains","parallel_chains","iter_warmup","iter_sampling","adapt_delta","max_treedepth","cmdstan_version","run_time_utc"
+5,2,4,4,750,1500,0.9,12,"2.39.0","2026-08-08 23:28:43 UTC"
