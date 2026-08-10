@@ -236,6 +236,12 @@ window.Quarto = {
       </div>
     </div>
     
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">August 10, 2026</p>
+      </div>
+    </div>
       
     </div>
     
@@ -253,19 +259,19 @@ window.Quarto = {
 
 <section id="from-structural-zeros-to-bounds" class="level2">
 <h2 class="anchored" data-anchor-id="from-structural-zeros-to-bounds">1. From Structural Zeros to Bounds</h2>
-<p>My <a href="../../posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.html">previous post</a> used a triangular basis to sample correlation matrices with exact structural zeros. Given the preceding Cholesky rows, each zero is a homogeneous linear constraint on the current row, and the zero vector remains an admissible row completion after every valid prefix. Here I ask how much of that construction carries over to prescribed signs, finite cell-specific intervals, and exact nonzero values.</p>
+<p>My <a href="../../posts/post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.html">previous post</a> used a triangular basis to sample correlation matrices with exact structural zeros. Given the preceding Cholesky rows, each zero is a homogeneous linear constraint on the current row. Setting all off-diagonal entries in that row to zero always satisfies those constraints and preserves positive definiteness. Here I ask how much of that construction carries over to prescribed signs, finite cell-specific intervals, and exact nonzero values.</p>
 <p>I ended up with three different cases.</p>
 <ol type="1">
 <li><p><strong>Prescribed signs admit a smooth triangular transform.</strong> Zeros define subspaces; signs define cones. Replacing the free coordinates in each Cholesky row by coordinates inside the requested sign cone gives a bijection onto the interior of the sign-constrained correlation space. Section 3 gives the row-wise inverse.</p></li>
-<li><p><strong>Finite boxes do not fit the same homogeneous construction.</strong> A box such as <span class="math inline">\(0.2 &lt; \Omega_{21} &lt; 0.5\)</span> is not scale invariant, so the linear zero basis does not represent it. For this case, I use rays from a strictly feasible anchor. Section 4 shows that the resulting map covers the interior of the box–elliptope intersection, apart from the anchor itself. Its active boundary can change with direction and create gradient kinks.</p></li>
-<li><p><strong>An exact nonzero value is an affine equality.</strong> A translated version of the zero-row construction exists, but its available radius depends on earlier correlations and can disappear after an otherwise valid prefix. For general fixed-value patterns, I instead remove the fixed coordinates from the global anchor-ray map.</p></li>
+<li><p><strong>Finite boxes do not fit the same homogeneous construction.</strong> A box such as <span class="math inline">\(0.2 &lt; \Omega_{21} &lt; 0.5\)</span> is not scale invariant, so the linear zero basis does not represent it. For this case, I use rays from a strictly feasible anchor. Section 4 shows that the resulting map covers the interior of the intersection between the box and the set of positive-definite correlation matrices, apart from the anchor itself. Its active boundary can change with direction and create gradient kinks.</p></li>
+<li><p><strong>An exact nonzero value is an affine equality.</strong> A translated version of the zero-row construction exists, but earlier correlations determine how much Cholesky-row norm remains. They can leave no feasible completion even when the earlier rows are valid on their own. For general fixed-value patterns, I instead remove the fixed coordinates from the global anchor-ray map.</p></li>
 </ol>
 <p>Throughout, the LKJ shape <span class="math inline">\(\eta&gt;0\)</span> is fixed. The target is an LKJ density <span class="citation" data-cites="lewandowski2009">(<a href="#ref-lewandowski2009" role="doc-biblioref">Lewandowski et al. 2009</a>)</span> restricted to the requested ordinary-correlation region,</p>
 <p><span class="math display">\[\pi(\Omega) \propto \det(\Omega)^{\eta-1}
   \mathbf 1\{\ell_{ij}&lt;\Omega_{ij}&lt;u_{ij}\},\]</span></p>
 <p>with respect to Lebesgue measure on the free lower-triangular correlations. For positive-width free bounds, endpoint faces have measure zero, so open and closed interval notation induce the same continuous distribution.</p>
-<p>When some correlations are fixed exactly, I instead define the density with respect to the remaining free ordinary-correlation coordinates. This is a lower-dimensional target, not an unnormalized positive-width indicator with equal endpoints. Any shrinking-interval argument must keep its width-dependent normalizing constant.</p>
-<p>The general look-ahead C-vine <a href="https://gist.github.com/spinkney/7d994fb03079c9edb8a0e83a40d2faad/d13345baceadce5062dc61ebb24cb9c08a87eba7">implementation</a> and my earlier entry-wise Cholesky construction <span class="citation" data-cites="pinkney2024">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024</a>)</span> provide sequential ways to target bounded densities, although a later feasible interval can be empty. Here I focus on transforms that make <em>global</em> feasibility explicit, so a sequential construction does not encounter a nonlocal boundary late.</p>
+<p>When a correlation is fixed exactly, the target distribution lives on the lower-dimensional set where that equality holds, so I define its density with respect to the remaining free ordinary-correlation coordinates. Simply setting the lower and upper endpoints equal in the indicator above does not define this distribution: a zero-width interval has zero volume under the original full-dimensional measure. The fixed-value distribution can instead be obtained as a limit of <em>normalized</em> restrictions to progressively narrower intervals around the fixed value; the normalization changes with the interval width and must be retained when taking that limit.</p>
+<p>The general look-ahead C-vine <a href="https://gist.github.com/spinkney/7d994fb03079c9edb8a0e83a40d2faad/d13345baceadce5062dc61ebb24cb9c08a87eba7">implementation</a> and my earlier entry-wise Cholesky construction <span class="citation" data-cites="pinkney2024">(<a href="#ref-pinkney2024" role="doc-biblioref">Pinkney 2024</a>)</span> provide sequential ways to target bounded densities, although choices made for earlier rows can leave no feasible value for a later correlation. Here I focus on transforms whose outputs satisfy all constraints globally.</p>
 </section>
 <section id="why-the-zero-basis-construction-does-not-extend-directly" class="level2">
 <h2 class="anchored" data-anchor-id="why-the-zero-basis-construction-does-not-extend-directly">2. Why the Zero-Basis Construction Does Not Extend Directly</h2>
@@ -888,7 +894,7 @@ c=\Omega_{i,1:(i-1)}'.\]</span></p>
 <img src="corr-bounds_files/figure-html/fig-schur-ellipsoid-slabs-1.png" class="img-fluid figure-img" width="1152">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schur-ellipsoid-slabs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: All three panels fix the leading <span class="math inline">\(3\times3\)</span> block <span class="math inline">\(R\)</span> and vary <span class="math inline">\(c=(\Omega_{4,1},\Omega_{4,2},\Omega_{4,3})\)</span>. In this example the first Cholesky-row coordinate equals <span class="math inline">\(c_1=q\)</span>, so positive definiteness requires <span class="math inline">\(q^2+v_2^2+v_3^2&lt;1\)</span>. The colored spokes show the image of the remaining Cholesky radius <span class="math inline">\(\sqrt{1-q^2}\)</span>: it is <span class="math inline">\(1\)</span> at zero, falls from <span class="math inline">\(0.84\)</span> to <span class="math inline">\(0.53\)</span> across the bounded interval, and is <span class="math inline">\(0.71\)</span> at the exact value <span class="math inline">\(q=0.70\)</span>. Thus zero is a homogeneous section through the full radius, the bound retains three-dimensional volume but gives every section a different budget, and the nonzero equality is an affine section with <span class="math inline">\(0.49\)</span> of the squared-norm budget already fixed. With several fixed values, the fixed share is generally <span class="math inline">\(\kappa=q^{\mathsf T}G^{-1}q\)</span> and the remaining radius is <span class="math inline">\(\sqrt{1-\kappa}\)</span>; it can shrink to tangency or become infeasible. The ordinary-correlation intersections remain convex, so the difficulty is a completion boundary rather than disconnected target regions. Look-ahead propagates <span class="math inline">\([0,0]\)</span>, <span class="math inline">\([\ell,u]\)</span>, and <span class="math inline">\([q,q]\)</span> through the same local <span class="math inline">\(3\times3\)</span> projection.
+Figure&nbsp;1: Each panel fixes the same leading <span class="math inline">\(3\times3\)</span> correlation block and shows the feasible values of <span class="math inline">\(c=(\Omega_{4,1},\Omega_{4,2},\Omega_{4,3})\)</span>. For this block, <span class="math inline">\(c_1\)</span> equals the first off-diagonal coordinate in the fourth Cholesky row, so fixing <span class="math inline">\(c_1=q\)</span> leaves the other two coordinates inside a disk of radius <span class="math inline">\(\sqrt{1-q^2}\)</span>. Setting <span class="math inline">\(c_1=0\)</span> therefore gives a two-dimensional linear slice with radius <span class="math inline">\(1\)</span>. Allowing <span class="math inline">\(0.55&lt;c_1&lt;0.85\)</span> retains a three-dimensional region whose cross-sectional radius decreases from <span class="math inline">\(0.84\)</span> to <span class="math inline">\(0.53\)</span>. Fixing <span class="math inline">\(c_1=0.70\)</span> gives a two-dimensional affine slice with radius <span class="math inline">\(0.71\)</span>. Exact constraints remove one degree of freedom; a positive-width bound retains it while changing the available radius.
 </figcaption>
 </figure>
 </div>
@@ -957,7 +963,7 @@ L_{ii}=\frac{1}{t+1}.\]</span></p>
 <p>The intersection of the box, the affine unit-diagonal space, and the positive-definite cone is convex, so it is star-shaped about <span class="math inline">\(\Omega_0\)</span>. Conversely, any point in its interior other than <span class="math inline">\(\Omega_0\)</span> determines a unique direction</p>
 <p><span class="math display">\[u=\frac{\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)}
 {\lVert\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\rVert}\]</span></p>
-<p>and a unique <span class="math inline">\(\rho=\lVert\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\rVert/R(u)\)</span>. Thus <span class="math inline">\((\rho,u)\mapsto\Omega\)</span> is one-to-one and onto the feasible interior except for the anchor, a single omitted point. The normalized <span class="math inline">\(z\)</span> representation adds an auxiliary radius, handled below, rather than another correlation-matrix coordinate.</p>
+<p>and a unique <span class="math inline">\(\rho=\lVert\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\rVert/R(u)\)</span>. Thus <span class="math inline">\((\rho,u)\mapsto\Omega\)</span> is one-to-one and onto the feasible interior except for the anchor, a single omitted point. The implementation represents the unit direction as <span class="math inline">\(u=z/\lVert z\rVert\)</span> for an unconstrained vector <span class="math inline">\(z\)</span>. The norm of <span class="math inline">\(z\)</span> is an auxiliary parameter, discussed below, rather than another correlation-matrix coordinate.</p>
 <section id="jacobian-and-the-auxiliary-direction" class="level3">
 <h3 class="anchored" data-anchor-id="jacobian-and-the-auxiliary-direction">4.1 Jacobian and the Auxiliary Direction</h3>
 <p>Let <span class="math inline">\(h=\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\)</span> and let <span class="math inline">\(d\sigma(u)\)</span> denote surface measure on <span class="math inline">\(\mathbb S^{D-1}\)</span>. Polar volume gives</p>
@@ -970,7 +976,7 @@ L_{ii}=\frac{1}{t+1}.\]</span></p>
 <h2 class="anchored" data-anchor-id="exact-nonzero-correlations-are-affine-slices">5. Exact Nonzero Correlations Are Affine Slices</h2>
 <p>Suppose selected correlations are fixed exactly rather than merely bounded. In row <span class="math inline">\(i\)</span>, let the nonempty set <span class="math inline">\(Z\)</span> index the fixed correlations, let <span class="math inline">\(q\)</span> contain their specified values, and let <span class="math inline">\(P_Z\)</span> select those cells from <span class="math inline">\(c=Bv\)</span>. Rows with <span class="math inline">\(Z=\varnothing\)</span> use the unconstrained row map. For <span class="math inline">\(Z\ne\varnothing\)</span>, the row constraint is</p>
 <p><span class="math display">\[Av=q,\qquad A=P_ZB.\]</span></p>
-<p>For a structural zero, <span class="math inline">\(q=0\)</span> and the solution set is the linear null space used by <code>tri</code>. For <span class="math inline">\(q\ne0\)</span>, the solution set is an affine translation that does not pass through the origin. This translation uses part of the available Cholesky row norm, so substituting a nonzero right-hand side into the zero basis while leaving the rest of the transform unchanged is not sufficient.</p>
+<p>For a structural zero, <span class="math inline">\(q=0\)</span> and the solution set is the linear null space used by the triangular zero construction in Section 2. For <span class="math inline">\(q\ne0\)</span>, the solution set is an affine translation that does not pass through the origin. This translation uses part of the available Cholesky row norm, so substituting a nonzero right-hand side into the zero basis while leaving the rest of the transform unchanged is not sufficient.</p>
 <p>Let</p>
 <p><span class="math display">\[G=AA'=\Omega_{Z,Z},\qquad
 v_0=A'G^{-1}q,\]</span></p>
@@ -2009,6 +2015,19 @@ Table&nbsp;2
 <span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Revision note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>August 10, 2026.</strong> I revised the explanation of exact fixed correlations and several related passages to remove context-dependent shorthand, explain the zero-width normalization issue directly, and clarify how correlations chosen in earlier Cholesky rows can affect the feasibility of later rows. This was an expository revision; the mathematical results, implementations, and numerical results were not changed.</p>
 </div>
 </div>
 
