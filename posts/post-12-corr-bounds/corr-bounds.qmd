@@ -2,6 +2,7 @@
 title: "Bounded Correlation Matrices: Sign Constraints, Finite Boxes, and Exact Values"
 author: "Sean Pinkney"
 date: "2026-08-08"
+date-modified: "2026-08-10"
 categories: [stan, correlation, parameterizations]
 bibliography: references.bib
 resources:
@@ -27,15 +28,15 @@ format:
 
 ## 1. From Structural Zeros to Bounds
 
-My [previous post](../post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.qmd) used a triangular basis to sample correlation matrices with exact structural zeros. Given the preceding Cholesky rows, each zero is a homogeneous linear constraint on the current row, and the zero vector remains an admissible row completion after every valid prefix. Here I ask how much of that construction carries over to prescribed signs, finite cell-specific intervals, and exact nonzero values.
+My [previous post](../post-11-corr-zeros-bakeoff/corr-zeros-bakeoff.qmd) used a triangular basis to sample correlation matrices with exact structural zeros. Given the preceding Cholesky rows, each zero is a homogeneous linear constraint on the current row. Setting all off-diagonal entries in that row to zero always satisfies those constraints and preserves positive definiteness. Here I ask how much of that construction carries over to prescribed signs, finite cell-specific intervals, and exact nonzero values.
 
 I ended up with three different cases.
 
 1.  **Prescribed signs admit a smooth triangular transform.** Zeros define subspaces; signs define cones. Replacing the free coordinates in each Cholesky row by coordinates inside the requested sign cone gives a bijection onto the interior of the sign-constrained correlation space. Section 3 gives the row-wise inverse.
 
-2.  **Finite boxes do not fit the same homogeneous construction.** A box such as $0.2 < \Omega_{21} < 0.5$ is not scale invariant, so the linear zero basis does not represent it. For this case, I use rays from a strictly feasible anchor. Section 4 shows that the resulting map covers the interior of the box--elliptope intersection, apart from the anchor itself. Its active boundary can change with direction and create gradient kinks.
+2.  **Finite boxes do not fit the same homogeneous construction.** A box such as $0.2 < \Omega_{21} < 0.5$ is not scale invariant, so the linear zero basis does not represent it. For this case, I use rays from a strictly feasible anchor. Section 4 shows that the resulting map covers the interior of the intersection between the box and the set of positive-definite correlation matrices, apart from the anchor itself. Its active boundary can change with direction and create gradient kinks.
 
-3.  **An exact nonzero value is an affine equality.** A translated version of the zero-row construction exists, but its available radius depends on earlier correlations and can disappear after an otherwise valid prefix. For general fixed-value patterns, I instead remove the fixed coordinates from the global anchor-ray map.
+3.  **An exact nonzero value is an affine equality.** A translated version of the zero-row construction exists, but earlier correlations determine how much Cholesky-row norm remains. They can leave no feasible completion even when the earlier rows are valid on their own. For general fixed-value patterns, I instead remove the fixed coordinates from the global anchor-ray map.
 
 Throughout, the LKJ shape $\eta>0$ is fixed. The target is an LKJ density [@lewandowski2009] restricted to the requested ordinary-correlation region,
 
@@ -44,9 +45,9 @@ $$\pi(\Omega) \propto \det(\Omega)^{\eta-1}
 
 with respect to Lebesgue measure on the free lower-triangular correlations. For positive-width free bounds, endpoint faces have measure zero, so open and closed interval notation induce the same continuous distribution.
 
-When some correlations are fixed exactly, I instead define the density with respect to the remaining free ordinary-correlation coordinates. This is a lower-dimensional target, not an unnormalized positive-width indicator with equal endpoints. Any shrinking-interval argument must keep its width-dependent normalizing constant.
+When a correlation is fixed exactly, the target distribution lives on the lower-dimensional set where that equality holds, so I define its density with respect to the remaining free ordinary-correlation coordinates. Simply setting the lower and upper endpoints equal in the indicator above does not define this distribution: a zero-width interval has zero volume under the original full-dimensional measure. The fixed-value distribution can instead be obtained as a limit of *normalized* restrictions to progressively narrower intervals around the fixed value; the normalization changes with the interval width and must be retained when taking that limit.
 
-The general look-ahead C-vine [implementation](https://gist.github.com/spinkney/7d994fb03079c9edb8a0e83a40d2faad/d13345baceadce5062dc61ebb24cb9c08a87eba7) and my earlier entry-wise Cholesky construction [@pinkney2024] provide sequential ways to target bounded densities, although a later feasible interval can be empty. Here I focus on transforms that make *global* feasibility explicit, so a sequential construction does not encounter a nonlocal boundary late.
+The general look-ahead C-vine [implementation](https://gist.github.com/spinkney/7d994fb03079c9edb8a0e83a40d2faad/d13345baceadce5062dc61ebb24cb9c08a87eba7) and my earlier entry-wise Cholesky construction [@pinkney2024] provide sequential ways to target bounded densities, although choices made for earlier rows can leave no feasible value for a later correlation. Here I focus on transforms whose outputs satisfy all constraints globally.
 
 ## 2. Why the Zero-Basis Construction Does Not Extend Directly
 
@@ -90,7 +91,7 @@ They also change the boundary geometry. In the closure of the feasible set, a bo
 
 ```{r}
 #| label: fig-schur-ellipsoid-slabs
-#| fig-cap: 'All three panels fix the leading $3\times3$ block $R$ and vary $c=(\Omega_{4,1},\Omega_{4,2},\Omega_{4,3})$. In this example the first Cholesky-row coordinate equals $c_1=q$, so positive definiteness requires $q^2+v_2^2+v_3^2<1$. The colored spokes show the image of the remaining Cholesky radius $\sqrt{1-q^2}$: it is $1$ at zero, falls from $0.84$ to $0.53$ across the bounded interval, and is $0.71$ at the exact value $q=0.70$. Thus zero is a homogeneous section through the full radius, the bound retains three-dimensional volume but gives every section a different budget, and the nonzero equality is an affine section with $0.49$ of the squared-norm budget already fixed. With several fixed values, the fixed share is generally $\kappa=q^{\mathsf T}G^{-1}q$ and the remaining radius is $\sqrt{1-\kappa}$; it can shrink to tangency or become infeasible. The ordinary-correlation intersections remain convex, so the difficulty is a completion boundary rather than disconnected target regions. Look-ahead propagates $[0,0]$, $[\ell,u]$, and $[q,q]$ through the same local $3\times3$ projection.'
+#| fig-cap: 'Each panel fixes the same leading $3\times3$ correlation block and shows the feasible values of $c=(\Omega_{4,1},\Omega_{4,2},\Omega_{4,3})$. For this block, $c_1$ equals the first off-diagonal coordinate in the fourth Cholesky row, so fixing $c_1=q$ leaves the other two coordinates inside a disk of radius $\sqrt{1-q^2}$. Setting $c_1=0$ therefore gives a two-dimensional linear slice with radius $1$. Allowing $0.55<c_1<0.85$ retains a three-dimensional region whose cross-sectional radius decreases from $0.84$ to $0.53$. Fixing $c_1=0.70$ gives a two-dimensional affine slice with radius $0.71$. Exact constraints remove one degree of freedom; a positive-width bound retains it while changing the available radius.'
 #| fig-width: 12
 #| fig-height: 5.6
 #| warning: false
@@ -788,7 +789,7 @@ The intersection of the box, the affine unit-diagonal space, and the positive-de
 $$u=\frac{\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)}
 {\lVert\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\rVert}$$
 
-and a unique $\rho=\lVert\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\rVert/R(u)$. Thus $(\rho,u)\mapsto\Omega$ is one-to-one and onto the feasible interior except for the anchor, a single omitted point. The normalized $z$ representation adds an auxiliary radius, handled below, rather than another correlation-matrix coordinate.
+and a unique $\rho=\lVert\operatorname{vech}_{\!\ell}(\Omega-\Omega_0)\rVert/R(u)$. Thus $(\rho,u)\mapsto\Omega$ is one-to-one and onto the feasible interior except for the anchor, a single omitted point. The implementation represents the unit direction as $u=z/\lVert z\rVert$ for an unconstrained vector $z$. The norm of $z$ is an auxiliary parameter, discussed below, rather than another correlation-matrix coordinate.
 
 ### 4.1 Jacobian and the Auxiliary Direction
 
@@ -806,7 +807,7 @@ Suppose selected correlations are fixed exactly rather than merely bounded. In r
 
 $$Av=q,\qquad A=P_ZB.$$
 
-For a structural zero, $q=0$ and the solution set is the linear null space used by `tri`. For $q\ne0$, the solution set is an affine translation that does not pass through the origin. This translation uses part of the available Cholesky row norm, so substituting a nonzero right-hand side into the zero basis while leaving the rest of the transform unchanged is not sufficient.
+For a structural zero, $q=0$ and the solution set is the linear null space used by the triangular zero construction in Section 2. For $q\ne0$, the solution set is an affine translation that does not pass through the origin. This translation uses part of the available Cholesky row norm, so substituting a nonzero right-hand side into the zero basis while leaving the rest of the transform unchanged is not sufficient.
 
 Let
 
@@ -1198,4 +1199,10 @@ The published results are the main [`diagnostics`](bounds-diagnostics.csv), [`ce
 ``` {.stan filename="direct-certified-box-corr.stan"}
 {{< include direct-certified-box-corr.stan >}}
 ```
+:::
+
+::: callout-note
+## Revision note
+
+**August 10, 2026.** I revised the explanation of exact fixed correlations and several related passages to remove context-dependent shorthand, explain the zero-width normalization issue directly, and clarify how correlations chosen in earlier Cholesky rows can affect the feasibility of later rows. This was an expository revision; the mathematical results, implementations, and numerical results were not changed.
 :::

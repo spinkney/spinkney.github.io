@@ -12,7 +12,9 @@ format:
 
 ## 1. The Problem with Zeros in Correlation Matrices
 
-Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are *marginally*^[[\@ethothepie.bsky.social](https://bsky.app/profile/ethothepie.bsky.social) corrected the original here where I incorrectly implied the zeros in the correlation matrix are conditionally unrelated when this is marginal] unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.
+Sometimes you know, before seeing any data, that certain correlations are exactly zero. For example, a priori knowledge that two variables are *marginally*[^1] unrelated occurs in graphical models as either an explicit assumption or by pre-existing knowledge that rules out the variable coupling. Building this structure directly through the correlation matrix parameterization is what this blog post is about.
+
+[^1]: [\@ethothepie.bsky.social](https://bsky.app/profile/ethothepie.bsky.social) corrected the original here where I incorrectly implied the zeros in the correlation matrix are conditionally unrelated when this is marginal
 
 Sampling from an LKJ prior and setting selected cells to zero does not work because the resulting matrix will generally not be positive definite. Instead, the zeros have to be part of the parameterization. In this post I compare thirteen Stan [@carpenter2017] implementations that target the same distribution. I check that they agree numerically, then compare divergences, effective sample size, gradient evaluations, and run time.
 
@@ -83,7 +85,7 @@ Each constrained row requires one $d\times d$ `cholesky_decompose` and several m
 I also test an over-parameterized version, called `donut`, that uses one additional parameter per row. It normalizes a free vector, $u=y/\lVert y\rVert$, before mapping it into the constrained subspace. The normalization is rotationally symmetric but singular at the origin. Following @axen2022, I replace the usual radial term $-\tfrac12\lVert y\rVert^2$ with $-\tfrac12(\lVert y\rVert-m)^2$ so that the typical radius is away from zero. Since this term only changes the radius, it does not change the induced distribution on $\Omega$. The largest difference in a free-cell posterior mean relative to `carpenter` is 0.0046. Across the five $K=7$, $\eta=4$ patterns:
 
 | radial prior | total divergences | median min ESS | median ESS / 1k gradients |
-|:-------------------|-----------------:|-----------------:|-----------------:|
+|:------------------|-----------------:|-----------------:|-----------------:|
 | $m = 0$ (implicit chi) | 2,549 | 4,778 | 19 |
 | $m = 2$ | 349 | 8,106 | 80 |
 | $m = 4$ | 8 | 10,778 | 192 |
@@ -139,11 +141,11 @@ $$
 to project every later pair onto a feasible interval for $x$. After selecting $x$, it tightens the later intervals and continues. Fixed ordinary correlations are point intervals, so zeros take no raw parameter in either model. The new transform uses the reduced Jacobian from raw values to the free ordinary correlations and adds the LKJ kernel as $(\eta-1)\log\det(\Omega)$; it therefore targets the same conditional LKJ distribution as `cvine`.
 
 | $K=7$, $\eta=4$, five patterns | `cvine` | `cvine_lookahead` |
-|:---------------------------------|--------:|------------------:|
-| total divergences | 501 | **8** |
-| median minimum bulk ESS | 10,219 | **10,454** |
-| median ESS / 1,000 gradients | 188.9 | **194.1** |
-| total wall clock (s) | 5.14 | **2.65** |
+|:-------------------------------|--------:|------------------:|
+| total divergences              |     501 |             **8** |
+| median minimum bulk ESS        |  10,219 |        **10,454** |
+| median ESS / 1,000 gradients   |   188.9 |         **194.1** |
+| total wall clock (s)           |    5.14 |          **2.65** |
 
 The scaling sweep tells the same story. The original initializes in 12 of 20 configurations and fails for every $K=15$ and $K=25$ fit. `cvine_lookahead` initializes in 16 of 20 and reaches $K=15$. On the 12 configurations where both initialize, divergences fall from 20,842 to 993, median minimum ESS rises from 6,447 to 7,876, and median ESS per 1,000 gradients rises from 84.3 to 152.4. It still fails under default random initialization at $K=25$: enforcing every local $3\times3$ condition is necessary, but for $K\ge4$ it is not sufficient for a globally feasible completion satisfying all remaining zero constraints.
 
@@ -156,7 +158,7 @@ The bounds still depend only on earlier raw coordinates and unsampled boxes. The
 The next table uses the same five $K=7$, $\eta=4$ patterns and sampler settings. Spans 1 through 5 limit both the pre-selection intersection and post-selection tightening to that many future indices. `all` reaches the maximum possible distance of 6 and is `cvine_lookahead`. The sweep rows retain all-future breadth and add synchronous all-triple propagation before every coordinate. For `rowscale`, pass 0 and pass 1 are the same executable with propagation disabled or enabled, which controls for floating-point changes between Stan programs.
 
 | experiment | total divergences | median min ESS | median ESS / 1k gradients | total time (s) |
-|:--------------------------|------------------:|---------------:|---------------------------:|---------------:|
+|:--------------|-------------:|-------------:|--------------:|-------------:|
 | C-vine, span 1 | 206 | 11,153 | 214.5 | 3.80 |
 | C-vine, span 2 | 43 | 10,562 | 205.7 | 3.06 |
 | C-vine, span 3 | 9 | 10,454 | 194.1 | 2.93 |
@@ -178,15 +180,15 @@ The projection also transfers to an entry-wise Cholesky transform, provided it i
 I then ported the same one-pass ordinary-correlation sweep to six entry-wise transforms from the bake-off. At a common parity-check point, pass-zero mode reproduced each original log density and full raw-gradient vector to printed precision. The table compares pass zero with pass one in those same executables; this is a cleaner intervention than comparing separately compiled programs. The contraction happens on $\Omega$, after which each transform retains its existing Cholesky or $LDL'$ scale and equality Jacobians.
 
 | model | successful patterns, 0 $\to$ 1 pass | divergences, 0 $\to$ 1 pass | median ESS / 1k gradients, 0 $\to$ 1 pass |
-|:----------|:-------------------------------:|-----------------------------:|-------------------------------------------:|
+|:---------------|:----------------:|---------------:|-----------------------:|
 | `carpenter` | 5 $\to$ 5 | 398 $\to$ **195** | 199.3 $\to$ **202.6** |
 | `pinkney` | 5 $\to$ 5 | 395 $\to$ **322** | 192.3 $\to$ **199.1** |
 | `ldl2` | 5 $\to$ 5 | 389 $\to$ **275** | 187.7 $\to$ **190.3** |
 | `ldl3` | 5 $\to$ 5 | 370 $\to$ **230** | 182.1 $\to$ **190.9** |
 | `rowscale` | 5 $\to$ 5 | 362 $\to$ **207** | 174.8 $\to$ **188.6** |
-| `schur` | 4 $\to$ **5** | 224 $\to$ **193**[^schur-lookahead] | 191.9 $\to$ **202.2** |
+| `schur` | 4 $\to$ **5** | 224 $\to$ **193**[^2] | 191.9 $\to$ **202.2** |
 
-[^schur-lookahead]: The pass-zero `schur` fit failed during initialization for seed 5, while the one-pass transform initialized all four chains. Its divergence and efficiency comparison therefore uses the four patterns that succeeded under both settings.
+[^2]: The pass-zero `schur` fit failed during initialization for seed 5, while the one-pass transform initialized all four chains. Its divergence and efficiency comparison therefore uses the four patterns that succeeded under both settings.
 
 Across the 29 matched model-pattern pairs, one sweep reduces divergences from 2,138 to 1,422, raises median minimum ESS from 10,222 to 10,334, and raises median ESS per 1,000 gradients from 189.7 to 190.9. Wall time doubles from 25.9 to 52.1 seconds. The direction is favorable for every model in aggregate, but the gain is much smaller than for `cvine_lookahead`, and individual fits can move the other way because HMC trajectories are chaotic near the boundary. Local $3\times3$ pruning is therefore useful as a guardrail for the entry-wise family, not a replacement for a parameterization that is feasible by construction.
 
